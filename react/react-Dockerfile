@@ -1,0 +1,5 @@
+FROM node:14
+WORKDIR /app
+COPY ./xinwu/build/ ./        
+RUN npm install
+CMD ["npm","start"]
