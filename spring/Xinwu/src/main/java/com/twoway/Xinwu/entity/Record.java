@@ -15,12 +15,32 @@ public class Record{
     private String plateNumber = "";
     private LocalDateTime recognitionTime;
     private String recognitionTimeStr = "";
-    private String passStatus = "";
+    private String carType="";
+
     private String imagePath = "";
     private String cameraId = "";
+
+
+    
+    /* plateIn判斷進出場用 , 初始值都是true -> "想進去" */
+    private Boolean plateIn=true;
+
+    public Boolean getPlateIn(){
+      return this.plateIn;
   
-    private String name = "";
-    private String vehicleType = "";
+    }  
+    public void setPlateIn(Boolean plateIn){
+      this.plateIn = plateIn;
+    }
+    /* */
+
+    public String getCarType() {
+      return this.carType;
+    }
+  
+    public void setCarType(String carType) {
+      this.carType = carType;
+    }
 
     public String getCameraId() {
         return this.cameraId;
@@ -70,29 +90,7 @@ public class Record{
         this.recognitionTime = recognitionTime;
       }
     
-      public String getPassStatus() {
-        return this.passStatus;
-      }
-    
-      public void setPassStatus(String passStatus) {
-        this.passStatus = passStatus;
-      }
-    
-      public String getName() {
-        return this.name;
-      }
-    
-      public void setName(String name) {
-        this.name = name;
-      }
-    
-      public String getVehicleType() {
-        return this.vehicleType;
-      }
-    
-      public void setVehicleType(String vehicleType) {
-        this.vehicleType = vehicleType;
-      }
+      
     
       @Override
       public String toString() {
@@ -101,11 +99,10 @@ public class Record{
             ", plateNumber='" + getPlateNumber() + "'" +
             ", recognitionTime='" + getRecognitionTime() + "'" +
             ", recognitionTimeStr='" + getRecognitionTimeStr() + "'" +
-            ", passStatus='" + getPassStatus() + "'" +
             ", imagePath='" + getImagePath() + "'" +
             ", cameraId='" + getCameraId() + "'" +
-            ", name='" + getName() + "'" +
-            ", vehicleType='" + getVehicleType() + "'" +
+            ", plateIn='" + getPlateIn() + "'" +
+            ", carType='" + getCarType() + "'" +
             "}";
       }
 }

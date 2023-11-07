@@ -1,33 +1,6 @@
 version: '3'
 services:
 
-  database:
-    image: mysql:latest
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: xinwudb
-    volumes:
-      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
-    container_name: xinwu-database
-    # ports:
-    #   - 3333:3306
-
-
-  spring:
-    image: xinwu-spring
-    restart: unless-stopped
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/xinwudb
-      SPRING_DATASOURCE_USERNAME: xinwu
-      SPRING_DATASOURCE_PASSWORD: 123456
-    container_name: xinwu-spring
-    ports:
-      - "8080:8080"
-    depends_on:
-      - database
-
-
   cms:
     image: xinwu-react
     restart: unless-stopped
@@ -37,24 +10,39 @@ services:
       - ./react/xinwu:/app
     container_name: xinwu-react
 
+  database:
+    image: mysql:latest
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: xinwudb
+    volumes:
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    container_name: xinwu-database
+    ports:
+      - 3339:3306
 
   web:
-    # image: xinwu-nginx
-    # ports:
-    #   - "80:80"
-    # volumes:
-    #   - ./react/xinwu/build:/usr/share/nginx/html
-    # container_name: xinwu-nginx
-    # depends_on:
-    #   - cms
     image: xinwu-nginx
     ports:
-      - "80:80"
+      - "81:81"
     volumes:
       - ./react/xinwu/build:/usr/share/nginx/html
     container_name: xinwu-nginx
 
-
+  spring:
+    depends_on:
+      - database
+    image: xinwu-spring
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/xinwudb
+      # SPRING_DATASOURCE_USERNAME: xinwu
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 123456
+    container_name: xinwu-spring
+    ports:
+      - "8080:8080"
 
 
 

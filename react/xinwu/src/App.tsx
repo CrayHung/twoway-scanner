@@ -1,57 +1,35 @@
-import React, { useEffect, useState } from 'react';
-
+import React, { useEffect, useState, createContext , useContext } from 'react';
+import WebSocketComponent from './component/websocket';
+import { useGlobalUrl } from './globalUrl';
 
 
 function App() {
 
-  const [string, setString] = useState("");
+  const {url}=useGlobalUrl();
+
   const [lprData,setLprData] = useState<any[]>([]);
 
   useEffect(() => {
 
-
-    fetch("http://127.0.0.1:8080/hello")
-      .then(res => {
-        if (!res.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return res.text();
-      })
-      .then(data=>setString(data))
-
-      .catch((err) => {
-        console.log(err.message);
-      });
-
-
-
-
-      fetch("http://127.0.0.1:8080/lpr/all")
+      //fetch("http://127.0.0.1:8080/lpr/all")
+      fetch(url+"/lpr/all")
       .then(response => response.json())
       .then(data => {
+        console.log(data);
         setLprData(data);
-        console.log("get from /lpr/all"+data.id);
       });
- 
-
-    
-
-
   }, []);
 
-  // const items = lprData.map((item, index) => (
-  //   <li key={index}>{item}</li>
-  // ));
+
   
 
   return (
     <>
+      <div><p>react OK</p></div>
       <div>
-        from react
+      <WebSocketComponent></WebSocketComponent>
       </div>
-      <div>
-        {string}
-      </div>
+
         <ul>
             {lprData.map((jsonObject) => (
               <li key={jsonObject.id}>
@@ -61,10 +39,6 @@ function App() {
             ))}
           </ul>
 
-      {/* {items} */}
-      <div>
-        from react end
-      </div>
     </>
   );
 }

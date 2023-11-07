@@ -13,8 +13,13 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
+    "react-stomp": "^5.1.0",
+    "react-use-websocket": "^4.5.0",
+    "sockjs": "^0.3.24",
+    "sockjs-client": "^1.6.1",
     "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "websocket": "^1.0.34"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -39,5 +44,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/sockjs-client": "^1.5.3",
+    "@types/stompjs": "^2.3.7"
   }
 }

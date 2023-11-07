@@ -6,4 +6,4 @@ RUN if [ -f /etc/nginx/conf.d/default ]; then rm /etc/nginx/conf.d/default; fi
 COPY nginx.conf /etc/nginx/conf.d/
 
 # 將Nginx的對外port80 開放
-EXPOSE 80
+EXPOSE 81
