@@ -11,8 +11,8 @@ function App() {
 
   useEffect(() => {
 
-      //fetch("http://127.0.0.1:8080/lpr/all")
-      fetch(url+"/lpr/all")
+      fetch("http://127.0.0.1:8080/lpr/all")
+      //fetch(url+"/lpr/all")
       .then(response => response.json())
       .then(data => {
         console.log(data);
@@ -26,9 +26,9 @@ function App() {
   return (
     <>
       <div><p>react OK</p></div>
-      <div>
+      {/* <div>
       <WebSocketComponent></WebSocketComponent>
-      </div>
+      </div> */}
 
         <ul>
             {lprData.map((jsonObject) => (

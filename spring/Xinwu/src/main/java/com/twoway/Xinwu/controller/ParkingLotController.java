@@ -27,6 +27,14 @@ public class ParkingLotController {
     return parkingLotRepository.save(parkinglot);
     }
 
+    @PostMapping("/modifyparkinglots")
+    public void nodifyParkingLots(@RequestBody ParkingLot parkinglot) {
+      String carType=parkinglot.getCarType();
+      Integer amount = parkinglot.getAmount();
+      parkingLotRepository.modifyParkingLots(carType , amount);
+      return ;
+    }
+
     @GetMapping("/all")
     Iterable<ParkingLot> getAll() {
       return parkingLotRepository.findAll();

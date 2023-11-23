@@ -53,12 +53,23 @@ public class AllowListController {
         return "成功";
     }
 
-    //新增/修改預約名單
+    //新增預約名單
     @PostMapping("/addNewTempPass")
     public String addnewTempPassList(@RequestBody AllowList allowList) {
         allowList.setPassStatus("temp_pass");
         allowListRepository.save(allowList);
         return "成功";
+    }
+
+    //修改預約名單
+    @PostMapping("/modifyTempPassTime")
+    public void modifyTempPassList(@RequestBody AllowList allowList) {
+        String platenumber = allowList.getPlateNumber();
+        String visitor_start_str = allowList.getVisitorStartStr();
+        String visitor_end_str = allowList.getVisitorEndStr();
+        allowListRepository.modifyTempPass(platenumber,visitor_start_str,visitor_end_str);
+
+        return ;
     }
 
 }
