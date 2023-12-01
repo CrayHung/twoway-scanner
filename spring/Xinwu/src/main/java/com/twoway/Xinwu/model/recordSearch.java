@@ -1,10 +1,14 @@
 package com.twoway.Xinwu.model;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 public class recordSearch {
     private String plateNumber = "";
     private String startDate = "";
-    private String endDate = "";
-    private Boolean plateIn = true;
+    //private String endDate = "";
+    private String endDate = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+    private Boolean plateIn = false;
 
     public String getPlateNumber() {
         return this.plateNumber;

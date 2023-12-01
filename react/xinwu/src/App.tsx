@@ -1,18 +1,24 @@
 import React, { useEffect, useState, createContext , useContext } from 'react';
 import WebSocketComponent from './component/websocket';
-import { useGlobalUrl } from './globalUrl';
+import { useGlobalContext } from './global';
 
 
 function App() {
 
-  const {url}=useGlobalUrl();
+  const {globalUrl,jwtToken,setToken}=useGlobalContext();
 
+  const { url, wsurl } = globalUrl;
   const [lprData,setLprData] = useState<any[]>([]);
-
+  const jwtToken1 = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJPUCIsImlhdCI6MTcwMTE2NTU4OCwiZXhwIjoxNzAxMTY5MTg4fQ.wd0nGFE4INNVkImyToAqQEmXxvV6gO3a0kL3ZyGq-_I"
+  
   useEffect(() => {
-
-      fetch("http://127.0.0.1:8080/lpr/all")
-      //fetch(url+"/lpr/all")
+    console.log(jwtToken1);
+      const headers = {'Authorization':`Bearer ${jwtToken1}`,
+                      "Content-Type": "application/json"};
+    
+      console.log(headers);
+      console.log(url);
+      fetch(url+"/lpr/all", {headers})
       .then(response => response.json())
       .then(data => {
         console.log(data);

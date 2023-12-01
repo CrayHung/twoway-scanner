@@ -19,9 +19,6 @@ public class Record{
 
     private String imagePath = "";
     private String cameraId = "";
-
-
-    
     /* plateIn判斷進出場用 , 初始值都是true -> "想進去" */
     private Boolean plateIn=true;
 

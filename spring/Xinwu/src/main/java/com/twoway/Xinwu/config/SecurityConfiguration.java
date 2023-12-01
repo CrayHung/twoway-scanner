@@ -18,6 +18,16 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
+    private static final String[] WHITE_LIST_URL = 
+            {
+                "/auth/**",
+                "/password/**",
+                "/lpr/**"
+            };
+
+
+
+
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 
@@ -26,41 +36,57 @@ public class SecurityConfiguration {
 
 
         // http
-        //         .csrf(csrf -> csrf
-        //             .disable())
+        //     .csrf(AbstractHttpConfigurer::disable)
+        //     .authorizeRequests(authorize ->
+        //         authorize
+        //             .antMatchers("/auth/register").hasRole("ADMIN")
+        //             .antMatchers("/auth/**").permitAll()
+        //             .antMatchers("/password/**").permitAll()
+        //             .antMatchers("/parking/addparkinglots").hasRole("ADMIN")
+        //             .antMatchers("/parking/modifyparkinglots").hasRole("ADMIN")
+        //             .antMatchers("/admin/").hasRole("ADMIN")
+        //             .anyRequest().authenticated()
+        //     )
+        //     .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
+        //     .authenticationProvider(authenticationProvider)
+        //     .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-        //             .authorizeHttpRequests(authorize -> authorize
-        //                 .requestMatchers("/auth/**").permitAll()
-        //                 .requestMatchers("/demo/admin/.*").hasRole("ADMIN")
-        //                 .requestMatchers("/users/.*").hasRole("ADMIN")
-        //                 // .requestMatchers("/demo/user").permitAll()
-        //                 // .requestMatchers("/demo/admin").hasRole("ADMIN")
 
-        //                 //.requestMatchers(new RegexRequestMatcher("/demo/admin", "GET")).hasRole("ADMIN")
-        //                 //.requestMatchers("/demo/admin").hasRole("ADMIN")
-        //                 .anyRequest().authenticated() 
-        //             )
-        //             .sessionManagement()
-        //             //避免儲存authentication state , 如此每個請求都要進行驗證
-        //             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        //             .and()
-        //             .authenticationProvider(authenticationProvider)
-        //             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
 
         /*要控制API路徑 , 在@RequestMapping作控管 */
+        // http
+        //         .csrf(AbstractHttpConfigurer::disable)
+        //         .authorizeHttpRequests(req ->
+        //                 req.requestMatchers("/auth/register").hasRole("ADMIN")
+        //                     .requestMatchers("/auth/**").permitAll()
+        //                     .requestMatchers("/password/**").permitAll()
+        //                     .requestMatchers("/parking/addparkinglots").hasRole("ADMIN")
+        //                     .requestMatchers("/parking/modifyparkinglots").hasRole("ADMIN")
+        //                     .requestMatchers("/admin").hasRole("ADMIN")
+        //                     .anyRequest()
+        //                     .authenticated()
+        //         )
+        //         .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
+        //         .authenticationProvider(authenticationProvider)
+        //         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers("/auth/**").permitAll()
-                            .requestMatchers("/demo/admin/**").hasRole("ADMIN")
-                            .anyRequest()
-                            .authenticated()
+                        req.requestMatchers(WHITE_LIST_URL).permitAll()
+                                .requestMatchers("/parking/addparkinglots/**").hasAuthority("ADMIN")
+                                .requestMatchers("/parking/modifyparkinglots/**").hasAuthority( "ADMIN")
+                                .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                                .anyRequest()
+                                .authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        
+
+
 
         return http.build();
     }

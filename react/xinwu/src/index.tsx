@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { GlobalUrlProvider } from './globalUrl';
+import { GlobalUrlProvider } from './global';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

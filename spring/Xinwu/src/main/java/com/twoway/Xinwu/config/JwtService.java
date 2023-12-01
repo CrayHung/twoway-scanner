@@ -6,7 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
@@ -18,6 +20,8 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtService {
 
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     private static final String SECRET_KEY="f055902968528c61af559aca12f237dbbe88e4b7ebc9ce8ca5a6bf608abce834";
 
@@ -30,7 +34,7 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    //如果傳入的只有user資料,要產生token
+    //如果傳入的只有user資料
     public String generateToken(UserDetails userDetails){
         return generateToken(new HashMap<>(), userDetails);
     }
@@ -45,7 +49,7 @@ public class JwtService {
             .setClaims(extraClaims)
             .setSubject(userDetails.getUsername())
             .setIssuedAt(new Date(System.currentTimeMillis()))
-            .setExpiration(new Date(System.currentTimeMillis() + 1000*60*60))   //1000*60=1min
+            .setExpiration(new Date(System.currentTimeMillis() + 1000*30))   //1000*60=1min
             .signWith(getSignInKey(),SignatureAlgorithm.HS256)
             .compact();
     }
@@ -78,5 +82,18 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+
+    /* */
+
+    public String generateTokenUsingRefreshToken(String refreshToken) {
+        var user = getUserFromRefreshToken(refreshToken);
+        return generateToken(user);
+    }
+
+    private UserDetails getUserFromRefreshToken(String refreshToken) {
+        var username = extractUsername(refreshToken);
+        return userDetailsService.loadUserByUsername(username);
+
+    }
 
 }

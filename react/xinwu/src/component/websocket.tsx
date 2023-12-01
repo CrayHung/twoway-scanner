@@ -4,7 +4,7 @@ import Stomp from "stompjs";
 import SockJS from 'sockjs-client';
 import { useWebSocket } from "react-use-websocket/dist/lib/use-websocket";
 import { ReadyState } from "react-use-websocket";
-import {useGlobalUrl} from "../globalUrl";
+import { useGlobalContext } from '../global';
 
 /*********************************************************** */
 interface CamData {
@@ -20,7 +20,7 @@ interface CamData {
 /*********************************************************** */
 const WebSocketComponent = () => {
 
-  const {url,wsurl}=useGlobalUrl();
+  const {url,wsurl}=useGlobalContext();
 
 
   //const [socketUrl] = useState('ws://127.0.0.1:8080/ws'); 

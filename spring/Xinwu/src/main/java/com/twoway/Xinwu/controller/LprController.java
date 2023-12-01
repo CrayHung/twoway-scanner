@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -89,12 +89,12 @@ public class LprController {
     }
 
     //日期區間
-    // @PostMapping("/all/searchDate")
-    // public Iterable<Record> getRecordByDate(@RequestBody recordSearch recordsearch) {
-    //   String startDate = recordsearch.getStartDate();
-    //   String endDate = recordsearch.getEndDate();
-    //   return recordRepository.searchByDateBetween(startDate,endDate);
-    // }
+    @PostMapping("/all/searchDateBetween")
+    public Iterable<Record> getRecordByDate(@RequestBody recordSearch recordsearch) {
+      String startDate = recordsearch.getStartDate();
+      String endDate = recordsearch.getEndDate();
+      return recordRepository.searchByDateBetween(startDate,endDate);
+    }
 
     //日期區間+模糊車號
     // @PostMapping("/all/searchDateAndPlateNumber")
@@ -248,8 +248,8 @@ public class LprController {
     /*for cam ID */
     messages.add("攝影機:"+record.getCameraId());
 
-    System.out.println(messages);
-    wsMessageTool.sendWsMessage(messages);
+    // System.out.println(messages);
+    // wsMessageTool.sendWsMessage(messages);
 
 
 
@@ -263,6 +263,20 @@ public class LprController {
       // WsMessageTool wsMessageTool = new WsMessageTool();
       // List<String> messages = Arrays.asList("目前場內車數:"+car_amount , "剩餘停車數:"+(5-car_amount));
       // wsMessageTool.sendWsMessage(messages);
+
+    // [WS] for Live 
+      /*如果要傳送Json , 改寫WsMessageTool的sendWsMessage */
+      //WsMessageTool wsMessageTool = new WsMessageTool();
+      Map<String, String> wsData = new HashMap<>();
+      wsData.put("cameraId", record.getCameraId());
+      wsData.put("imagePath", record.getImagePath());
+      wsData.put("plateNumber", record.getPlateNumber());
+      JSONObject json = new JSONObject();
+      json.put("type", "live");
+      wsData.put("palteIn", String.valueOf(record.getPlateIn()));
+      json.put("data", wsData);
+      wsMessageTool.sendWsMessage(json.toString());
+
 
       return "成功";
 

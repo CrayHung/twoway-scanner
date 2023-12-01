@@ -55,7 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
                 //驗證JWT是否有效 且與 userDetails資料相符
                 if(jwtService.isTokenValid(jwt, userDetails)){ 
-                    //產生認證 , 傳入的參數 1.user(主體..用戶資料) 2.密碼(憑證...JWT不需要密碼) 3.用戶權限 , 並將認證後的(authToken)
+                    //產生認證 , 傳入的參數 1.user(主體..用戶資料) 2.密碼(憑證...JWT不需要密碼) 3.用戶權限 , 彙整成認證後的(authToken)
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
