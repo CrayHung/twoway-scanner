@@ -18,12 +18,22 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
+    // private static final String[] WHITE_LIST_URL = 
+    //         {
+    //             "/auth/**",
+    //             "/password/**",
+    //             "/lpr/**",
+    //             "/reset/**",
+    //             "/forget/**"
+    //         };
+
     private static final String[] WHITE_LIST_URL = 
-            {
-                "/auth/**",
-                "/password/**",
-                "/lpr/**"
-            };
+    {
+        "/auth/**",
+        "/password/**",
+        "/reset/**",
+        "/forget/**"
+    };
 
 
 

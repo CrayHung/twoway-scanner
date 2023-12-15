@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 public class RefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @ManyToOne
     private User user;
@@ -34,6 +34,11 @@ public class RefreshToken {
 
     private Instant expirationDate;
 
+
+    public User getUser() {
+        return user;
+    }
+    
     public boolean isExpired() {
         return Instant.now().isAfter(expirationDate);
     }

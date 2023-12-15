@@ -1,53 +1,74 @@
-# Xinwu
+# 雷達測速API
 
-- 即時影像
-  - 兩支即時影像
-    - 北門-出入車輛可直接放行
-      - 需要車牌辨識嗎?
-    - 南門-出入車輛須經過判斷
-      - 要進入
-        - 場內的車位數>0 && 車位數-1
-        - 車牌辨識為白名單 或 預約名單
-      - 出
-        - 場內車位數+1
+- 雷達測速 CMS 的API
 
+网址:https://yj.wisiotsys.com:8889/
+账号:test
+密码:123456
 
-- 車牌查詢
-  - 區間查詢
-    - 起始日期 , 結束日期(default=當日)
-  - 車號查詢 
-    - 可只提供部分車號
-  - 進出狀態查詢 
-    - (全部 進 出)
+1. 取得驗證圖片
+https://yj.wisiotsys.com:8889/admin/login/getVerifyCode
+POST
+將data中的verifyCodeImg透過人工計算得到verifyCode
 
+![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/0849cd19-520e-4bc9-9cb9-6d1ba25f518f/1c23f36b-2a4f-46e9-8c76-3655989f99e8/Untitled.png)
 
-- 車流總數管理
-  - 剩餘車位數量 
-    - 修改 車位總數 (管理者權限)
+1. 登入
+    
+    https://yj.wisiotsys.com:8889/admin/login/login
+    POST 
+    
+    Body :  (form-data)
+    
+    ```jsx
+    
+    username : test
+    password : 123456
+    verifyCode : 步驟1.得到的值
+    ```
+    
+    取得appstr  
+    
+    **(將appstr當作token使用      一次只能在一個地方登入)**
+    
+    ![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/0849cd19-520e-4bc9-9cb9-6d1ba25f518f/191da678-562c-461e-8ea4-2120d94b01a8/Untitled.png)
+    
 
+![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/0849cd19-520e-4bc9-9cb9-6d1ba25f518f/5d019ab9-a6ca-4680-8dbd-77dd40f45971/Untitled.png)
 
-- 入場車牌申請登記
-  - 新增 白名單
-  - 新增 預約名單
-  - 修改 預約名單的預約時間
+1. 取得車速 車號等資料
 
+https://yj.wisiotsys.com:8889/admin/equipmentAlarmRecord/lists
 
+POST
+Body : form-data
 
-- 帳號密碼登入
-  - 新增 使用者 (管理者權限)
-  - 新增 管理者
-  - 重新取得新token
-  - 忘記密碼
+```jsx
+equipment_ids[0]    :  204
+time[0]  :  start_date
+time[1]  :  end_date
+page  :  1
+appst  :  步驟1.得到的值
+```
 
-  
-- 雷達測速 (管理者權限)
-  - 未超過速限
-    - 不記錄資料
-  - 紀錄 超過速限車輛
-    - 時間 , 車號 , 車速
-  - 修改 場內速限
+得到datalist內的車輛資訊
 
+![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/0849cd19-520e-4bc9-9cb9-6d1ba25f518f/f191dfc9-4c8f-48d1-b4f8-66f2ca810d7e/Untitled.png)
 
-
-- 燈號控制
-- LED字幕機控制
+- 串流 
+https://yj.wisiotsys.com:8889/admin/stream/start
+    
+    POST
+    Body : 
+    
+    ```jsx
+    camera_id  :  197
+    
+    appstr  :  步驟1.得到的值
+    ```
+    
+    ![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/0849cd19-520e-4bc9-9cb9-6d1ba25f518f/8f89b23f-d4f9-4845-b7f6-6608ebd5890e/Untitled.png)
+    
+    [https://yj.wisiotsys.com:1443/index/api/webrtc](https://yj.wisiotsys.com:1443/index/api/webrtc?app=rtp&stream=45116200001321000189_45116200001321000189&type=play)
+    POST
+    Body :

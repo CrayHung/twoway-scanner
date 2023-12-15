@@ -60,5 +60,9 @@ public interface RecordRepository extends CrudRepository<Record , Integer> , Jpa
     );
 
 
+    //正確車號+攝影機ID
+    @Query(value = "SELECT * FROM record WHERE camera_id LIKE ?1 AND plate_number LIKE ?2 ORDER by id DESC LIMIT 1", nativeQuery = true)
+    Optional<Record> findByCameraIdByPlateNumber(String cameraId,String plateNumber);
+
 
 }

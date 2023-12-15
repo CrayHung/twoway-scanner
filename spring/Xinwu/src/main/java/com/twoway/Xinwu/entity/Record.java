@@ -22,6 +22,7 @@ public class Record{
     /* plateIn判斷進出場用 , 初始值都是true -> "想進去" */
     private Boolean plateIn=true;
 
+
     public Boolean getPlateIn(){
       return this.plateIn;
   

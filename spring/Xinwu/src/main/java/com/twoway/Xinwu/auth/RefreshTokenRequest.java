@@ -8,6 +8,7 @@ public class RefreshTokenRequest {
 
     public RefreshTokenRequest() {
     }
+    
     public RefreshTokenRequest(String refreshToken) {
         this.refreshToken = refreshToken;
     }

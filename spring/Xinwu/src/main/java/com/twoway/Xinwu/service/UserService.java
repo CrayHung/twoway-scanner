@@ -32,6 +32,12 @@ public class UserService implements UserDetailsService{
         );
     }
 
+    public boolean isValidUser(String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        return user != null;
+    }
+
+
     public void registerUser(User user){
         userRepository.save(user);
     }

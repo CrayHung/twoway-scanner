@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class RefreshTokenService {
 
     private static final long REFRESH_TOKEN_VALIDITY_DAYS = 30;
-    private static final long REFRESH_TOKEN_VALIDITY_MINUTES = 1;
+    private static final long REFRESH_TOKEN_VALIDITY_MINUTES = 60;
 
     private final RefreshTokenRepository refreshTokenRepository;
 
