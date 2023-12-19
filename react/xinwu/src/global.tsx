@@ -34,6 +34,39 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
     setJwtToken(token);
   };
 
+  /**fetch token at begining */
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/auth/authenticate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: 'admin',
+            password: '1234',
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to authenticate');
+        }
+
+        const data = await response.json();
+        const token = data.token; // Replace 'token' with the actual key in your API response
+
+        setToken(token);
+      } catch (error) {
+        console.error('Error fetching token:', error);
+      }
+    };
+
+    fetchToken();
+  }, []);
+
+
+
 
 
   const contextValue = {

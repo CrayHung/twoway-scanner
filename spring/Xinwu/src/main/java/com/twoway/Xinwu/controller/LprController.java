@@ -17,6 +17,9 @@ import java.util.Optional;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,11 +28,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.socket.WebSocketMessage;
 
 import com.twoway.Xinwu.entity.AllowList;
 import com.twoway.Xinwu.entity.AllowListRepository;
 import com.twoway.Xinwu.entity.ParkingLot;
 import com.twoway.Xinwu.entity.ParkingLotRepository;
+
 
 //for websocket
 /*
@@ -44,6 +49,7 @@ import com.twoway.Xinwu.entity.RecordRepository;
 import com.twoway.Xinwu.entity.Speeding;
 import com.twoway.Xinwu.entity.SpeedingRepository;
 import com.twoway.Xinwu.model.recordSearch;
+import com.twoway.Xinwu.service.WebSocketService;
 import com.twoway.Xinwu.webSocket.WsMessageTool;
 
 // import org.springframework.stereotype.Controller;
@@ -64,6 +70,11 @@ public class LprController {
 
   @Autowired
   private SpeedingRepository speedingRepository;
+  
+
+  @Autowired
+  private WebSocketService websocketService;
+
 
   // 偵測長度(公尺)
   private static final long DETECT_LENGTH = 25;
@@ -298,6 +309,7 @@ public class LprController {
     
     String platenumber = speeding.getPlateNumber();
     String camera = speeding.getCameraId();
+    String recognitionTimeStr=speeding.getRecognitionTimeStr();
 
     //場內最高限速轉換成公尺/秒
     long limitSpeed = (LINIT_SPEED*1000)/3600;
@@ -328,7 +340,8 @@ public class LprController {
         if(avgSpeed >= limitSpeed && timeDifference <= TIME_BETWEEN_NEW_AND_DB) {
           speeding.setAvgSpeed(avgSpeed);
           speedingRepository.save(speeding);
-          return "另一隻攝影機有相同車號 , 超速 + 時間小於30秒---真正超速  車速:"+avgSpeed;
+          websocketService.processAndBroadcastData(platenumber, recognitionTimeStr, camera);
+          return "另一隻攝影機有相同車號 , 超速 + 時間小於30秒---真正超速  車速:"+avgSpeed*3.6+"km/hr";
         }
         else if(avgSpeed >= limitSpeed && timeDifference > TIME_BETWEEN_NEW_AND_DB){
           speedingRepository.save(speeding);
@@ -336,7 +349,7 @@ public class LprController {
         }
         else if(avgSpeed < limitSpeed && timeDifference <= TIME_BETWEEN_NEW_AND_DB){
           speedingRepository.save(speeding);
-          return "另一隻攝影機有相同車號 , 沒超速 + 時間小於30秒---此為正常駕駛  車速:"+avgSpeed;
+          return "另一隻攝影機有相同車號 , 沒超速 + 時間小於30秒---此為正常駕駛  車速:"+avgSpeed*3.6+"km/hr";
         }
         //avgSpeed < limitSpeed && timeDifference > TIME_BETWEEN_NEW_AND_DB
         else{
@@ -351,7 +364,7 @@ public class LprController {
       }
     }
 
-    if ("cam2".equals(camera) ) {
+    else if ("cam2".equals(camera) ) {
       System.out.println("從cam2進來");
       Optional<Speeding> sameCarInDB = speedingRepository.findByCameraIdByPlateNumber("cam1", platenumber);
 
@@ -372,7 +385,8 @@ public class LprController {
         if (avgSpeed >= limitSpeed && timeDifference <= TIME_BETWEEN_NEW_AND_DB) {
           speeding.setAvgSpeed(avgSpeed);
           speedingRepository.save(speeding);
-          return "另一隻攝影機有相同車號 , 超速 + 時間小於30秒---真正超速  車速:"+avgSpeed;
+          websocketService.processAndBroadcastData(platenumber, recognitionTimeStr, camera);
+          return "另一隻攝影機有相同車號 , 超速 + 時間小於30秒---真正超速  車速:"+avgSpeed*3.6+"km/hr";
         }
         else if(avgSpeed >= limitSpeed && timeDifference > TIME_BETWEEN_NEW_AND_DB){
           speedingRepository.save(speeding);
@@ -380,7 +394,7 @@ public class LprController {
         }
         else if(avgSpeed < limitSpeed && timeDifference <= TIME_BETWEEN_NEW_AND_DB){
           speedingRepository.save(speeding);
-          return "另一隻攝影機有相同車號 , 沒超速 + 時間小於30秒---此為正常駕駛  車速:"+avgSpeed;
+          return "另一隻攝影機有相同車號 , 沒超速 + 時間小於30秒---此為正常駕駛  車速:"+avgSpeed*3.6+"km/hr";
         }
         //avgSpeed < limitSpeed && timeDifference > TIME_BETWEEN_NEW_AND_DB
         else{
@@ -397,18 +411,23 @@ public class LprController {
     else{
       return "沒有cameraID資訊";
     }
-      
-    
+ 
+
 
   }
 
+
+
+
+
+  
   // 將每支攝影機最新的一筆車子資料回傳
   @GetMapping("/cams/latest")
   public Map<String, Record> getAllLatestRecordByCam() {
     Map<String, Record> latestCamsMap = new HashMap<>();
 
-    latestCamsMap.put("cam1", latestCamsTool("CAM1"));
-    latestCamsMap.put("cam2", latestCamsTool("CAM2"));
+    latestCamsMap.put("cam1", latestCamsTool("cam1"));
+    latestCamsMap.put("cam2", latestCamsTool("cam2"));
 
     return latestCamsMap;
   }

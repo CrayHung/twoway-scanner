@@ -1,5 +1,5 @@
 import React, { useEffect, useState, createContext , useContext } from 'react';
-import WebSocketComponent from '../component/websocket';
+import WebSocketComponent from "./websocket";
 import { useGlobalContext } from '../global';
 
 import { BrowserRouter as Router, Route } from 'react-router-dom';
@@ -11,15 +11,15 @@ function Home() {
 
   const { url, wsurl } = globalUrl;
   const [lprData,setLprData] = useState<any[]>([]);
-  const jwtToken1 = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcwMjI1OTk4OSwiZXhwIjoxNzAyMjYzNTg5fQ.SuJQ4mIPX6iz5QOtVP_xt-tNS7YqtrfaAUBiwrwukzk"
+  //const jwtToken1 = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTcwMjYzMTg5OSwiZXhwIjoxNzAyNjM1NDk5fQ.LpXDmqSXcOgW4t9xHDguicPZ7BEETw9_nP1cLJVQnaM"
   
   useEffect(() => {
     console.log(jwtToken);
       const headers = {'Authorization':`Bearer ${jwtToken}`,
                       "Content-Type": "application/json"};
     
-      console.log(headers);
-      console.log(url);
+      //console.log(headers);
+      //console.log(url);
       fetch(url+"/lpr/all", {headers})
       .then(response => response.json())
       .then(data => {
@@ -34,18 +34,18 @@ function Home() {
   return (
     <>
       <div><p>react OK</p></div>
-      {/* <div>
+      <div>
       <WebSocketComponent></WebSocketComponent>
-      </div> */}
+      </div>
 
-        <ul>
+        {/* <ul>
             {lprData.map((jsonObject) => (
               <li key={jsonObject.id}>
                 <p>plateNumber: {jsonObject.plateNumber}</p>
                 <p>vehicleType: {jsonObject.vehicleType}</p>
               </li>
             ))}
-          </ul>
+          </ul> */}
 
     </>
   );

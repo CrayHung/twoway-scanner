@@ -37,4 +37,12 @@ public class Speeding {
         return cameraId;
     }
     
+    public String getPlateNumber() {
+        return plateNumber;
+    }
+    
+    public String getRecognitionTimeStr() {
+        return recognitionTimeStr;
+    }
+    
 }

@@ -41,6 +41,7 @@ const WebSocketComponent = () => {
   const [listData, setListData] = useState<string[]>([]);
   useEffect(() => {
     if (lastMessage && lastMessage.data) {
+      //console.log("前端接收到的ws資訊為:"+lastMessage.data)
       try {
         const jsonData = JSON.parse(lastMessage.data);
 
@@ -79,7 +80,7 @@ const WebSocketComponent = () => {
       }
     })();
 
-  }, [cam1LatestData,cam2LatestData]);
+  }, [cam1LatestData,cam2LatestData,lastMessage]);
 
 
   

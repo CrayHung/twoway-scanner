@@ -19,4 +19,8 @@ public interface SpeedingRepository extends JpaRepository<Speeding , Integer>{
     @Query(value = "SELECT * FROM speeding WHERE camera_id LIKE ?1 AND plate_number LIKE ?2 ORDER by id DESC LIMIT 1", nativeQuery = true)
     Optional<Speeding> findByCameraIdByPlateNumber(String cameraId,String plateNumber);
     
+
+    /*cam */
+    @Query(value = "SELECT * FROM speeding WHERE camera_id=?1 ORDER by id DESC LIMIT 1", nativeQuery = true)
+    Optional<Speeding> findAllLatestRecordByCameraId(String cameraId);
 }

@@ -32,7 +32,8 @@ public class SecurityConfiguration {
         "/auth/**",
         "/password/**",
         "/reset/**",
-        "/forget/**"
+        "/forget/**",
+        "/lpr/**"
     };
 
 
