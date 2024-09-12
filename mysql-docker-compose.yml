@@ -1,0 +1,18 @@
+# version: '3'
+# services:
+#   database:
+#     image: mysql:latest
+#     restart: unless-stopped
+#     environment:
+#       MYSQL_DATABASE: youthdb
+#       MYSQL_ROOT_PASSWORD: 123456
+#     volumes:
+#       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+#     container_name: youth-database
+#     ports:
+#       - 3339:3306
+      
+# # 將mysql獨立出來,增加指定docker網路
+# networks:
+#   my-network:
+#     external: true

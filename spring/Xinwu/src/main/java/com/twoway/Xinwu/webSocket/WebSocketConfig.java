@@ -10,18 +10,43 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
+import com.twoway.Xinwu.config.SocketTextHandler;
+
+
+
+// @Configuration
+// @EnableWebSocket
+// public class WebSocketConfig implements WebSocketConfigurer {
+    
+//     @Override
+//     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+//         System.out.println("Registering WebSocket handler...");
+//         registry.addHandler(new MyWebSocketHandler(), "/ws")
+//                 .setAllowedOrigins("*");
+//     }
+// }
 
 
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
     
+    private final SocketTextHandler socketTextHandler;
+
+    public WebSocketConfig(SocketTextHandler socketTextHandler) {
+        this.socketTextHandler = socketTextHandler;
+    }
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new MyWebSocketHandler(), "/ws")
+        System.out.println("Registering WebSocket handler...");
+        registry.addHandler(socketTextHandler, "/ws")
                 .setAllowedOrigins("*");
     }
 }
+
+
+
 
 
 // @EnableWebSocketMessageBroker

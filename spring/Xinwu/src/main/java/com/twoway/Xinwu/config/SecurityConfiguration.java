@@ -84,12 +84,16 @@ public class SecurityConfiguration {
         
 
         http
+        .cors() // 啟用全域 CORS 設定
+        .and()
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(WHITE_LIST_URL).permitAll()
+                            .requestMatchers("/ws").permitAll()
                                 .requestMatchers("/parking/addparkinglots/**").hasAuthority("ADMIN")
                                 .requestMatchers("/parking/modifyparkinglots/**").hasAuthority( "ADMIN")
                                 .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                                .requestMatchers("/upload/**").hasAuthority("ADMIN")
                                 .anyRequest()
                                 .authenticated()
                 )

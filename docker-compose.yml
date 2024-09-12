@@ -2,66 +2,38 @@ version: '3'
 services:
 
   cms:
-    image: xinwu-react
+    image: twoway-react
     restart: unless-stopped
     ports:
       - "3000:3000"
     volumes:
       - ./react/xinwu:/app
-    container_name: xinwu-react
+    container_name: twoway-react
 
+# 如果要把mysql獨立出來,則註解掉這段 , 並另外執行mysql-docker-compose.yml
   database:
     image: mysql:latest
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: xinwudb
     volumes:
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
-    container_name: xinwu-database
+    container_name: twoway-database
     ports:
       - 3339:3306
 
-  web:
-    image: xinwu-nginx
-    ports:
-      - "81:81"
-    volumes:
-      - ./react/xinwu/build:/usr/share/nginx/html
-    container_name: xinwu-nginx
-
   spring:
+  # 如果將mysql獨立出來 , SPRING_DATASOURCE_URL要改為youth-database
     depends_on:
       - database
-    image: xinwu-spring
+    image: twoway-spring
     restart: unless-stopped
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/xinwudb
-      # SPRING_DATASOURCE_USERNAME: xinwu
+    # 將mysql獨立出來 , URL改為youth-database
+      # SPRING_DATASOURCE_URL: jdbc:mysql://youth-database:3306/twowaydb
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/twowaydb
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: 123456
-    container_name: xinwu-spring
+    container_name: twoway-spring
     ports:
       - "8080:8080"
-
-
-
-
-    # 參考用
-    # command:
-    #   --default-authentication-plugin=mysql_native_password
-    #   --character-set-server=utf8mb4
-    #   --collation-server=utf8mb4_general_ci
-    #   --explicit_defaults_for_timestamp=true
-    #   --lower_case_table_names=1
-    # environment:
-    #   - TZ=Asia/Taipei
-    #   - LANG=en_US.UTF-8
-    #   - MYSQL_ROOT_PASSWORD=xxxxxx
-    # privileged: true
-    # restart: always
-    # volumes:
-    #   - ./config/mysql/conf/my.cnf:/etc/mysql/my.cnf
-    #   - ./config/mysql/logs:/var/log/mysql
-    #   - ./config/mysql/data:/var/lib/mysql
-    #   - ./config/mysql/init:/docker-entrypoint-initdb.d/

@@ -62,6 +62,14 @@ dependencies {
 	// 添加 Thymeleaf 依赖
 	// implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.0'
+
+	// https://mvnrepository.com/artifact/org.apache.poi/poi
+	implementation group: 'org.apache.poi', name: 'poi', version: '4.1.2'
+
+	// https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
+	implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
+
 
 }
 

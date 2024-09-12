@@ -2,6 +2,7 @@ package com.twoway.Xinwu.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,8 +31,26 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> registerAdmin(
         @RequestBody RegisterRequest request) {
 
-        return ResponseEntity.ok(service.registerAdmin(request));
+        // return ResponseEntity.ok(service.registerAdmin(request));
+
+        try {
+            return service.registerAdmin(request);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                AuthenticationResponse.builder()
+                    .error(e.getMessage())
+                    .build()
+            );
         }
+        }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<AuthenticationResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ResponseEntity.badRequest()
+            .body(AuthenticationResponse.builder()
+                .error(e.getMessage())
+                .build());
+    }
 
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(

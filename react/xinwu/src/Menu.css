@@ -1,0 +1,17 @@
+.menu {
+  background-color: #eee;
+  padding: 40px;
+  width: 100px;
+  min-height: 100vh;
+}
+
+.menu a {
+  display: block;
+  margin-bottom: 10px;
+  text-decoration: none;
+  color: #333;
+}
+  
+.menu a:hover {
+  background-color: #ddd;
+}

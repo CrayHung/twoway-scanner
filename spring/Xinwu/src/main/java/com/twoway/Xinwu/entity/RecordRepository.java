@@ -1,5 +1,6 @@
 package com.twoway.Xinwu.entity;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.format.annotation.DateTimeFormat;
 
 // 創建執行CRUD接口 , 第一個參數是實體(entity)類型 , 第二個參數是該entity的主key的類型
 public interface RecordRepository extends CrudRepository<Record , Integer> , JpaSpecificationExecutor<Record>{
@@ -39,6 +41,7 @@ public interface RecordRepository extends CrudRepository<Record , Integer> , Jpa
     //日期區間
     @Query(value = "SELECT * FROM record WHERE DATE(recognition_time) BETWEEN ?1 AND ?2 ORDER by id DESC", nativeQuery = true)
     Iterable<Record> searchByDateBetween(String startDate,String endDate);
+    
 
     //模糊車號+日期區間
     @Query(value = "SELECT * FROM record WHERE plate_number LIKE %?1% AND DATE(recognition_time) BETWEEN ?2 AND ?3 ORDER by id DESC", nativeQuery = true)

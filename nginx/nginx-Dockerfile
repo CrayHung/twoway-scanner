@@ -1,9 +1,0 @@
-FROM nginx:latest
-
-# 正常來說nginx會有內建的default文件, 以下RUN檢查文件是否存在並刪除
-RUN if [ -f /etc/nginx/conf.d/default ]; then rm /etc/nginx/conf.d/default; fi
-
-COPY nginx.conf /etc/nginx/conf.d/
-
-# 將Nginx的對外port80 開放
-EXPOSE 81
