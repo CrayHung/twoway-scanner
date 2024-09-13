@@ -1,14 +1,14 @@
 version: '3'
 services:
 
-  cms:
-    image: twoway-react
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./react/xinwu:/app
-    container_name: twoway-react
+  # cms:
+  #   image: twoway-react
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./react/xinwu:/app
+  #   container_name: twoway-react
 
 # 如果要把mysql獨立出來,則註解掉這段 , 另外執行mysql-docker-compose.yml
   database:
@@ -22,18 +22,18 @@ services:
     ports:
       - 3339:3306
 
-  spring:
-  # 如果將mysql獨立出來 , SPRING_DATASOURCE_URL要改為youth-database
-    depends_on:
-      - database
-    image: twoway-spring
-    restart: unless-stopped
-    environment:
-    # 將mysql獨立出來 , URL改為youth-database
-      # SPRING_DATASOURCE_URL: jdbc:mysql://youth-database:3306/twowaydb
-      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/twowaydb
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: 123456
-    container_name: twoway-spring
-    ports:
-      - "8080:8080"
+  # spring:
+  # # 如果將mysql獨立出來 , SPRING_DATASOURCE_URL要改為youth-database
+  #   depends_on:
+  #     - database
+  #   image: twoway-spring
+  #   restart: unless-stopped
+  #   environment:
+  #   # 將mysql獨立出來 , URL改為youth-database
+  #     # SPRING_DATASOURCE_URL: jdbc:mysql://youth-database:3306/twowaydb
+  #     SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/twowaydb
+  #     SPRING_DATASOURCE_USERNAME: root
+  #     SPRING_DATASOURCE_PASSWORD: 123456
+  #   container_name: twoway-spring
+  #   ports:
+  #     - "8080:8080"
