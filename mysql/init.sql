@@ -63,6 +63,13 @@ CREATE TABLE IF NOT EXISTS speeding (
   PRIMARY KEY (id)
 );
 
+CREATE TABLE IF NOT EXISTS work_orders (
+  id INT AUTO_INCREMENT,
+  work_order_number VARCHAR(255) NOT NULL,
+  quantity INT NOT NULL,
+  part_number VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id)
+);
 
 INSERT INTO record (id,plate_number, recognition_time, recognition_time_str, car_type, image_path, camera_id, plate_in)
 VALUES
@@ -100,3 +107,10 @@ VALUES
   (1,'ABC-123', '2023-12-14 12:30:00.000000', '2023-12-14 12:30:00.000000', 'car', '1.jpg', 'cam1', 5),
   (2,'AAA-789', '2023-12-14 12:30:00.000000', '2023-12-14 12:30:00.000000', 'truck', '2.jpg', 'cam2', 7),
   (3,'123-XYZ', '2023-12-14 12:30:00.000000', '2023-12-14 12:30:00.000000', 'truck', '3.jpg', 'cam1', 10);
+
+-- 測試數據 for 工單 work_orders 
+INSERT INTO work_orders (work_order_number, quantity, part_number) VALUES 
+  ('WO-001', 100, 'PART-A'),
+  ('WO-002', 200, 'PART-B'),
+  ('WO-003', 150, 'PART-C');
+  SELECT COUNT(*) FROM work_orders;
