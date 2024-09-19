@@ -33,8 +33,10 @@ public class SecurityConfiguration {
         "/password/**",
         "/reset/**",
         "/forget/**",
-        "/lpr/**",
-        "/api/work-order"
+        "/lpr/**", 
+        //以下開發中API 測試完後需加入安全限制
+        "/api/post-work-orders",
+        "/api/get-work-orders"
     };
 
 

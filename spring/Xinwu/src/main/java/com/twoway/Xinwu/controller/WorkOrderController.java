@@ -5,8 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import com.twoway.Xinwu.entity.WorkOrder;
 import com.twoway.Xinwu.repository.WorkOrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.web.bind.annotation.RequestBody;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -15,7 +14,7 @@ public class WorkOrderController {
   @Autowired
   private WorkOrderRepository workOrderRepository;
 
-  @PostMapping("/work-order")
+  @PostMapping("/post-work-orders")
   public ResponseEntity<String> processWorkOrder(@RequestBody WorkOrderRequest request) {
       //處理接收到的工單數據
        // 1. 數據驗證
@@ -40,6 +39,11 @@ public class WorkOrderController {
 
     return ResponseEntity.ok("工單已成功處理");
   }
+  @GetMapping("/get-work-orders")
+    public ResponseEntity<List<WorkOrder>> getAllWorkOrders() {
+        List<WorkOrder> workOrders = workOrderRepository.findAll();
+        return ResponseEntity.ok(workOrders);
+    }
 }
 class WorkOrderRequest {
   private String workOrderNumber;
