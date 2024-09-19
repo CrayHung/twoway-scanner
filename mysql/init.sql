@@ -97,10 +97,10 @@ INSERT INTO parking_lot (id,amount, car_type) VALUES
 --   (2,'admin', '123456', 'ADMIN'),
 --   (3,'cray5', '123456', 'USER');
 
-INSERT INTO refresh_token (id,user_id, token, createdDate, expirationDate)
-VALUES
-  (1,1, 'token123', '2023-12-14 12:30:00.000000', '2023-12-14 12:30:00.000000'),
-  (2,2, 'token456', '2023-12-14 12:30:00.000000', '2023-12-14 12:30:00.000000');
+-- INSERT INTO refresh_token (id,user_id, token, createdDate, expirationDate)
+-- VALUES
+--   (1,1, 'token123', '2023-12-14 12:30:00.000000', '2023-12-14 12:30:00.000000'),
+--   (2,2, 'token456', '2023-12-14 12:30:00.000000', '2023-12-14 12:30:00.000000');
 
 INSERT INTO speeding (id,plate_number, recognition_time, recognition_time_str, car_type, image_path, camera_id, avgSpeed)
 VALUES

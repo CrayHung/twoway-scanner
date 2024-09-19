@@ -33,7 +33,8 @@ public class SecurityConfiguration {
         "/password/**",
         "/reset/**",
         "/forget/**",
-        "/lpr/**"
+        "/lpr/**",
+        "/api/work-order"
     };
 
 

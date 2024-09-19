@@ -20,6 +20,7 @@ mysql直接拉docker倉庫最新版本的mysql , 不自己寫Dockerfile
     - 輸入密碼123456
     - show databases;
     - use twowaydb;
+    - SHOW TABLES;
     - desc `record`;
     - select * from record;
 
