@@ -37,7 +37,7 @@ public class WorkOrderController {
       workOrder.setPartNumber(request.getPartNumber());
       workOrder.setCreateUser(request.getCreateUser());
       workOrder.setCreateDate(LocalDateTime.now());
-      workOrder.setEditUser(request.getCreateUser());
+      workOrder.setEditUser(request.getEditUser());
       workOrder.setEditDate(LocalDateTime.now());
       
       workOrderRepository.save(workOrder);
@@ -57,9 +57,7 @@ class WorkOrderRequest {
   private int quantity;
   private String partNumber;
   private String createUser;
-  private LocalDateTime createDate;
   private String editUser;
-  private LocalDateTime editDate;
 
   // Getter
   public String getWorkOrderNumber() {
@@ -74,14 +72,8 @@ class WorkOrderRequest {
   public String getCreateUser() {
       return createUser;
   }
-  public LocalDateTime getCreateDate() {
-      return createDate;
-  }
   public String getEditUser() {
       return editUser;
-  }
-  public LocalDateTime getEditDate() {
-      return editDate;
   }
   
   // Setter
@@ -97,13 +89,7 @@ class WorkOrderRequest {
   public void setCreateUser(String createUser) {
       this.createUser = createUser;
   }
-  public void setCreateDate(LocalDateTime createDate) {
-      this.createDate = createDate;
-  }
   public void setEditUser(String editUser) {
-      this.editUser = editUser;  
-  }
-  public void setEditDate(LocalDateTime editDate) {
-      this.editDate = editDate;
+      this.editUser = editUser;
   }
 }

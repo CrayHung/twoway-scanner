@@ -72,8 +72,34 @@ CREATE TABLE IF NOT EXISTS work_orders (
   create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   edit_user VARCHAR(255),
   edit_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  UNIQUE (work_order_number)
 );
+
+-- 修改 work_order_details 表結構
+DROP TABLE IF EXISTS work_order_details;
+CREATE TABLE work_order_details (
+  id INT AUTO_INCREMENT,
+  work_order_number VARCHAR(255) NOT NULL,
+  detail_id INT NOT NULL,
+  sn VARCHAR(255),
+  qr_rf_tray VARCHAR(255),
+  qr_ps VARCHAR(255),
+  qr_hs VARCHAR(255),
+  qr_backup1 VARCHAR(255),
+  qr_backup2 VARCHAR(255),
+  qr_backup3 VARCHAR(255),
+  qr_backup4 VARCHAR(255),
+  note TEXT,
+  create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  create_user VARCHAR(255),
+  edit_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  edit_user VARCHAR(255),
+  PRIMARY KEY (id),
+  FOREIGN KEY (work_order_number) REFERENCES work_orders(work_order_number),
+  UNIQUE (work_order_number, detail_id)
+);
+
 
 INSERT INTO record (id,plate_number, recognition_time, recognition_time_str, car_type, image_path, camera_id, plate_in)
 VALUES
@@ -120,3 +146,13 @@ VALUES
   ('WO-003', 150, 'PART-C', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00');
 
 SELECT COUNT(*) FROM work_orders;
+
+-- 測試數據 for work_order_details
+INSERT INTO work_order_details (work_order_number, detail_id, sn, qr_rf_tray, qr_ps, qr_hs, qr_backup1, qr_backup2, qr_backup3, qr_backup4, note, create_user, create_date, edit_user, edit_date)
+VALUES
+  ('WO-001', 1, 'SN001', 'QRRF001', 'QRPS001', 'QRHS001', 'QRBU001', 'QRBU002', 'QRBU003', 'QRBU004', 'Note for WO-001 #1', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
+  ('WO-001', 2, 'SN002', 'QRRF002', 'QRPS002', 'QRHS002', 'QRBU005', 'QRBU006', 'QRBU007', 'QRBU008', 'Note for WO-001 #2', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
+  ('WO-001', 3, 'SN003', 'QRRF003', 'QRPS003', 'QRHS003', 'QRBU009', 'QRBU010', 'QRBU011', 'QRBU012', 'Note for WO-001 #3', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
+  ('WO-002', 1, 'SN004', 'QRRF004', 'QRPS004', 'QRHS004', 'QRBU013', 'QRBU014', 'QRBU015', 'QRBU016', 'Note for WO-002 #1', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
+  ('WO-002', 2, 'SN005', 'QRRF005', 'QRPS005', 'QRHS005', 'QRBU017', 'QRBU018', 'QRBU019', 'QRBU020', 'Note for WO-002 #2', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
+  ('WO-003', 1, 'SN006', 'QRRF006', 'QRPS006', 'QRHS006', 'QRBU021', 'QRBU022', 'QRBU023', 'QRBU024', 'Note for WO-003 #1', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00');

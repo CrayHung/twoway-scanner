@@ -3,6 +3,9 @@ package com.twoway.Xinwu.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 @Entity
 @Table(name = "work_orders")
 public class WorkOrder {
@@ -11,7 +14,7 @@ public class WorkOrder {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "work_order_number")
+    @Column(name = "work_order_number", unique = true)
     private String workOrderNumber;
 
     @Column(name = "quantity")
@@ -24,12 +27,14 @@ public class WorkOrder {
     private String createUser;
 
     @Column(name = "create_date")
+    @CreationTimestamp
     private LocalDateTime createDate;
 
     @Column(name = "edit_user")
     private String editUser;
 
     @Column(name = "edit_date")
+    @UpdateTimestamp
     private LocalDateTime editDate;
 
     // Getters
