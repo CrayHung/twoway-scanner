@@ -2,6 +2,7 @@ package com.twoway.Xinwu.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,9 +10,13 @@ import com.twoway.Xinwu.entity.WorkOrderDetail;
 import com.twoway.Xinwu.entity.WorkOrder;
 import com.twoway.Xinwu.repository.WorkOrderDetailRepository;
 import com.twoway.Xinwu.repository.WorkOrderRepository;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api")
@@ -23,27 +28,39 @@ public class WorkOrderDetailController {
     @Autowired
     private WorkOrderRepository workOrderRepository;
 
+    //測試檢查錯誤
+    private static final Logger logger = LoggerFactory.getLogger(WorkOrderDetailController.class);
+
     @PostMapping("/post-work-order-details")
     public ResponseEntity<String> processWorkOrderDetail(@RequestBody WorkOrderDetailRequest request) {
+
+        //API測試
+        System.out.println("Received request: " + request);
+        logger.info("Received request to process work order detail: {}", request);
+
         // 數據驗證
+    try {
         if (request.getWorkOrderNumber() == null || request.getWorkOrderNumber().isEmpty()) {
+            logger.warn("Work order number is empty or null");
             return ResponseEntity.badRequest().body("工單編號不能為空");
         }
-        if (request.getSN() == null || request.getSN().isEmpty()) {
+        if (request.getSn() == null || request.getSn().isEmpty()) {
+            logger.warn("Sn is empty or null");
             return ResponseEntity.badRequest().body("SN不能為空");
         }
 
         // 檢查對應的WorkOrder是否存在
         WorkOrder workOrder = workOrderRepository.findByWorkOrderNumber(request.getWorkOrderNumber());
         if (workOrder == null) {
+            logger.warn("Work order not found for number: {}", request.getWorkOrderNumber());
             return ResponseEntity.badRequest().body("找不到對應的工單");
         }
 
         // 創建WorkOrderDetail實體並保存到數據庫
         WorkOrderDetail workOrderDetail = new WorkOrderDetail();
         workOrderDetail.setWorkOrderNumber(request.getWorkOrderNumber());
-        workOrderDetail.setDetailId(request.getDetailId());
-        workOrderDetail.setSN(request.getSN());
+        workOrderDetail.setDetail_id(request.getDetail_id());
+        workOrderDetail.setSn(request.getSn());
         workOrderDetail.setQR_RFTray(request.getQR_RFTray());
         workOrderDetail.setQR_PS(request.getQR_PS());
         workOrderDetail.setQR_HS(request.getQR_HS());
@@ -58,13 +75,19 @@ public class WorkOrderDetailController {
         workOrderDetail.setEdit_user(request.getEdit_user());
 
         workOrderDetailRepository.save(workOrderDetail);
+        logger.info("Work order detail saved successfully: {}", workOrderDetail);
 
         // 更新WorkOrder的相關字段
         workOrder.setEditDate(LocalDateTime.now());
         workOrder.setEditUser(request.getEdit_user());
         workOrderRepository.save(workOrder);
+        logger.info("Work order updated successfully: {}", workOrder);
 
         return ResponseEntity.ok("工單詳細信息已成功處理");
+      } catch (Exception e) {
+            logger.error("Error occurred while processing work order detail", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("服務器內部錯誤");
+        }
     }
 
     // get-all API
@@ -88,7 +111,7 @@ public class WorkOrderDetailController {
         }
 
         // 更新WorkOrderDetail
-        workOrderDetail.setSN(request.getSN());
+        workOrderDetail.setSn(request.getSn());
         workOrderDetail.setQR_RFTray(request.getQR_RFTray());
         workOrderDetail.setQR_PS(request.getQR_PS());
         workOrderDetail.setQR_HS(request.getQR_HS());
@@ -135,14 +158,30 @@ public class WorkOrderDetailController {
 
 class WorkOrderDetailRequest {
     private String workOrderNumber;
-    private int detailId;
+    private int detail_id;
+
+    @JsonProperty("SN")
     private String SN;
+
+    @JsonProperty("QR_RFTray")
     private String QR_RFTray;
+    
+    @JsonProperty("QR_PS")
     private String QR_PS;
+
+    @JsonProperty("QR_HS")
     private String QR_HS;
+
+    @JsonProperty("QR_backup1")
     private String QR_backup1;
+
+    @JsonProperty("QR_backup2")
     private String QR_backup2;
+
+    @JsonProperty("QR_backup3")
     private String QR_backup3;
+    
+    @JsonProperty("QR_backup4")
     private String QR_backup4;
     private String note;
     private String create_user;
@@ -159,22 +198,22 @@ class WorkOrderDetailRequest {
         this.workOrderNumber = workOrderNumber;
     }
 
-    public int getDetailId() {
-        return detailId;
+    public int getDetail_id() {
+        return detail_id;
     }
 
-    public void setDetailId(int detailId) {
-        this.detailId = detailId;
+    public void setDetail_id(int detail_id) {
+        this.detail_id = detail_id;
     }
 
-    public String getSN() {
+    public String getSn() {
         return SN;
     }
 
-    public void setSN(String SN) {
+    public void setSn(String SN) {
         this.SN = SN;
     }
-
+    
     public String getQR_RFTray() {
       return QR_RFTray;
     }

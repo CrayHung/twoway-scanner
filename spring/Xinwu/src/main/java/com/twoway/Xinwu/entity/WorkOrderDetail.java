@@ -15,14 +15,14 @@ public class WorkOrderDetail {
     private String workOrderNumber;
 
     @Column(name = "detail_id")
-    private Integer detailId;
+    private Integer detail_id;
 
     @Column(name = "sn")
     private String SN;
-
+    
     @Column(name = "qr_rf_tray")
     private String QR_RFTray;
-
+    
     @Column(name = "qr_ps")
     private String QR_PS;
 
@@ -74,19 +74,19 @@ public class WorkOrderDetail {
         this.workOrderNumber = workOrderNumber;
     }
 
-    public Integer getDetailId() {
-        return detailId;
+    public Integer getDetail_id() {
+        return detail_id;
     }
 
-    public void setDetailId(Integer detailId) {
-        this.detailId = detailId;
+    public void setDetail_id(Integer detail_id) {
+        this.detail_id = detail_id;
     }
 
-    public String getSN() {
+    public String getSn() {
         return SN;
     }
 
-    public void setSN(String SN) {
+    public void setSn(String SN) {
         this.SN = SN;
     }
 

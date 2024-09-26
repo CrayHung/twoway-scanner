@@ -21,8 +21,8 @@ mysql直接拉docker倉庫最新版本的mysql , 不自己寫Dockerfile
     - show databases;
     - use twowaydb;
     - SHOW TABLES;
-    - desc `record`;
-    - select * from record;
+    - desc `work_order_details`;
+    - select * from work_order_details;
 
 
 
