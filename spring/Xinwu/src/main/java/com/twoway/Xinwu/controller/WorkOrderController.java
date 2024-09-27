@@ -6,8 +6,10 @@ import com.twoway.Xinwu.entity.WorkOrder;
 import com.twoway.Xinwu.repository.WorkOrderRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.util.List;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api")
@@ -16,6 +18,7 @@ public class WorkOrderController {
   @Autowired
   private WorkOrderRepository workOrderRepository;
 
+  //POST API
   @PostMapping("/post-work-orders")
   public ResponseEntity<String> processWorkOrder(@RequestBody WorkOrderRequest request) {
       // 處理接收到的工單數據
@@ -36,20 +39,90 @@ public class WorkOrderController {
       workOrder.setQuantity(request.getQuantity());
       workOrder.setPartNumber(request.getPartNumber());
       workOrder.setCreateUser(request.getCreateUser());
-      workOrder.setCreateDate(LocalDateTime.now());
+      workOrder.setCreateDate(LocalDate.now());
       workOrder.setEditUser(request.getEditUser());
-      workOrder.setEditDate(LocalDateTime.now());
+      workOrder.setEditDate(LocalDate.now());
       
       workOrderRepository.save(workOrder);
       
       return ResponseEntity.ok("工單已成功處理");
   }
   
+  //GET API
   @GetMapping("/get-work-orders")
   public ResponseEntity<List<WorkOrder>> getAllWorkOrders() {
       List<WorkOrder> workOrders = workOrderRepository.findAll();
       return ResponseEntity.ok(workOrders);
   }
+
+  //SEARCH API
+    @GetMapping("/search-work-orders")
+  public ResponseEntity<List<WorkOrder>> searchWorkOrders(
+      @RequestParam(required = false) String workOrderNumber,
+      @RequestParam(required = false) Integer quantity,
+      @RequestParam(required = false) String partNumber,
+      @RequestParam(required = false) String createUser,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate productionDateStart,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate productionDateEnd
+  ) {
+      List<WorkOrder> workOrders = workOrderRepository.searchWorkOrders(
+          workOrderNumber,
+          quantity,
+          partNumber,
+          createUser,
+          productionDateStart,
+          productionDateEnd
+      );
+      return ResponseEntity.ok(workOrders);
+  }
+
+  //EDIT PUT API
+  @PutMapping("/update-work-orders/{id}")
+    public ResponseEntity<?> updateWorkOrder(@PathVariable Long id, @RequestBody WorkOrderRequest request) {
+        WorkOrder existingWorkOrder = workOrderRepository.findById(id)
+                .orElse(null);
+        
+        if (existingWorkOrder == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        // 驗證數據
+        if (request.getWorkOrderNumber() == null || request.getWorkOrderNumber().isEmpty()) {
+            return ResponseEntity.badRequest().body("工單編號不能為空");
+        }
+        if (request.getQuantity() <= 0) {
+            return ResponseEntity.badRequest().body("數量必須大於0");
+        }
+        if (request.getPartNumber() == null || request.getPartNumber().isEmpty()) {
+            return ResponseEntity.badRequest().body("料號不能為空");
+        }
+        
+        // 更新工單信息
+        existingWorkOrder.setWorkOrderNumber(request.getWorkOrderNumber());
+        existingWorkOrder.setQuantity(request.getQuantity());
+        existingWorkOrder.setPartNumber(request.getPartNumber());
+        existingWorkOrder.setEditUser(request.getEditUser());
+        existingWorkOrder.setEditDate(LocalDate.now());
+        
+        WorkOrder updatedWorkOrder = workOrderRepository.save(existingWorkOrder);
+        
+        return ResponseEntity.ok(updatedWorkOrder);
+    }
+
+    //Delete API
+    @DeleteMapping("/delete-work-orders/{id}")
+    public ResponseEntity<?> deleteWorkOrder(@PathVariable Long id) {
+        WorkOrder existingWorkOrder = workOrderRepository.findById(id)
+                .orElse(null);
+        
+        if (existingWorkOrder == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        workOrderRepository.delete(existingWorkOrder);
+        
+        return ResponseEntity.ok("工單已成功刪除");
+    }
 }
 
 class WorkOrderRequest {

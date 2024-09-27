@@ -1,7 +1,7 @@
 package com.twoway.Xinwu.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "work_order_details")
@@ -17,7 +17,7 @@ public class WorkOrderDetail {
     @Column(name = "detail_id")
     private Integer detail_id;
 
-    @Column(name = "sn")
+    @Column(name = "SN")
     private String SN;
     
     @Column(name = "qr_rf_tray")
@@ -45,13 +45,13 @@ public class WorkOrderDetail {
     private String note;
 
     @Column(name = "create_date")
-    private LocalDateTime create_date;
+    private LocalDate create_date;
 
     @Column(name = "create_user")
     private String create_user;
 
     @Column(name = "edit_date")
-    private LocalDateTime edit_date;
+    private LocalDate edit_date;
 
     @Column(name = "edit_user")
     private String edit_user;
@@ -154,11 +154,11 @@ public class WorkOrderDetail {
         this.note = note;
     }
 
-    public LocalDateTime getCreate_date() {
+    public LocalDate getCreate_date() {
         return create_date;
     }
 
-    public void setCreate_date(LocalDateTime create_date) {
+    public void setCreate_date(LocalDate create_date) {
         this.create_date = create_date;
     }
 
@@ -170,11 +170,11 @@ public class WorkOrderDetail {
         this.create_user = create_user;
     }
 
-    public LocalDateTime getEdit_date() {
+    public LocalDate getEdit_date() {
         return edit_date;
     }
 
-    public void setEdit_date(LocalDateTime edit_date) {
+    public void setEdit_date(LocalDate edit_date) {
         this.edit_date = edit_date;
     }
 

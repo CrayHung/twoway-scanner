@@ -1,7 +1,7 @@
 package com.twoway.Xinwu.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -28,14 +28,14 @@ public class WorkOrder {
 
     @Column(name = "create_date")
     @CreationTimestamp
-    private LocalDateTime createDate;
+    private LocalDate createDate;
 
     @Column(name = "edit_user")
     private String editUser;
 
     @Column(name = "edit_date")
     @UpdateTimestamp
-    private LocalDateTime editDate;
+    private LocalDate editDate;
 
     // Getters
     public Long getId() {
@@ -58,7 +58,7 @@ public class WorkOrder {
         return createUser;
     }
 
-    public LocalDateTime getCreateDate() {
+    public LocalDate getCreateDate() {
         return createDate;
     }
 
@@ -66,7 +66,7 @@ public class WorkOrder {
         return editUser;
     }
 
-    public LocalDateTime getEditDate() {
+    public LocalDate getEditDate() {
         return editDate;
     }
 
@@ -91,7 +91,7 @@ public class WorkOrder {
         this.createUser = createUser;
     }
 
-    public void setCreateDate(LocalDateTime createDate) {
+    public void setCreateDate(LocalDate createDate) {
         this.createDate = createDate;
     }
 
@@ -99,7 +99,7 @@ public class WorkOrder {
         this.editUser = editUser;
     }
 
-    public void setEditDate(LocalDateTime editDate) {
+    public void setEditDate(LocalDate editDate) {
         this.editDate = editDate;
     }
 }

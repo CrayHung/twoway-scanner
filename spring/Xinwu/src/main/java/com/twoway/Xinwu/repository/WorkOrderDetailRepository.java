@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -37,8 +37,8 @@ public interface WorkOrderDetailRepository extends JpaRepository<WorkOrderDetail
         @Param("qrBackup2") String qrBackup2,
         @Param("qrBackup3") String qrBackup3,
         @Param("qrBackup4") String qrBackup4,
-        @Param("productionDateStart") LocalDateTime productionDateStart,
-        @Param("productionDateEnd") LocalDateTime productionDateEnd
+        @Param("productionDateStart") LocalDate productionDateStart,
+        @Param("productionDateEnd") LocalDate productionDateEnd
     );
 
     

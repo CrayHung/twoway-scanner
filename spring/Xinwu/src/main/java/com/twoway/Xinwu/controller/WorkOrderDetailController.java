@@ -12,7 +12,7 @@ import com.twoway.Xinwu.repository.WorkOrderDetailRepository;
 import com.twoway.Xinwu.repository.WorkOrderRepository;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -69,16 +69,16 @@ public class WorkOrderDetailController {
         workOrderDetail.setQR_backup3(request.getQR_backup3());
         workOrderDetail.setQR_backup4(request.getQR_backup4());
         workOrderDetail.setNote(request.getNote());
-        workOrderDetail.setCreate_date(LocalDateTime.now());
+        workOrderDetail.setCreate_date(LocalDate.now());
         workOrderDetail.setCreate_user(request.getCreate_user());
-        workOrderDetail.setEdit_date(LocalDateTime.now());
+        workOrderDetail.setEdit_date(LocalDate.now());
         workOrderDetail.setEdit_user(request.getEdit_user());
 
         workOrderDetailRepository.save(workOrderDetail);
         logger.info("Work order detail saved successfully: {}", workOrderDetail);
 
         // 更新WorkOrder的相關字段
-        workOrder.setEditDate(LocalDateTime.now());
+        workOrder.setEditDate(LocalDate.now());
         workOrder.setEditUser(request.getEdit_user());
         workOrderRepository.save(workOrder);
         logger.info("Work order updated successfully: {}", workOrder);
@@ -103,7 +103,7 @@ public class WorkOrderDetailController {
        }
 
     //edit/upadate API
-    @PutMapping("/update-work-order-detail/{id}")
+    @PutMapping("/update-work-order-details/{id}")
     public ResponseEntity<String> updateWorkOrderDetail(@PathVariable Long id, @RequestBody WorkOrderDetailRequest request) {
         WorkOrderDetail workOrderDetail = workOrderDetailRepository.findById(id).orElse(null);
         if (workOrderDetail == null) {
@@ -120,7 +120,7 @@ public class WorkOrderDetailController {
         workOrderDetail.setQR_backup3(request.getQR_backup3());
         workOrderDetail.setQR_backup4(request.getQR_backup4());
         workOrderDetail.setNote(request.getNote());
-        workOrderDetail.setEdit_date(LocalDateTime.now());
+        workOrderDetail.setEdit_date(LocalDate.now());
         workOrderDetail.setEdit_user(request.getEdit_user());
 
         workOrderDetailRepository.save(workOrderDetail);
@@ -128,7 +128,7 @@ public class WorkOrderDetailController {
         // 更新對應的WorkOrder, & Dateime 
         WorkOrder workOrder = workOrderRepository.findByWorkOrderNumber(workOrderDetail.getWorkOrderNumber());
         if (workOrder != null) {
-            workOrder.setEditDate(LocalDateTime.now());
+            workOrder.setEditDate(LocalDate.now());
             workOrder.setEditUser(request.getEdit_user());
             workOrderRepository.save(workOrder);
         }
@@ -147,13 +147,31 @@ public class WorkOrderDetailController {
             @RequestParam(required = false) String qrBackup2,
             @RequestParam(required = false) String qrBackup3,
             @RequestParam(required = false) String qrBackup4,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime productionDateStart,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime productionDateEnd) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate productionDateStart,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate productionDateEnd) {
 
         List<WorkOrderDetail> results = workOrderDetailRepository.searchWorkOrderDetails(
             workOrderNumber, sn, qrRFTray, qrPS, qrHS, qrBackup1, qrBackup2, qrBackup3, qrBackup4, productionDateStart, productionDateEnd);
         return ResponseEntity.ok(results);
     }
+
+    // DEL API
+    @DeleteMapping("/delete-work-order-details/{id}")
+    public ResponseEntity<String> deleteWorkOrderDetail(@PathVariable Long id) {
+    try {
+        WorkOrderDetail workOrderDetail = workOrderDetailRepository.findById(id).orElse(null);
+        if (workOrderDetail == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        workOrderDetailRepository.delete(workOrderDetail);
+
+        return ResponseEntity.ok("工單詳細信息已成功刪除");
+    } catch (Exception e) {
+        logger.error("Error occurred while deleting work order detail", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("服務器內部錯誤");
+    }
+}
 }
 
 class WorkOrderDetailRequest {
