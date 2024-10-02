@@ -38,6 +38,7 @@ public class WorkOrderController {
       workOrder.setWorkOrderNumber(request.getWorkOrderNumber());
       workOrder.setQuantity(request.getQuantity());
       workOrder.setPartNumber(request.getPartNumber());
+      workOrder.setInputMode(request.getInputMode());
       workOrder.setCreateUser(request.getCreateUser());
       workOrder.setCreateDate(LocalDate.now());
       workOrder.setEditUser(request.getEditUser());
@@ -61,6 +62,7 @@ public class WorkOrderController {
       @RequestParam(required = false) String workOrderNumber,
       @RequestParam(required = false) Integer quantity,
       @RequestParam(required = false) String partNumber,
+      @RequestParam(required = false) String inputMode,
       @RequestParam(required = false) String createUser,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate productionDateStart,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate productionDateEnd
@@ -69,6 +71,7 @@ public class WorkOrderController {
           workOrderNumber,
           quantity,
           partNumber,
+          inputMode,
           createUser,
           productionDateStart,
           productionDateEnd
@@ -101,6 +104,7 @@ public class WorkOrderController {
         existingWorkOrder.setWorkOrderNumber(request.getWorkOrderNumber());
         existingWorkOrder.setQuantity(request.getQuantity());
         existingWorkOrder.setPartNumber(request.getPartNumber());
+        existingWorkOrder.setInputMode(request.getInputMode());
         existingWorkOrder.setEditUser(request.getEditUser());
         existingWorkOrder.setEditDate(LocalDate.now());
         
@@ -129,8 +133,11 @@ class WorkOrderRequest {
   private String workOrderNumber;
   private int quantity;
   private String partNumber;
+  private String inputMode;
   private String createUser;
   private String editUser;
+
+
 
   // Getter
   public String getWorkOrderNumber() {
@@ -165,4 +172,12 @@ class WorkOrderRequest {
   public void setEditUser(String editUser) {
       this.editUser = editUser;
   }
+public String getInputMode() {
+    return inputMode;
+}
+public void setInputMode(String inputMode) {
+    this.inputMode = inputMode;
+}
+
+  
 }

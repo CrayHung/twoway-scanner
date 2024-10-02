@@ -58,7 +58,7 @@ public class WorkOrderDetailController {
 
         // 創建WorkOrderDetail實體並保存到數據庫
         WorkOrderDetail workOrderDetail = new WorkOrderDetail();
-        workOrderDetail.setWorkOrderNumber(request.getWorkOrderNumber());
+        workOrderDetail.setWorkOrder(workOrder);
         workOrderDetail.setDetail_id(request.getDetail_id());
         workOrderDetail.setSn(request.getSn());
         workOrderDetail.setQR_RFTray(request.getQR_RFTray());
@@ -94,7 +94,10 @@ public class WorkOrderDetailController {
     @GetMapping("/get-work-order-details")
        public ResponseEntity<?> getAllWorkOrderDetails() {
            try {
-               List<WorkOrderDetail> workOrderDetails = workOrderDetailRepository.findAll();
+               List<WorkOrderDetail> workOrderDetails = workOrderDetailRepository.findAllWithWorkOrderLeftJoin();
+               for (WorkOrderDetail detail : workOrderDetails) {
+                logger.info("WorkOrderDetail: {}, WorkOrder: {}", detail, detail.getWorkOrder());
+            }
                return ResponseEntity.ok(workOrderDetails);
            } catch (Exception e) {
                e.printStackTrace();

@@ -3,6 +3,8 @@ package com.twoway.Xinwu.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "work_order_details")
 public class WorkOrderDetail {
@@ -10,9 +12,6 @@ public class WorkOrderDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "work_order_number")
-    private String workOrderNumber;
 
     @Column(name = "detail_id")
     private Integer detail_id;
@@ -56,6 +55,12 @@ public class WorkOrderDetail {
     @Column(name = "edit_user")
     private String edit_user;
 
+    // parent workorder
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "work_order_number", referencedColumnName = "work_order_number")
+    @JsonBackReference
+    private WorkOrder workOrder;
+
     // Getters and setters for all fields
 
     public Long getId() {
@@ -64,14 +69,6 @@ public class WorkOrderDetail {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getWorkOrderNumber() {
-        return workOrderNumber;
-    }
-
-    public void setWorkOrderNumber(String workOrderNumber) {
-        this.workOrderNumber = workOrderNumber;
     }
 
     public Integer getDetail_id() {
@@ -185,4 +182,34 @@ public class WorkOrderDetail {
     public void setEdit_user(String edit_user) {
         this.edit_user = edit_user;
     }
+
+    public WorkOrder getWorkOrder() {
+        return workOrder;
+    }
+
+    public void setWorkOrder(WorkOrder workOrder) {
+        this.workOrder = workOrder;
+    }
+
+     // Add a method to get parent WorkOrder properties
+     @Transient
+    public String getWorkOrderNumber() {
+        return workOrder != null ? workOrder.getWorkOrderNumber() : null;
+    }
+
+    @Transient
+    public String getParentWorkOrderNumber() {
+        return getWorkOrderNumber();
+    }
+
+    @Transient
+    public int getParentQuantity() {
+        return workOrder != null ? workOrder.getQuantity() : 0;
+    }
+
+    @Transient
+    public String getParentPartNumber() {
+        return workOrder != null ? workOrder.getPartNumber() : null;
+    }
+ 
 }

@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS work_orders (
   work_order_number VARCHAR(255) NOT NULL,
   quantity INT NOT NULL,
   part_number VARCHAR(255) NOT NULL,
+  input_mode VARCHAR(255),
   create_user VARCHAR(255),
   create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   edit_user VARCHAR(255),
@@ -139,11 +140,11 @@ VALUES
   (3,'123-XYZ', '2023-12-14 12:30:00.000000', '2023-12-14 12:30:00.000000', 'truck', '3.jpg', 'cam1', 10);
 
 -- 測試數據 for 工單 work_orders 
-INSERT INTO work_orders (work_order_number, quantity, part_number, create_user, create_date, edit_user, edit_date)
+INSERT INTO work_orders (work_order_number, quantity, part_number, input_mode, create_user, create_date, edit_user, edit_date)
 VALUES
-  ('WO-001', 100, 'PART-A', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
-  ('WO-002', 200, 'PART-B', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
-  ('WO-003', 150, 'PART-C', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00');
+  ('WO-001', 100, 'PART-A', 'Manual', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
+  ('WO-002', 200, 'PART-B', 'Barcode', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
+  ('WO-003', 150, 'PART-C', 'Manual', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00');
 
 SELECT COUNT(*) FROM work_orders;
 

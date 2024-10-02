@@ -2,9 +2,13 @@ package com.twoway.Xinwu.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "work_orders")
@@ -23,6 +27,9 @@ public class WorkOrder {
     @Column(name = "part_number")
     private String partNumber;
 
+    @Column(name = "input_mode")
+    private String inputMode;
+
     @Column(name = "create_user")
     private String createUser;
 
@@ -36,6 +43,10 @@ public class WorkOrder {
     @Column(name = "edit_date")
     @UpdateTimestamp
     private LocalDate editDate;
+
+    @OneToMany(mappedBy = "workOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<WorkOrderDetail> workOrderDetails = new ArrayList<>();
 
     // Getters
     public Long getId() {
@@ -101,5 +112,34 @@ public class WorkOrder {
 
     public void setEditDate(LocalDate editDate) {
         this.editDate = editDate;
+    }
+
+    public List<WorkOrderDetail> getWorkOrderDetails() {
+        return workOrderDetails;
+    }
+
+    public void setWorkOrderDetails(List<WorkOrderDetail> workOrderDetails) {
+        this.workOrderDetails = workOrderDetails;
+    }
+
+    public String getInputMode() {
+        return inputMode;
+    }
+
+    public void setInputMode(String inputMode) {
+        this.inputMode = inputMode;
+    }
+
+
+    // Add a method to add WorkOrderDetail
+    public void addWorkOrderDetail(WorkOrderDetail detail) {
+        workOrderDetails.add(detail);
+        detail.setWorkOrder(this);
+    }
+
+    // Add a method to remove WorkOrderDetail
+    public void removeWorkOrderDetail(WorkOrderDetail detail) {
+        workOrderDetails.remove(detail);
+        detail.setWorkOrder(null);
     }
 }

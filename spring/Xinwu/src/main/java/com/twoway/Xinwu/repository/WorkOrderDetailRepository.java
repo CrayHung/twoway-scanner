@@ -16,7 +16,7 @@ public interface WorkOrderDetailRepository extends JpaRepository<WorkOrderDetail
    
 
     @Query("SELECT w FROM WorkOrderDetail w WHERE " +
-           "(:workOrderNumber IS NULL OR w.workOrderNumber = :workOrderNumber) AND " +
+           "(:workOrderNumber IS NULL OR w.workOrder.workOrderNumber = :workOrderNumber) AND " +
            "(:SN IS NULL OR w.SN = :SN) AND " +
            "(:qrRFTray IS NULL OR w.QR_RFTray = :qrRFTray) AND " +
            "(:qrPS IS NULL OR w.QR_PS = :qrPS) AND " +
@@ -40,6 +40,11 @@ public interface WorkOrderDetailRepository extends JpaRepository<WorkOrderDetail
         @Param("productionDateStart") LocalDate productionDateStart,
         @Param("productionDateEnd") LocalDate productionDateEnd
     );
+    
+    @Query("SELECT w FROM WorkOrderDetail w JOIN FETCH w.workOrder")
+    List<WorkOrderDetail> findAllWithWorkOrder();
 
+    @Query("SELECT w FROM WorkOrderDetail w LEFT JOIN FETCH w.workOrder")
+    List<WorkOrderDetail> findAllWithWorkOrderLeftJoin();
     
 }
