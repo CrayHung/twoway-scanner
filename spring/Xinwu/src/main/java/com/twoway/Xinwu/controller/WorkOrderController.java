@@ -38,7 +38,7 @@ public class WorkOrderController {
       workOrder.setWorkOrderNumber(request.getWorkOrderNumber());
       workOrder.setQuantity(request.getQuantity());
       workOrder.setPartNumber(request.getPartNumber());
-      workOrder.setInputMode(request.getInputMode());
+      workOrder.setCompany(request.getCompany());
       workOrder.setCreateUser(request.getCreateUser());
       workOrder.setCreateDate(LocalDate.now());
       workOrder.setEditUser(request.getEditUser());
@@ -62,7 +62,7 @@ public class WorkOrderController {
       @RequestParam(required = false) String workOrderNumber,
       @RequestParam(required = false) Integer quantity,
       @RequestParam(required = false) String partNumber,
-      @RequestParam(required = false) String inputMode,
+      @RequestParam(required = false) String company,
       @RequestParam(required = false) String createUser,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate productionDateStart,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate productionDateEnd
@@ -71,7 +71,7 @@ public class WorkOrderController {
           workOrderNumber,
           quantity,
           partNumber,
-          inputMode,
+          company,
           createUser,
           productionDateStart,
           productionDateEnd
@@ -104,7 +104,7 @@ public class WorkOrderController {
         existingWorkOrder.setWorkOrderNumber(request.getWorkOrderNumber());
         existingWorkOrder.setQuantity(request.getQuantity());
         existingWorkOrder.setPartNumber(request.getPartNumber());
-        existingWorkOrder.setInputMode(request.getInputMode());
+        existingWorkOrder.setCompany(request.getCompany());
         existingWorkOrder.setEditUser(request.getEditUser());
         existingWorkOrder.setEditDate(LocalDate.now());
         
@@ -133,7 +133,7 @@ class WorkOrderRequest {
   private String workOrderNumber;
   private int quantity;
   private String partNumber;
-  private String inputMode;
+  private String company;
   private String createUser;
   private String editUser;
 
@@ -172,11 +172,12 @@ class WorkOrderRequest {
   public void setEditUser(String editUser) {
       this.editUser = editUser;
   }
-public String getInputMode() {
-    return inputMode;
+  public String getCompany() {
+    return company;
 }
-public void setInputMode(String inputMode) {
-    this.inputMode = inputMode;
+
+public void setCompany(String company) {
+    this.company = company;
 }
 
   

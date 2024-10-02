@@ -198,11 +198,6 @@ public class WorkOrderDetail {
     }
 
     @Transient
-    public String getParentWorkOrderNumber() {
-        return getWorkOrderNumber();
-    }
-
-    @Transient
     public int getParentQuantity() {
         return workOrder != null ? workOrder.getQuantity() : 0;
     }

@@ -27,8 +27,8 @@ public class WorkOrder {
     @Column(name = "part_number")
     private String partNumber;
 
-    @Column(name = "input_mode")
-    private String inputMode;
+    @Column(name = "company")
+    private String company;
 
     @Column(name = "create_user")
     private String createUser;
@@ -122,12 +122,12 @@ public class WorkOrder {
         this.workOrderDetails = workOrderDetails;
     }
 
-    public String getInputMode() {
-        return inputMode;
+    public String getCompany() {
+        return company;
     }
 
-    public void setInputMode(String inputMode) {
-        this.inputMode = inputMode;
+    public void setCompany(String company) {
+        this.company = company;
     }
 
 
