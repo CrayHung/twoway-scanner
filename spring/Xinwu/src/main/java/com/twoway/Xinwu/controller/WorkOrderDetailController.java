@@ -24,11 +24,11 @@ public class WorkOrderDetailController {
 
     @Autowired
     private WorkOrderDetailRepository workOrderDetailRepository;
-
+    
     @Autowired
     private WorkOrderRepository workOrderRepository;
 
-    //測試檢查錯誤
+    //測試檢查錯誤用變數
     private static final Logger logger = LoggerFactory.getLogger(WorkOrderDetailController.class);
 
     @PostMapping("/post-work-order-details")
@@ -129,7 +129,7 @@ public class WorkOrderDetailController {
         workOrderDetailRepository.save(workOrderDetail);
 
         // 更新對應的WorkOrder, & Dateime 
-        WorkOrder workOrder = workOrderRepository.findByWorkOrderNumber(workOrderDetail.getWorkOrderNumber());
+        WorkOrder workOrder = workOrderRepository.findByWorkOrderNumber(workOrderDetail.getParentWorkOrderNumber());
         if (workOrder != null) {
             workOrder.setEditDate(LocalDate.now());
             workOrder.setEditUser(request.getEdit_user());
@@ -142,7 +142,8 @@ public class WorkOrderDetailController {
     @GetMapping("/search-work-order-details")
     public ResponseEntity<List<WorkOrderDetail>> searchWorkOrderDetails(
             @RequestParam(required = false) String workOrderNumber,
-            @RequestParam(required = false) String sn,
+            @RequestParam(required = false) String snStart,
+            @RequestParam(required = false) String snEnd,
             @RequestParam(required = false) String qrRFTray,
             @RequestParam(required = false) String qrPS,
             @RequestParam(required = false) String qrHS,
@@ -150,11 +151,17 @@ public class WorkOrderDetailController {
             @RequestParam(required = false) String qrBackup2,
             @RequestParam(required = false) String qrBackup3,
             @RequestParam(required = false) String qrBackup4,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate productionDateStart,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate productionDateEnd) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate productionDateStart,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate productionDateEnd) {
+
+        logger.info("正在搜尋工單詳細資料，參數為：workOrderNumber={}, snStart={}, snEnd={}, qrRFTray={}, qrPS={}, qrHS={}, qrBackup1={}, qrBackup2={}, qrBackup3={}, qrBackup4={}, productionDateStart={}, productionDateEnd={}",
+                workOrderNumber, snStart, snEnd, qrRFTray, qrPS, qrHS, qrBackup1, qrBackup2, qrBackup3, qrBackup4, productionDateStart, productionDateEnd);
 
         List<WorkOrderDetail> results = workOrderDetailRepository.searchWorkOrderDetails(
-            workOrderNumber, sn, qrRFTray, qrPS, qrHS, qrBackup1, qrBackup2, qrBackup3, qrBackup4, productionDateStart, productionDateEnd);
+            workOrderNumber, snStart, snEnd, qrRFTray, qrPS, qrHS, qrBackup1, qrBackup2, qrBackup3, qrBackup4, productionDateStart, productionDateEnd);
+
+        logger.info("搜尋完成。找到 {} 個結果。", results.size());
+
         return ResponseEntity.ok(results);
     }
 

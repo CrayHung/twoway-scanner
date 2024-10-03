@@ -183,6 +183,7 @@ public class WorkOrderDetail {
         this.edit_user = edit_user;
     }
 
+    // Parent 類別的 WorkOrder 設定
     public WorkOrder getWorkOrder() {
         return workOrder;
     }
@@ -193,7 +194,7 @@ public class WorkOrderDetail {
 
      // Add a method to get parent WorkOrder properties
      @Transient
-    public String getWorkOrderNumber() {
+    public String getParentWorkOrderNumber() {
         return workOrder != null ? workOrder.getWorkOrderNumber() : null;
     }
 
@@ -206,5 +207,9 @@ public class WorkOrderDetail {
     public String getParentPartNumber() {
         return workOrder != null ? workOrder.getPartNumber() : null;
     }
- 
+    
+    @Transient
+    public String getParentCompany() {
+        return workOrder != null ? workOrder.getCompany() : null;
+    }
 }
