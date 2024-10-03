@@ -101,6 +101,15 @@ CREATE TABLE work_order_details (
   UNIQUE (work_order_number, detail_id)
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- 創建 input_modes 表
+CREATE TABLE IF NOT EXISTS input_modes (
+  id INT AUTO_INCREMENT,
+  part_number VARCHAR(255) NOT NULL,
+  input_mode VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- 以下為測試用數據
 
 INSERT INTO record (id,plate_number, recognition_time, recognition_time_str, car_type, image_path, camera_id, plate_in)
 VALUES
@@ -157,3 +166,13 @@ VALUES
   ('WO-002', 1, 'SN004', 'QRRF004', 'QRPS004', 'QRHS004', 'QRBU013', 'QRBU014', 'QRBU015', 'QRBU016', 'Note for WO-002 #1', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
   ('WO-002', 2, 'SN005', 'QRRF005', 'QRPS005', 'QRHS005', 'QRBU017', 'QRBU018', 'QRBU019', 'QRBU020', 'Note for WO-002 #2', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
   ('WO-003', 1, 'SN006', 'QRRF006', 'QRPS006', 'QRHS006', 'QRBU021', 'QRBU022', 'QRBU023', 'QRBU024', 'Note for WO-003 #1', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00');
+
+-- 插入測試數據到 input_modes 表
+INSERT INTO input_modes (part_number, input_mode) VALUES
+  ('PART-A', 'Manual'),
+  ('PART-B', 'Automatic'),
+  ('PART-C', 'Semi-Automatic'),
+  ('PART-D', 'Manual'),
+  ('PART-E', 'Automatic');
+  -- 確認插入的數據
+SELECT COUNT(*) FROM input_modes;
