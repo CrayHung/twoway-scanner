@@ -24,31 +24,31 @@ public class WorkOrderDetail {
     
 
     @Column(name = "qr_rf_tray")
-    private String QR_RFTray;
+    private String qrRfTray;
     
  
     @Column(name = "qr_ps")
-    private String QR_PS;
+    private String qrPs;
 
 
     @Column(name = "qr_hs")
-    private String QR_HS;
+    private String qrHs;
 
 
     @Column(name = "qr_backup1")
-    private String QR_backup1;
+    private String qrBackup1;
 
 
     @Column(name = "qr_backup2")
-    private String QR_backup2;
+    private String qrBackup2;
 
     
     @Column(name = "qr_backup3")
-    private String QR_backup3;
+    private String qrBackup3;
 
     
     @Column(name = "qr_backup4")
-    private String QR_backup4;
+    private String qrBackup4;
 
     
     @Column(name = "note")
@@ -102,60 +102,74 @@ public class WorkOrderDetail {
         this.sn = sn;
     }
 
-    public String getQR_RFTray() {
-        return QR_RFTray;
+    @JsonProperty("QR_RFTray")
+    public String getQrRfTray() {
+        return qrRfTray;
     }
 
-    public void setQR_RFTray(String QR_RFTray) {
-        this.QR_RFTray = QR_RFTray;
+    @JsonProperty("QR_RFTray")
+    public void setQrRfTray(String qrRfTray) {
+        this.qrRfTray = qrRfTray;
     }
 
-    public String getQR_PS() {
-        return QR_PS;
+    @JsonProperty("QR_PS")
+    public String getQrPs() {
+        return qrPs;
     }
 
-    public void setQR_PS(String QR_PS) {
-        this.QR_PS = QR_PS;
+    @JsonProperty("QR_PS")
+    public void setQrPs(String qrPs) {
+        this.qrPs = qrPs;
     }
 
-    public String getQR_HS() {
-        return QR_HS;
+    @JsonProperty("QR_HS")
+    public String getQrHs() {
+        return qrHs;
     }
 
-    public void setQR_HS(String QR_HS) {
-        this.QR_HS = QR_HS;
+    @JsonProperty("QR_HS")
+    public void setQrHs(String qrHs) {
+        this.qrHs = qrHs;
     }
 
-    public String getQR_backup1() {
-        return QR_backup1;
+    @JsonProperty("QR_backup1")
+    public String getQrBackup1() {
+        return qrBackup1;
     }
 
-    public void setQR_backup1(String QR_backup1) {
-        this.QR_backup1 = QR_backup1;
+    @JsonProperty("QR_backup1")
+    public void setQrBackup1(String qrBackup1) {
+        this.qrBackup1 = qrBackup1;
     }
 
-    public String getQR_backup2() {
-        return QR_backup2;
+    @JsonProperty("QR_backup2")
+    public String getQrBackup2() {
+        return qrBackup2;
     }
 
-    public void setQR_backup2(String QR_backup2) {
-        this.QR_backup2 = QR_backup2;
+    @JsonProperty("QR_backup2")
+    public void setQrBackup2(String qrBackup2) {
+        this.qrBackup2 = qrBackup2;
     }
 
-    public String getQR_backup3() {
-        return QR_backup3;
+    @JsonProperty("QR_backup3")
+    public String getQrBackup3() {
+        return qrBackup3;
     }
 
-    public void setQR_backup3(String QR_backup3) {
-        this.QR_backup3 = QR_backup3;
+    @JsonProperty("QR_backup3")
+    public void setQrBackup3(String qrBackup3) {
+        this.qrBackup3 = qrBackup3;
     }
 
-    public String getQR_backup4() {
-        return QR_backup4;
+    @JsonProperty("QR_backup4")
+    public String getQrBackup4() {
+        return qrBackup4;
     }
 
-    public void setQR_backup4(String QR_backup4) {
-        this.QR_backup4 = QR_backup4;
+    @JsonProperty("QR_backup4")
+    public void setQrBackup4(String qrBackup4) {
+        this.qrBackup4 = qrBackup4;
     }
 
     public String getNote() {

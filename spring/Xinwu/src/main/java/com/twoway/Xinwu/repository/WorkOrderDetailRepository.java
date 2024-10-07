@@ -20,13 +20,13 @@ public interface WorkOrderDetailRepository extends JpaRepository<WorkOrderDetail
            "(:workOrderNumber IS NULL OR w.workOrder.workOrderNumber = :workOrderNumber) AND " +
            "(:snStart IS NULL OR w.sn >= :snStart) AND " +
            "(:snEnd IS NULL OR w.sn <= :snEnd) AND " +
-           "(:qrRFTray IS NULL OR w.QR_RFTray = :qrRFTray) AND " +
-           "(:qrPS IS NULL OR w.QR_PS = :qrPS) AND " +
-           "(:qrHS IS NULL OR w.QR_HS = :qrHS) AND " +
-           "(:qrBackup1 IS NULL OR w.QR_backup1 = :qrBackup1) AND " +
-           "(:qrBackup2 IS NULL OR w.QR_backup2 = :qrBackup2) AND " +
-           "(:qrBackup3 IS NULL OR w.QR_backup3 = :qrBackup3) AND " +
-           "(:qrBackup4 IS NULL OR w.QR_backup4 = :qrBackup4) AND " +
+           "(:qrRFTray IS NULL OR w.qrRfTray = :qrRFTray) AND " +
+           "(:qrPS IS NULL OR w.qrPs = :qrPS) AND " +
+           "(:qrHS IS NULL OR w.qrHs = :qrHS) AND " +
+           "(:qrBackup1 IS NULL OR w.qrBackup1 = :qrBackup1) AND " +
+           "(:qrBackup2 IS NULL OR w.qrBackup2 = :qrBackup2) AND " +
+           "(:qrBackup3 IS NULL OR w.qrBackup3 = :qrBackup3) AND " +
+           "(:qrBackup4 IS NULL OR w.qrBackup4 = :qrBackup4) AND " +
            "(:productionDateStart IS NULL OR w.create_date >= :productionDateStart) AND " +
            "(:productionDateEnd IS NULL OR w.create_date <= :productionDateEnd)")
     List<WorkOrderDetail> searchWorkOrderDetails(

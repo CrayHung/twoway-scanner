@@ -7,13 +7,28 @@ public class WorkOrderDetailDTO {
 
     @JsonProperty("SN")
     private List<String> sn;
-    private List<String> QR_RFTray;
-    private List<String> QR_PS;
-    private List<String> QR_HS;
-    private List<String> QR_backup1;
-    private List<String> QR_backup2;
-    private List<String> QR_backup3;
-    private List<String> QR_backup4;
+
+    @JsonProperty("QR_RFTray")
+    private List<String> qrRfTray;
+
+    @JsonProperty("QR_PS")
+    private List<String> qrPs;
+
+    @JsonProperty("QR_HS")
+    private List<String> qrHs;
+
+    @JsonProperty("QR_backup1")
+    private List<String> qrBackup1;
+
+    @JsonProperty("QR_backup2")
+    private List<String> qrBackup2;
+
+    @JsonProperty("QR_backup3")
+    private List<String> qrBackup3;
+
+    @JsonProperty("QR_backup4")
+    private List<String> qrBackup4;
+
     private List<String> note;
     private List<String> create_user;
     private List<String> edit_user;
@@ -34,48 +49,77 @@ public class WorkOrderDetailDTO {
     public void setSn(List<String> sn) {
       this.sn = sn;
     }
-    public List<String> getQR_RFTray() {
-      return QR_RFTray;
+
+    @JsonProperty("QR_RFTray")
+    public List<String> getQrRfTray() {
+        return qrRfTray;
     }
-    public void setQR_RFTray(List<String> qR_RFTray) {
-      QR_RFTray = qR_RFTray;
+
+    @JsonProperty("QR_RFTray")
+    public void setQrRfTray(List<String> qrRfTray) {
+        this.qrRfTray = qrRfTray;
     }
-    public List<String> getQR_PS() {
-      return QR_PS;
+
+    @JsonProperty("QR_PS")
+    public List<String> getQrPs() {
+        return qrPs;
     }
-    public void setQR_PS(List<String> qR_PS) {
-      QR_PS = qR_PS;
+
+   @JsonProperty("QR_PS")
+    public void setQrPs(List<String> qrPs) {
+        this.qrPs = qrPs;
     }
-    public List<String> getQR_HS() {
-      return QR_HS;
+
+    @JsonProperty("QR_HS")
+    public List<String> getQrHs() {
+        return qrHs;
     }
-    public void setQR_HS(List<String> qR_HS) {
-      QR_HS = qR_HS;
+
+    @JsonProperty("QR_HS")
+    public void setQrHs(List<String> qrHs) {
+        this.qrHs = qrHs;
     }
-    public List<String> getQR_backup1() {
-      return QR_backup1;
+    
+    @JsonProperty("QR_backup1")
+    public List<String> getQrBackup1() {
+        return qrBackup1;
     }
-    public void setQR_backup1(List<String> qR_backup1) {
-      QR_backup1 = qR_backup1;
+
+    @JsonProperty("QR_backup1")
+    public void setQrBackup1(List<String> qrBackup1) {
+        this.qrBackup1 = qrBackup1;
     }
-    public List<String> getQR_backup2() {
-      return QR_backup2;
+
+    @JsonProperty("QR_backup2")
+    public List<String> getQrBackup2() {
+        return qrBackup2;
     }
-    public void setQR_backup2(List<String> qR_backup2) {
-      QR_backup2 = qR_backup2;
+
+    @JsonProperty("QR_backup2")
+    public void setQrBackup2(List<String> qrBackup2) {
+        this.qrBackup2 = qrBackup2;
     }
-    public List<String> getQR_backup3() {
-      return QR_backup3;
+
+    @JsonProperty("QR_backup3")
+    public List<String> getQrBackup3() {
+        return qrBackup3;
     }
-    public void setQR_backup3(List<String> qR_backup3) {
-      QR_backup3 = qR_backup3;
+
+    @JsonProperty("QR_backup3")
+    public void setQrBackup3(List<String> qrBackup3) {
+        this.qrBackup3 = qrBackup3;
     }
-    public List<String> getQR_backup4() {
-      return QR_backup4;
+
+    @JsonProperty("QR_backup4")
+    public List<String> getQrBackup4() {
+        return qrBackup4;
     }
-    public void setQR_backup4(List<String> qR_backup4) {
-      QR_backup4 = qR_backup4;
+
+   @JsonProperty("QR_backup4")
+    public void setQrBackup4(List<String> qrBackup4) {
+        this.qrBackup4 = qrBackup4;
     }
+    
     public List<String> getNote() {
       return note;
     }

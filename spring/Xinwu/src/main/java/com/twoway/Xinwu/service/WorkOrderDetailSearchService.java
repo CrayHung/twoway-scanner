@@ -29,58 +29,58 @@ public class WorkOrderDetailSearchService {
                 ));
             }
 
-            if (criteria.getQR_RFTray() != null && !criteria.getQR_RFTray().isEmpty()) {
+            if (criteria.getQrRfTray() != null && !criteria.getQrRfTray().isEmpty()) {
                 predicates.add(criteriaBuilder.or(
-                    criteria.getQR_RFTray().stream()
-                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("QR_RFTray")), "%" + qr.toLowerCase() + "%"))
+                    criteria.getQrRfTray().stream()
+                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrRfTray")), "%" + qr.toLowerCase() + "%"))
                         .toArray(Predicate[]::new)
                 ));
             }
 
-            if (criteria.getQR_PS() != null && !criteria.getQR_PS().isEmpty()) {
+            if (criteria.getQrPs() != null && !criteria.getQrPs().isEmpty()) {
                 predicates.add(criteriaBuilder.or(
-                    criteria.getQR_PS().stream()
-                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("QR_PS")), "%" + qr.toLowerCase() + "%"))
+                    criteria.getQrPs().stream()
+                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrPs")), "%" + qr.toLowerCase() + "%"))
                         .toArray(Predicate[]::new)
                 ));
             }
 
-            if (criteria.getQR_HS() != null && !criteria.getQR_HS().isEmpty()) {
+            if (criteria.getQrHs() != null && !criteria.getQrHs().isEmpty()) {
                 predicates.add(criteriaBuilder.or(
-                    criteria.getQR_HS().stream()
-                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("QR_HS")), "%" + qr.toLowerCase() + "%"))
+                    criteria.getQrHs().stream()
+                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrHs")), "%" + qr.toLowerCase() + "%"))
                         .toArray(Predicate[]::new)
                 ));
             }
 
-            if (criteria.getQR_backup1() != null && !criteria.getQR_backup1().isEmpty()) {
+            if (criteria.getQrBackup1() != null && !criteria.getQrBackup1().isEmpty()) {
                 predicates.add(criteriaBuilder.or(
-                    criteria.getQR_backup1().stream()
-                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("QR_backup1")), "%" + qr.toLowerCase() + "%"))
+                    criteria.getQrBackup1().stream()
+                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrBackup1")), "%" + qr.toLowerCase() + "%"))
                         .toArray(Predicate[]::new)
                 ));
             }
 
-            if (criteria.getQR_backup2() != null && !criteria.getQR_backup2().isEmpty()) {
+            if (criteria.getQrBackup2() != null && !criteria.getQrBackup2().isEmpty()) {
                 predicates.add(criteriaBuilder.or(
-                    criteria.getQR_backup2().stream()
-                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("QR_backup2")), "%" + qr.toLowerCase() + "%"))
+                    criteria.getQrBackup2().stream()
+                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrBackup2")), "%" + qr.toLowerCase() + "%"))
                         .toArray(Predicate[]::new)
                 ));
             }
 
-            if (criteria.getQR_backup3() != null && !criteria.getQR_backup3().isEmpty()) {
+            if (criteria.getQrBackup3() != null && !criteria.getQrBackup3().isEmpty()) {
                 predicates.add(criteriaBuilder.or(
-                    criteria.getQR_backup3().stream()
-                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("QR_backup3")), "%" + qr.toLowerCase() + "%"))
+                    criteria.getQrBackup3().stream()
+                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrBackup3")), "%" + qr.toLowerCase() + "%"))
                         .toArray(Predicate[]::new)
                 ));
             }
 
-            if (criteria.getQR_backup4() != null && !criteria.getQR_backup4().isEmpty()) {
+            if (criteria.getQrBackup4() != null && !criteria.getQrBackup4().isEmpty()) {
                 predicates.add(criteriaBuilder.or(
-                    criteria.getQR_backup4().stream()
-                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("QR_backup4")), "%" + qr.toLowerCase() + "%"))
+                    criteria.getQrBackup4().stream()
+                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrBackup4")), "%" + qr.toLowerCase() + "%"))
                         .toArray(Predicate[]::new)
                 ));
             }

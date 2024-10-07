@@ -74,13 +74,13 @@ public class WorkOrderDetailController {
         workOrderDetail.setWorkOrder(workOrder);
         workOrderDetail.setDetail_id(request.getDetail_id());
         workOrderDetail.setSn(request.getSN());
-        workOrderDetail.setQR_RFTray(request.getQR_RFTray());
-        workOrderDetail.setQR_PS(request.getQR_PS());
-        workOrderDetail.setQR_HS(request.getQR_HS());
-        workOrderDetail.setQR_backup1(request.getQR_backup1());
-        workOrderDetail.setQR_backup2(request.getQR_backup2());
-        workOrderDetail.setQR_backup3(request.getQR_backup3());
-        workOrderDetail.setQR_backup4(request.getQR_backup4());
+        workOrderDetail.setQrRfTray(request.getQR_RFTray());
+        workOrderDetail.setQrPs(request.getQR_PS());
+        workOrderDetail.setQrHs(request.getQR_HS());
+        workOrderDetail.setQrBackup1(request.getQR_backup1());
+        workOrderDetail.setQrBackup2(request.getQR_backup2());
+        workOrderDetail.setQrBackup3(request.getQR_backup3());
+        workOrderDetail.setQrBackup4(request.getQR_backup4());
         workOrderDetail.setNote(request.getNote());
         workOrderDetail.setCreate_date(LocalDate.now());
         workOrderDetail.setCreate_user(request.getCreate_user());
@@ -128,13 +128,13 @@ public class WorkOrderDetailController {
 
         // 更新WorkOrderDetail
         workOrderDetail.setSn(request.getSN());
-        workOrderDetail.setQR_RFTray(request.getQR_RFTray());
-        workOrderDetail.setQR_PS(request.getQR_PS());
-        workOrderDetail.setQR_HS(request.getQR_HS());
-        workOrderDetail.setQR_backup1(request.getQR_backup1());
-        workOrderDetail.setQR_backup2(request.getQR_backup2());
-        workOrderDetail.setQR_backup3(request.getQR_backup3());
-        workOrderDetail.setQR_backup4(request.getQR_backup4());
+        workOrderDetail.setQrRfTray(request.getQR_RFTray());
+        workOrderDetail.setQrPs(request.getQR_PS());
+        workOrderDetail.setQrHs(request.getQR_HS());
+        workOrderDetail.setQrBackup1(request.getQR_backup1());
+        workOrderDetail.setQrBackup2(request.getQR_backup2());
+        workOrderDetail.setQrBackup3(request.getQR_backup3());
+        workOrderDetail.setQrBackup4(request.getQR_backup4());
         workOrderDetail.setNote(request.getNote());
         workOrderDetail.setEdit_date(LocalDate.now());
         workOrderDetail.setEdit_user(request.getEdit_user());
