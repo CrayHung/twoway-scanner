@@ -7,18 +7,19 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+
 import java.time.LocalDate;
 import java.util.List;
 
 @Repository
 public interface WorkOrderDetailRepository extends JpaRepository<WorkOrderDetail, Long>, JpaSpecificationExecutor<WorkOrderDetail> {
     
-   
+   // 範圍搜尋
 
     @Query("SELECT w FROM WorkOrderDetail w WHERE " +
            "(:workOrderNumber IS NULL OR w.workOrder.workOrderNumber = :workOrderNumber) AND " +
-           "(:snStart IS NULL OR w.SN >= :snStart) AND " +
-           "(:snEnd IS NULL OR w.SN <= :snEnd) AND " +
+           "(:snStart IS NULL OR w.sn >= :snStart) AND " +
+           "(:snEnd IS NULL OR w.sn <= :snEnd) AND " +
            "(:qrRFTray IS NULL OR w.QR_RFTray = :qrRFTray) AND " +
            "(:qrPS IS NULL OR w.QR_PS = :qrPS) AND " +
            "(:qrHS IS NULL OR w.QR_HS = :qrHS) AND " +
@@ -43,10 +44,11 @@ public interface WorkOrderDetailRepository extends JpaRepository<WorkOrderDetail
         @Param("productionDateEnd") LocalDate productionDateEnd
     );
     
+
+    // Get All function
     @Query("SELECT w FROM WorkOrderDetail w JOIN FETCH w.workOrder")
     List<WorkOrderDetail> findAllWithWorkOrder();
 
     @Query("SELECT w FROM WorkOrderDetail w LEFT JOIN FETCH w.workOrder")
     List<WorkOrderDetail> findAllWithWorkOrderLeftJoin();
-    
 }

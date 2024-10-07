@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "work_order_details")
@@ -13,45 +14,57 @@ public class WorkOrderDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    
     @Column(name = "detail_id")
     private Integer detail_id;
 
-    @Column(name = "SN")
-    private String SN;
+
+    @Column(name = "sn")
+    private String sn;
     
+
     @Column(name = "qr_rf_tray")
     private String QR_RFTray;
     
+ 
     @Column(name = "qr_ps")
     private String QR_PS;
+
 
     @Column(name = "qr_hs")
     private String QR_HS;
 
+
     @Column(name = "qr_backup1")
     private String QR_backup1;
+
 
     @Column(name = "qr_backup2")
     private String QR_backup2;
 
+    
     @Column(name = "qr_backup3")
     private String QR_backup3;
 
+    
     @Column(name = "qr_backup4")
     private String QR_backup4;
 
+    
     @Column(name = "note")
     private String note;
 
     @Column(name = "create_date")
     private LocalDate create_date;
 
+    
     @Column(name = "create_user")
     private String create_user;
 
     @Column(name = "edit_date")
     private LocalDate edit_date;
 
+    
     @Column(name = "edit_user")
     private String edit_user;
 
@@ -79,12 +92,14 @@ public class WorkOrderDetail {
         this.detail_id = detail_id;
     }
 
+    @JsonProperty("SN")
     public String getSn() {
-        return SN;
+        return sn;
     }
 
-    public void setSn(String SN) {
-        this.SN = SN;
+    @JsonProperty("SN")
+    public void setSn(String sn) {
+        this.sn = sn;
     }
 
     public String getQR_RFTray() {
@@ -193,20 +208,24 @@ public class WorkOrderDetail {
     }
 
      // Add a method to get parent WorkOrder properties
+     
      @Transient
     public String getParentWorkOrderNumber() {
         return workOrder != null ? workOrder.getWorkOrderNumber() : null;
     }
 
+    
     @Transient
     public int getParentQuantity() {
         return workOrder != null ? workOrder.getQuantity() : 0;
     }
 
+    
     @Transient
     public String getParentPartNumber() {
         return workOrder != null ? workOrder.getPartNumber() : null;
     }
+    
     
     @Transient
     public String getParentCompany() {

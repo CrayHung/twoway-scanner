@@ -1,26 +1,39 @@
 package com.twoway.Xinwu.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+// import org.springframework.util.MultiValueMap;
 
 import com.twoway.Xinwu.entity.WorkOrderDetail;
 import com.twoway.Xinwu.entity.WorkOrder;
+import com.twoway.Xinwu.repository.WorkOrderDetailDTO;
+// import com.twoway.Xinwu.repository.WorkOrderDetailDTO;
 import com.twoway.Xinwu.repository.WorkOrderDetailRepository;
 import com.twoway.Xinwu.repository.WorkOrderRepository;
+// import com.twoway.Xinwu.repository.WorkOrderDetailSpecification;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.twoway.Xinwu.service.WorkOrderDetailSearchService;
 
 import java.time.LocalDate;
 import java.util.List;
+// import java.util.ArrayList;
+// import java.util.stream.Collectors;
+// import java.util.Map;
 
+// import org.hibernate.mapping.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api")
 public class WorkOrderDetailController {
+
+      @Autowired
+      private WorkOrderDetailSearchService searchService;
 
     @Autowired
     private WorkOrderDetailRepository workOrderDetailRepository;
@@ -44,7 +57,7 @@ public class WorkOrderDetailController {
             logger.warn("Work order number is empty or null");
             return ResponseEntity.badRequest().body("工單編號不能為空");
         }
-        if (request.getSn() == null || request.getSn().isEmpty()) {
+        if (request.getSN() == null || request.getSN().isEmpty()) {
             logger.warn("Sn is empty or null");
             return ResponseEntity.badRequest().body("SN不能為空");
         }
@@ -60,7 +73,7 @@ public class WorkOrderDetailController {
         WorkOrderDetail workOrderDetail = new WorkOrderDetail();
         workOrderDetail.setWorkOrder(workOrder);
         workOrderDetail.setDetail_id(request.getDetail_id());
-        workOrderDetail.setSn(request.getSn());
+        workOrderDetail.setSn(request.getSN());
         workOrderDetail.setQR_RFTray(request.getQR_RFTray());
         workOrderDetail.setQR_PS(request.getQR_PS());
         workOrderDetail.setQR_HS(request.getQR_HS());
@@ -114,7 +127,7 @@ public class WorkOrderDetailController {
         }
 
         // 更新WorkOrderDetail
-        workOrderDetail.setSn(request.getSn());
+        workOrderDetail.setSn(request.getSN());
         workOrderDetail.setQR_RFTray(request.getQR_RFTray());
         workOrderDetail.setQR_PS(request.getQR_PS());
         workOrderDetail.setQR_HS(request.getQR_HS());
@@ -138,7 +151,7 @@ public class WorkOrderDetailController {
 
         return ResponseEntity.ok("工單詳細信息已成功更新");
     }
-    //搜尋API
+    //範圍搜尋API
     @GetMapping("/search-work-order-details")
     public ResponseEntity<List<WorkOrderDetail>> searchWorkOrderDetails(
             @RequestParam(required = false) String workOrderNumber,
@@ -163,6 +176,19 @@ public class WorkOrderDetailController {
         logger.info("搜尋完成。找到 {} 個結果。", results.size());
 
         return ResponseEntity.ok(results);
+    }
+
+    // 模糊搜尋 API
+    
+    @PostMapping("/fuzzy-search-work-order-details")
+    public ResponseEntity<List<WorkOrderDetail>> fuzzySearchWorkOrderDetails(@RequestBody WorkOrderDetailDTO searchCriteria) {
+        try {
+            List<WorkOrderDetail> results = searchService.fuzzySearch(searchCriteria);
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            logger.error("Error occurred while performing fuzzy search on work order details", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     // DEL API
@@ -234,11 +260,11 @@ class WorkOrderDetailRequest {
         this.detail_id = detail_id;
     }
 
-    public String getSn() {
+    public String getSN() {
         return SN;
     }
 
-    public void setSn(String SN) {
+    public void setSN(String SN) {
         this.SN = SN;
     }
     

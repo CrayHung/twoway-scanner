@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
@@ -18,18 +17,22 @@ public class WorkOrder {
     @Column(name = "id")
     private Long id;
 
+    
     @Column(name = "work_order_number", unique = true)
     private String workOrderNumber;
 
     @Column(name = "quantity")
     private int quantity;
 
+    
     @Column(name = "part_number")
     private String partNumber;
 
+    
     @Column(name = "company")
     private String company;
 
+    
     @Column(name = "create_user")
     private String createUser;
 
@@ -37,6 +40,7 @@ public class WorkOrder {
     @CreationTimestamp
     private LocalDate createDate;
 
+    
     @Column(name = "edit_user")
     private String editUser;
 
