@@ -1,6 +1,7 @@
 package com.twoway.Xinwu.repository;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class WorkOrderDetailDTO {
@@ -33,8 +34,15 @@ public class WorkOrderDetailDTO {
     private List<String> create_user;
     private List<String> edit_user;
     private List<String> detail_id;
+
+    @JsonProperty("create_date")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private List<String> create_date;
+
+    @JsonProperty("edit_date")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private List<String> edit_date;
+
     private List<String> workOrderNumber;
     private List<String> partNumber;
     private List<String> company;

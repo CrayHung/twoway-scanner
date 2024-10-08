@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 @Service
 public class WorkOrderDetailSearchService {
@@ -113,6 +115,36 @@ public class WorkOrderDetailSearchService {
                 predicates.add(criteriaBuilder.or(
                     criteria.getCompany().stream()
                         .map(c -> criteriaBuilder.like(criteriaBuilder.lower(root.get("workOrder").get("company")), "%" + c.toLowerCase() + "%"))
+                        .toArray(Predicate[]::new)
+                ));
+            }
+
+            if (criteria.getCreate_date() != null && !criteria.getCreate_date().isEmpty()) {
+                predicates.add(criteriaBuilder.or(
+                    criteria.getCreate_date().stream()
+                        .<Predicate>map(dateStr -> {
+                            try {
+                                LocalDate date = LocalDate.parse(dateStr);
+                                return criteriaBuilder.equal(root.get("create_date"), date);
+                            } catch (DateTimeParseException e) {
+                                return criteriaBuilder.conjunction();
+                            }
+                        })
+                        .toArray(Predicate[]::new)
+                ));
+            }
+
+            if (criteria.getEdit_date() != null && !criteria.getEdit_date().isEmpty()) {
+                predicates.add(criteriaBuilder.or(
+                    criteria.getEdit_date().stream()
+                        .<Predicate>map(dateStr -> {
+                            try {
+                                LocalDate date = LocalDate.parse(dateStr);
+                                return criteriaBuilder.equal(root.get("edit_date"), date);
+                            } catch (DateTimeParseException e) {
+                                return criteriaBuilder.conjunction();
+                            }
+                        })
                         .toArray(Predicate[]::new)
                 ));
             }

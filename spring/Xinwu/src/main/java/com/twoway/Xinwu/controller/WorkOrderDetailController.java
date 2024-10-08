@@ -170,6 +170,11 @@ public class WorkOrderDetailController {
         logger.info("正在搜尋工單詳細資料，參數為：workOrderNumber={}, snStart={}, snEnd={}, qrRFTray={}, qrPS={}, qrHS={}, qrBackup1={}, qrBackup2={}, qrBackup3={}, qrBackup4={}, productionDateStart={}, productionDateEnd={}",
                 workOrderNumber, snStart, snEnd, qrRFTray, qrPS, qrHS, qrBackup1, qrBackup2, qrBackup3, qrBackup4, productionDateStart, productionDateEnd);
 
+        // 檢查日期參數
+        if (productionDateStart != null && productionDateEnd != null && productionDateStart.isAfter(productionDateEnd)) {
+          return ResponseEntity.badRequest().body(null);
+      }
+
         List<WorkOrderDetail> results = workOrderDetailRepository.searchWorkOrderDetails(
             workOrderNumber, snStart, snEnd, qrRFTray, qrPS, qrHS, qrBackup1, qrBackup2, qrBackup3, qrBackup4, productionDateStart, productionDateEnd);
 
