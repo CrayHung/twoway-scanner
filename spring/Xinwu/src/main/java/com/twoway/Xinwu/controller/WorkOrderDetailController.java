@@ -19,11 +19,15 @@ import com.twoway.Xinwu.repository.WorkOrderRepository;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.twoway.Xinwu.service.WorkOrderDetailSearchService;
 
+import jakarta.transaction.Transactional;
+
 import java.time.LocalDate;
 import java.util.List;
-// import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.ArrayList;
 // import java.util.stream.Collectors;
-// import java.util.Map;
+import java.util.Map;
+import java.util.Set;
 
 // import org.hibernate.mapping.Map;
 import org.slf4j.Logger;
@@ -48,14 +52,32 @@ public class WorkOrderDetailController {
     //測試檢查錯誤用變數
     private static final Logger logger = LoggerFactory.getLogger(WorkOrderDetailController.class);
 
+
+    @Transactional
     @PostMapping("/post-work-order-details")
-    public ResponseEntity<String> processWorkOrderDetail(@RequestBody WorkOrderDetailRequest request) {
+    public ResponseEntity<String> processWorkOrderDetail(@RequestBody List<WorkOrderDetailRequest> requests) {
+
+          StringBuilder response = new StringBuilder();
+          List<String> errors = new ArrayList<>();
+
+        // 獲取所有請求的工單號
+        Set<String> workOrderNumbers = requests.stream()
+                .map(WorkOrderDetailRequest::getWorkOrderNumber)
+                .collect(Collectors.toSet());
+
+        // 獲取當前每個工單的最大 detailId
+        Map<String, Integer> maxDetailIds = workOrderNumbers.stream()
+            .collect(Collectors.toMap(
+                    workOrderNumber -> workOrderNumber,
+                    workOrderNumber -> workOrderDetailRepository.findMaxDetailIdByWorkOrderNumber(workOrderNumber)
+            ));
 
         //API測試
-        System.out.println("Received request: " + request);
-        logger.info("Received request to process work order detail: {}", request);
+        System.out.println("Received request: " + requests);
+        logger.info("Received request to process work order detail: {}", requests);
 
         // 數據驗證
+  for (WorkOrderDetailRequest request : requests) {
     try {
         if (request.getWorkOrderNumber() == null || request.getWorkOrderNumber().isEmpty()) {
             logger.warn("Work order number is empty or null");
@@ -73,10 +95,23 @@ public class WorkOrderDetailController {
             return ResponseEntity.badRequest().body("找不到對應的工單");
         }
 
+        // 獲取當前 detailId 並檢查是否超過數量限制
+        Integer currentDetailId = maxDetailIds.get(request.getWorkOrderNumber());
+        int newDetailId = (currentDetailId == null) ? 1 : currentDetailId + 1;
+
+        if (newDetailId > workOrder.getQuantity()) {
+            errors.add("工單 " + request.getWorkOrderNumber() + " 的詳情數量已達到上限 " + workOrder.getQuantity());
+            continue;
+        }
+
+        // 更新 maxDetailIds
+        maxDetailIds.put(request.getWorkOrderNumber(), newDetailId);
+
+
         // 創建WorkOrderDetail實體並保存到數據庫
         WorkOrderDetail workOrderDetail = new WorkOrderDetail();
         workOrderDetail.setWorkOrder(workOrder);
-        workOrderDetail.setDetail_id(request.getDetail_id());
+        workOrderDetail.setDetailId(newDetailId);  // 設置新的 detailId
         workOrderDetail.setSn(request.getSN());
         workOrderDetail.setQrRfTray(request.getQR_RFTray());
         workOrderDetail.setQrPs(request.getQR_PS());
@@ -100,12 +135,25 @@ public class WorkOrderDetailController {
         workOrderRepository.save(workOrder);
         logger.info("Work order updated successfully: {}", workOrder);
 
-        return ResponseEntity.ok("工單詳細信息已成功處理");
+        response.append("工單詳細信息已成功處理: ").append(request.getWorkOrderNumber())
+        .append(", detailId: ").append(newDetailId)
+        .append(", 當前數量: ").append(newDetailId)
+        .append("/").append(workOrder.getQuantity())
+        .append("\n");
       } catch (Exception e) {
-            logger.error("Error occurred while processing work order detail", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("服務器內部錯誤");
-        }
-    }
+          logger.error("Error occurred while processing work order detail", e);
+          errors.add("處理工單時發生錯誤: " + request.getWorkOrderNumber() + " - " + e.getMessage());
+      }
+  }
+
+  if (!errors.isEmpty()) {
+      response.append("\n錯誤信息:\n");
+      errors.forEach(error -> response.append(error).append("\n"));
+      return ResponseEntity.badRequest().body(response.toString());
+  }
+
+  return ResponseEntity.ok(response.toString());
+}
 
     // get-all API
     @GetMapping("/get-work-order-details")
@@ -203,7 +251,7 @@ public class WorkOrderDetailController {
 
 class WorkOrderDetailRequest {
     private String workOrderNumber;
-    private int detail_id;
+
 
     @JsonProperty("SN")
     private String SN;
@@ -232,6 +280,28 @@ class WorkOrderDetailRequest {
     private String create_user;
     private String edit_user;
 
+    // 新增一個無參數構造函數
+    public WorkOrderDetailRequest() {}
+
+    // 新增一個帶參數的構造函數
+    public WorkOrderDetailRequest(String workOrderNumber, String SN, 
+                                    String QR_RFTray, String QR_PS, String QR_HS, 
+                                    String QR_backup1, String QR_backup2, String QR_backup3, 
+                                    String QR_backup4, String note, String create_user, String edit_user) {
+        this.workOrderNumber = workOrderNumber;
+       
+        this.SN = SN;
+        this.QR_RFTray = QR_RFTray;
+        this.QR_PS = QR_PS;
+        this.QR_HS = QR_HS;
+        this.QR_backup1 = QR_backup1;
+        this.QR_backup2 = QR_backup2;
+        this.QR_backup3 = QR_backup3;
+        this.QR_backup4 = QR_backup4;
+        this.note = note;
+        this.create_user = create_user;
+        this.edit_user = edit_user;
+    }
     // Getters and setters for all fields
     // ...
 
@@ -241,14 +311,6 @@ class WorkOrderDetailRequest {
 
     public void setWorkOrderNumber(String workOrderNumber) {
         this.workOrderNumber = workOrderNumber;
-    }
-
-    public int getDetail_id() {
-        return detail_id;
-    }
-
-    public void setDetail_id(int detail_id) {
-        this.detail_id = detail_id;
     }
 
     public String getSN() {

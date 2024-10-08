@@ -16,7 +16,7 @@ public class WorkOrderDetail {
 
     
     @Column(name = "detail_id")
-    private Integer detail_id;
+    private Integer detailId;
 
 
     @Column(name = "sn")
@@ -84,12 +84,12 @@ public class WorkOrderDetail {
         this.id = id;
     }
 
-    public Integer getDetail_id() {
-        return detail_id;
+    public Integer getDetailId() {
+        return detailId;
     }
 
-    public void setDetail_id(Integer detail_id) {
-        this.detail_id = detail_id;
+    public void setDetailId(Integer detailId) {
+        this.detailId = detailId;
     }
 
     @JsonProperty("SN")
