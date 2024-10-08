@@ -2,13 +2,14 @@ package com.twoway.Xinwu.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 // import org.springframework.data.jpa.domain.Specification;
-import org.springframework.format.annotation.DateTimeFormat;
+// import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 // import org.springframework.util.MultiValueMap;
 
 import com.twoway.Xinwu.entity.WorkOrderDetail;
+import com.twoway.Xinwu.dto.WorkOrderFieldSearchDTO;
 import com.twoway.Xinwu.entity.WorkOrder;
 import com.twoway.Xinwu.repository.WorkOrderDetailDTO;
 // import com.twoway.Xinwu.repository.WorkOrderDetailDTO;
@@ -34,6 +35,9 @@ public class WorkOrderDetailController {
 
       @Autowired
       private WorkOrderDetailSearchService searchService;
+
+      @Autowired
+    private WorkOrderDetailSearchService workOrderDetailSearchService;
 
     @Autowired
     private WorkOrderDetailRepository workOrderDetailRepository;
@@ -151,40 +155,22 @@ public class WorkOrderDetailController {
 
         return ResponseEntity.ok("工單詳細信息已成功更新");
     }
+
+
     //範圍搜尋API
-    @GetMapping("/search-work-order-details")
-    public ResponseEntity<List<WorkOrderDetail>> searchWorkOrderDetails(
-            @RequestParam(required = false) String workOrderNumber,
-            @RequestParam(required = false) String snStart,
-            @RequestParam(required = false) String snEnd,
-            @RequestParam(required = false) String qrRFTray,
-            @RequestParam(required = false) String qrPS,
-            @RequestParam(required = false) String qrHS,
-            @RequestParam(required = false) String qrBackup1,
-            @RequestParam(required = false) String qrBackup2,
-            @RequestParam(required = false) String qrBackup3,
-            @RequestParam(required = false) String qrBackup4,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate productionDateStart,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate productionDateEnd) {
+    @PostMapping("/search-work-order-details")
+    public ResponseEntity<List<WorkOrderDetail>> searchWorkOrderDetails(@RequestBody WorkOrderFieldSearchDTO request) {
+        logger.info("正在搜尋工單詳細資料，參數為：{}", request);
 
-        logger.info("正在搜尋工單詳細資料，參數為：workOrderNumber={}, snStart={}, snEnd={}, qrRFTray={}, qrPS={}, qrHS={}, qrBackup1={}, qrBackup2={}, qrBackup3={}, qrBackup4={}, productionDateStart={}, productionDateEnd={}",
-                workOrderNumber, snStart, snEnd, qrRFTray, qrPS, qrHS, qrBackup1, qrBackup2, qrBackup3, qrBackup4, productionDateStart, productionDateEnd);
-
-        // 檢查日期參數
-        if (productionDateStart != null && productionDateEnd != null && productionDateStart.isAfter(productionDateEnd)) {
-          return ResponseEntity.badRequest().body(null);
-      }
-
-        List<WorkOrderDetail> results = workOrderDetailRepository.searchWorkOrderDetails(
-            workOrderNumber, snStart, snEnd, qrRFTray, qrPS, qrHS, qrBackup1, qrBackup2, qrBackup3, qrBackup4, productionDateStart, productionDateEnd);
+        List<WorkOrderDetail> results = workOrderDetailSearchService.searchWorkOrderDetails(request);
 
         logger.info("搜尋完成。找到 {} 個結果。", results.size());
 
         return ResponseEntity.ok(results);
     }
 
+
     // 模糊搜尋 API
-    
     @PostMapping("/fuzzy-search-work-order-details")
     public ResponseEntity<List<WorkOrderDetail>> fuzzySearchWorkOrderDetails(@RequestBody WorkOrderDetailDTO searchCriteria) {
         try {
@@ -355,3 +341,4 @@ class WorkOrderDetailRequest {
         this.edit_user = edit_user;
     }
 }
+
