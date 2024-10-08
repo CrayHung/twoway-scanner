@@ -82,13 +82,58 @@ BODY 範例(JSON):
 
 #### Search API (GET)
 
-http://localhost:8080/api/search-work-order-details?{條件}
+##### SN與日期 範圍搜尋（其餘模糊）
+URL: http://localhost:8080/api/snfield-search-details
+方法: POST
+Headers:
+Content-Type: application/json
 
-URL 範例：
-http://localhost:8080/api/search-work-order-details?sn=SN001
+JSON 可用名稱範例
+{
+  "workOrderNumbers": ["WO2023", "WO2024"],
+  "snStart": ["SN1000"],
+  "snEnd": ["SN9999"],
+  "QR_RFTray": ["RF001", "RF002"],
+  "QR_PS": ["PS001", "PS002"],
+  "QR_HS": ["HS001", "HS002"],
+  "QR_backup1": ["BK1001", "BK1002"],
+  "QR_backup2": ["BK2001", "BK2002"],
+  "QR_backup3": ["BK3001", "BK3002"],
+  "QR_backup4": ["BK4001", "BK4002"],
+  "productionDateStart": ["2023-01-01", "2023-06-01"],
+  "productionDateEnd": ["2023-12-31", "2024-05-31"],
+  "note": ["note1", "note2"],
+  "create_user": ["user1", "user2"],
+  "edit_user": ["editor1", "editor2"],
+  "partNumber": ["PART001", "PART002"],
+  "company": ["Company A", "Company B"]
+}
 
-範例 2:
-(空白待補充)
+##### 日期範圍搜尋（SN與其餘模糊）
+URL: http://localhost:8080/api/snfuzzy-search-details
+方法: POST
+Headers:
+Content-Type: application/json
+
+JSON 可用名稱範例
+{
+  "workOrderNumber": ["WO123", "WO456"],
+  "SN": ["SN001", "SN002"],
+  "QR_RFTray": ["RF001", "RF002"],
+  "QR_PS": ["PS001", "PS002"],
+  "QR_HS": ["HS001", "HS002"],
+  "QR_backup1": ["B1001", "B1002"],
+  "QR_backup2": ["B2001", "B2002"],
+  "QR_backup3": ["B3001", "B3002"],
+  "QR_backup4": ["B4001", "B4002"],
+  "note": ["note1", "note2"],
+  "create_user": ["user1", "user2"],
+  "edit_user": ["user3", "user4"],
+  "partNumber": ["PART123", "PART456"],
+  "company": ["Twoway", "ACI"],
+  "productionDateStart": ["2023-01-01", "2023-02-01"],
+  "productionDateEnd": ["2023-12-31", "2023-11-30"]
+}
 
 #### UPDATE/EDIT API (PUT)
 

@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.*;
 // import org.springframework.util.MultiValueMap;
 
 import com.twoway.Xinwu.entity.WorkOrderDetail;
+import com.twoway.Xinwu.dto.WorkOrderDetailDTO;
 import com.twoway.Xinwu.dto.WorkOrderFieldSearchDTO;
 import com.twoway.Xinwu.entity.WorkOrder;
-import com.twoway.Xinwu.repository.WorkOrderDetailDTO;
 // import com.twoway.Xinwu.repository.WorkOrderDetailDTO;
 import com.twoway.Xinwu.repository.WorkOrderDetailRepository;
 import com.twoway.Xinwu.repository.WorkOrderRepository;
@@ -157,10 +157,10 @@ public class WorkOrderDetailController {
     }
 
 
-    //範圍搜尋API
-    @PostMapping("/search-work-order-details")
+    //SN與日期範圍，其餘搜尋API
+    @PostMapping("/snfield-search-details")
     public ResponseEntity<List<WorkOrderDetail>> searchWorkOrderDetails(@RequestBody WorkOrderFieldSearchDTO request) {
-        logger.info("正在搜尋工單詳細資料，參數為：{}", request);
+        logger.info("正在使用SN搜尋的範圍，參數為：{}", request);
 
         List<WorkOrderDetail> results = workOrderDetailSearchService.searchWorkOrderDetails(request);
 
@@ -170,8 +170,8 @@ public class WorkOrderDetailController {
     }
 
 
-    // 模糊搜尋 API
-    @PostMapping("/fuzzy-search-work-order-details")
+    // SN 模糊搜尋 API
+    @PostMapping("/snfuzzy-search-details")
     public ResponseEntity<List<WorkOrderDetail>> fuzzySearchWorkOrderDetails(@RequestBody WorkOrderDetailDTO searchCriteria) {
         try {
             List<WorkOrderDetail> results = searchService.fuzzySearch(searchCriteria);

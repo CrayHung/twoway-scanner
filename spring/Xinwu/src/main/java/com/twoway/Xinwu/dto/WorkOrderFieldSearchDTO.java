@@ -41,6 +41,14 @@ public class WorkOrderFieldSearchDTO {
     @JsonProperty("productionDateEnd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private List<LocalDate> productionDateEnd;
+
+    private List<String> note;
+    private List<String> create_user;
+    private List<String> edit_user;
+    private List<String> detail_id;
+    private List<String> partNumber;
+    private List<String> company;
+    private List<String> quantity;
     
 
 
@@ -149,5 +157,62 @@ public class WorkOrderFieldSearchDTO {
       this.productionDateEnd = productionDateEnd;
     }
 
+
+    // 補上未有特殊字樣的項目
+        public List<String> getNote() {
+          return note;
+      }
+
+      public void setNote(List<String> note) {
+          this.note = note;
+      }
+
+      public List<String> getCreate_user() {
+          return create_user;
+      }
+
+      public void setCreate_user(List<String> create_user) {
+          this.create_user = create_user;
+      }
+
+      public List<String> getEdit_user() {
+          return edit_user;
+      }
+
+      public void setEdit_user(List<String> edit_user) {
+          this.edit_user = edit_user;
+      }
+
+      public List<String> getDetail_id() {
+          return detail_id;
+      }
+
+      public void setDetail_id(List<String> detail_id) {
+          this.detail_id = detail_id;
+      }
+
+      public List<String> getPartNumber() {
+          return partNumber;
+      }
+
+      public void setPartNumber(List<String> partNumber) {
+          this.partNumber = partNumber;
+      }
+
+      public List<String> getCompany() {
+          return company;
+      }
+
+      public void setCompany(List<String> company) {
+          this.company = company;
+      }
+
+      public List<String> getQuantity() {
+          return quantity;
+      }
+
+      public void setQuantity(List<String> quantity) {
+          this.quantity = quantity;
+      }
   
 }

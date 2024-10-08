@@ -1,19 +1,20 @@
 package com.twoway.Xinwu.service;
 
 import com.twoway.Xinwu.entity.WorkOrderDetail;
-import com.twoway.Xinwu.repository.WorkOrderDetailDTO;
 import com.twoway.Xinwu.repository.WorkOrderDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import com.twoway.Xinwu.dto.WorkOrderDetailDTO;
 import com.twoway.Xinwu.dto.WorkOrderFieldSearchDTO;
 
 
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
+// import java.time.LocalDate;
+// import java.time.format.DateTimeParseException;
 
 @Service
 public class WorkOrderDetailSearchService {
@@ -121,48 +122,57 @@ public class WorkOrderDetailSearchService {
                 ));
             }
 
-            if (criteria.getCreate_date() != null && !criteria.getCreate_date().isEmpty()) {
+            if (criteria.getCreate_user() != null && !criteria.getCreate_user().isEmpty()) {
                 predicates.add(criteriaBuilder.or(
-                    criteria.getCreate_date().stream()
-                        .<Predicate>map(dateStr -> {
-                            try {
-                                LocalDate date = LocalDate.parse(dateStr);
-                                return criteriaBuilder.equal(root.get("create_date"), date);
-                            } catch (DateTimeParseException e) {
-                                return criteriaBuilder.conjunction();
-                            }
-                        })
+                    criteria.getCreate_user().stream()
+                        .map(user -> criteriaBuilder.like(criteriaBuilder.lower(root.get("create_user")), "%" + user.toLowerCase() + "%"))
                         .toArray(Predicate[]::new)
                 ));
             }
 
-            if (criteria.getEdit_date() != null && !criteria.getEdit_date().isEmpty()) {
+            
+            if (criteria.getEdit_user() != null && !criteria.getEdit_user().isEmpty()) {
                 predicates.add(criteriaBuilder.or(
-                    criteria.getEdit_date().stream()
-                        .<Predicate>map(dateStr -> {
-                            try {
-                                LocalDate date = LocalDate.parse(dateStr);
-                                return criteriaBuilder.equal(root.get("edit_date"), date);
-                            } catch (DateTimeParseException e) {
-                                return criteriaBuilder.conjunction();
-                            }
-                        })
+                    criteria.getEdit_user().stream()
+                        .map(user -> criteriaBuilder.like(criteriaBuilder.lower(root.get("edit_user")), "%" + user.toLowerCase() + "%"))
                         .toArray(Predicate[]::new)
                 ));
             }
+
+             // 日期範圍搜尋邏輯
+             if (criteria.getProductionDateStart() != null && !criteria.getProductionDateStart().isEmpty()) {
+                predicates.add(criteriaBuilder.or(
+                    criteria.getProductionDateStart().stream()
+                        .map(date -> criteriaBuilder.greaterThanOrEqualTo(root.get("create_date"), date))
+                        .toArray(Predicate[]::new)
+                ));
+            }
+
+            if (criteria.getProductionDateEnd() != null && !criteria.getProductionDateEnd().isEmpty()) {
+                predicates.add(criteriaBuilder.or(
+                    criteria.getProductionDateEnd().stream()
+                        .map(date -> criteriaBuilder.lessThanOrEqualTo(root.get("create_date"), date))
+                        .toArray(Predicate[]::new)
+                ));
+            }
+
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         });
     }
 
-    // 範圍搜尋
+    // SN範圍搜尋
 
     public List<WorkOrderDetail> searchWorkOrderDetails(WorkOrderFieldSearchDTO request) {
         return workOrderDetailRepository.findAll((Specification<WorkOrderDetail>) (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             if (request.getWorkOrderNumbers() != null && !request.getWorkOrderNumbers().isEmpty()) {
-                predicates.add(root.get("workOrder").get("workOrderNumber").in(request.getWorkOrderNumbers()));
+                predicates.add(criteriaBuilder.or(
+                    request.getWorkOrderNumbers().stream()
+                        .map(won -> criteriaBuilder.like(criteriaBuilder.lower(root.get("workOrder").get("workOrderNumber")), "%" + won.toLowerCase() + "%"))
+                        .toArray(Predicate[]::new)
+                ));
             }
 
             if (request.getSnStart() != null && !request.getSnStart().isEmpty()) {
@@ -182,31 +192,59 @@ public class WorkOrderDetailSearchService {
             }
 
             if (request.getQrRFTray() != null && !request.getQrRFTray().isEmpty()) {
-                predicates.add(root.get("qrRfTray").in(request.getQrRFTray()));
+                predicates.add(criteriaBuilder.or(
+                    request.getQrRFTray().stream()
+                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrRfTray")), "%" + qr.toLowerCase() + "%"))
+                        .toArray(Predicate[]::new)
+                ));
             }
-
+    
             if (request.getQrPS() != null && !request.getQrPS().isEmpty()) {
-                predicates.add(root.get("qrPs").in(request.getQrPS()));
+                predicates.add(criteriaBuilder.or(
+                    request.getQrPS().stream()
+                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrPs")), "%" + qr.toLowerCase() + "%"))
+                        .toArray(Predicate[]::new)
+                ));
             }
-
+    
             if (request.getQrHS() != null && !request.getQrHS().isEmpty()) {
-                predicates.add(root.get("qrHs").in(request.getQrHS()));
+                predicates.add(criteriaBuilder.or(
+                    request.getQrHS().stream()
+                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrHs")), "%" + qr.toLowerCase() + "%"))
+                        .toArray(Predicate[]::new)
+                ));
             }
-
+    
             if (request.getQrBackup1() != null && !request.getQrBackup1().isEmpty()) {
-                predicates.add(root.get("qrBackup1").in(request.getQrBackup1()));
+                predicates.add(criteriaBuilder.or(
+                    request.getQrBackup1().stream()
+                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrBackup1")), "%" + qr.toLowerCase() + "%"))
+                        .toArray(Predicate[]::new)
+                ));
             }
-
+    
             if (request.getQrBackup2() != null && !request.getQrBackup2().isEmpty()) {
-                predicates.add(root.get("qrBackup2").in(request.getQrBackup2()));
+                predicates.add(criteriaBuilder.or(
+                    request.getQrBackup2().stream()
+                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrBackup2")), "%" + qr.toLowerCase() + "%"))
+                        .toArray(Predicate[]::new)
+                ));
             }
-
+    
             if (request.getQrBackup3() != null && !request.getQrBackup3().isEmpty()) {
-                predicates.add(root.get("qrBackup3").in(request.getQrBackup3()));
+                predicates.add(criteriaBuilder.or(
+                    request.getQrBackup3().stream()
+                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrBackup3")), "%" + qr.toLowerCase() + "%"))
+                        .toArray(Predicate[]::new)
+                ));
             }
-
+    
             if (request.getQrBackup4() != null && !request.getQrBackup4().isEmpty()) {
-                predicates.add(root.get("qrBackup4").in(request.getQrBackup4()));
+                predicates.add(criteriaBuilder.or(
+                    request.getQrBackup4().stream()
+                        .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrBackup4")), "%" + qr.toLowerCase() + "%"))
+                        .toArray(Predicate[]::new)
+                ));
             }
 
             // 添加 productionDateStart 邏輯
@@ -223,6 +261,64 @@ public class WorkOrderDetailSearchService {
                 predicates.add(criteriaBuilder.or(
                     request.getProductionDateEnd().stream()
                         .map(date -> criteriaBuilder.lessThanOrEqualTo(root.get("create_date"), date))
+                        .toArray(Predicate[]::new)
+                ));
+            }
+
+            // 補上未有特殊字樣的項目
+
+            if (request.getNote() != null && !request.getNote().isEmpty()) {
+                predicates.add(criteriaBuilder.or(
+                    request.getNote().stream()
+                        .map(note -> criteriaBuilder.like(criteriaBuilder.lower(root.get("note")), "%" + note.toLowerCase() + "%"))
+                        .toArray(Predicate[]::new)
+                ));
+            }
+    
+            if (request.getCreate_user() != null && !request.getCreate_user().isEmpty()) {
+                predicates.add(criteriaBuilder.or(
+                    request.getCreate_user().stream()
+                        .map(user -> criteriaBuilder.like(criteriaBuilder.lower(root.get("create_user")), "%" + user.toLowerCase() + "%"))
+                        .toArray(Predicate[]::new)
+                ));
+            }
+    
+            if (request.getEdit_user() != null && !request.getEdit_user().isEmpty()) {
+                predicates.add(criteriaBuilder.or(
+                    request.getEdit_user().stream()
+                        .map(user -> criteriaBuilder.like(criteriaBuilder.lower(root.get("edit_user")), "%" + user.toLowerCase() + "%"))
+                        .toArray(Predicate[]::new)
+                ));
+            }
+    
+            if (request.getDetail_id() != null && !request.getDetail_id().isEmpty()) {
+                predicates.add(criteriaBuilder.or(
+                    request.getDetail_id().stream()
+                        .map(id -> criteriaBuilder.like(root.get("detail_id").as(String.class), "%" + id + "%"))
+                        .toArray(Predicate[]::new)
+                ));
+            }
+    
+            if (request.getPartNumber() != null && !request.getPartNumber().isEmpty()) {
+                predicates.add(criteriaBuilder.or(
+                    request.getPartNumber().stream()
+                        .map(pn -> criteriaBuilder.like(criteriaBuilder.lower(root.get("workOrder").get("partNumber")), "%" + pn.toLowerCase() + "%"))
+                        .toArray(Predicate[]::new)
+                ));
+            }
+    
+            if (request.getCompany() != null && !request.getCompany().isEmpty()) {
+                predicates.add(criteriaBuilder.or(
+                    request.getCompany().stream()
+                        .map(c -> criteriaBuilder.like(criteriaBuilder.lower(root.get("workOrder").get("company")), "%" + c.toLowerCase() + "%"))
+                        .toArray(Predicate[]::new)
+                ));
+            }
+    
+            if (request.getQuantity() != null && !request.getQuantity().isEmpty()) {
+                predicates.add(criteriaBuilder.or(
+                    request.getQuantity().stream()
+                        .map(q -> criteriaBuilder.like(root.get("workOrder").get("quantity").as(String.class), "%" + q + "%"))
                         .toArray(Predicate[]::new)
                 ));
             }

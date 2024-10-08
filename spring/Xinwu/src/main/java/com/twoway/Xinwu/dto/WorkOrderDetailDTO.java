@@ -1,5 +1,6 @@
-package com.twoway.Xinwu.repository;
+package com.twoway.Xinwu.dto;
 import java.util.List;
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,18 +36,18 @@ public class WorkOrderDetailDTO {
     private List<String> edit_user;
     private List<String> detail_id;
 
-    @JsonProperty("create_date")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private List<String> create_date;
-
-    @JsonProperty("edit_date")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private List<String> edit_date;
-
     private List<String> workOrderNumber;
     private List<String> partNumber;
     private List<String> company;
     private List<String> quantity;
+
+      @JsonProperty("productionDateStart")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private List<LocalDate> productionDateStart;
+
+    @JsonProperty("productionDateEnd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private List<LocalDate> productionDateEnd;
     
     @JsonProperty("SN")
     public List<String> getSn() {
@@ -152,18 +153,7 @@ public class WorkOrderDetailDTO {
     public void setDetail_id(List<String> detail_id) {
       this.detail_id = detail_id;
     }
-    public List<String> getCreate_date() {
-      return create_date;
-    }
-    public void setCreate_date(List<String> create_date) {
-      this.create_date = create_date;
-    }
-    public List<String> getEdit_date() {
-      return edit_date;
-    }
-    public void setEdit_date(List<String> edit_date) {
-      this.edit_date = edit_date;
-    }
+
     public List<String> getWorkOrderNumber() {
       return workOrderNumber;
     }
@@ -189,6 +179,21 @@ public class WorkOrderDetailDTO {
       this.quantity = quantity;
     }
 
+    public List<LocalDate> getProductionDateStart() {
+      return productionDateStart;
+  }
+
+  public void setProductionDateStart(List<LocalDate> productionDateStart) {
+      this.productionDateStart = productionDateStart;
+  }
+
+  public List<LocalDate> getProductionDateEnd() {
+      return productionDateEnd;
+  }
+
+  public void setProductionDateEnd(List<LocalDate> productionDateEnd) {
+      this.productionDateEnd = productionDateEnd;
+  }
 
     
 }
