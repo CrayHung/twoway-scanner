@@ -199,6 +199,55 @@ http://localhost:8080/api/delete-work-order-details/{id}
 URL 範例：
 http://localhost:8080/api/delete-work-order-details/10
 
+
+### InputMode API
+
+#### GET API (GET)
+http://localhost:8080/api/get-input-modes
+獲取所有輸入模式。
+
+#### POST API (POST)
+http://localhost:8080/api/post-input-modes
+創建新的輸入模式。
+BODY 範例(JSON):
+
+{
+  "partNumber": "PART001",
+  "inputMode": "MODE1"
+}
+
+注意:
+
+partNumber 不能為空
+inputMode 不能為空
+
+
+#### UPDATE/EDIT API (PUT)
+
+http://localhost:8080/api/put-input-modes/{id}
+更新指定 id 的輸入模式。
+
+URL 範例:
+http://localhost:8080/api/put-input-modes/1
+
+BODY 範例(JSON):
+{
+  "partNumber": "PART001-UPDATED",
+  "inputMode": "MODE1-UPDATED"
+}
+
+注意:
+
+partNumber 不能為空
+inputMode 不能為空
+
+#### DELETE API (DELETE)
+http://localhost:8080/api/del-input-modes/{id}
+刪除指定 id 的輸入模式。
+URL 範例:
+http://localhost:8080/api/del-input-modes/1
+
+
 ### 資料架構
 其中第一層 workOrder 的 mysql 資料架構為：
 +-------------------+--------------+------+-----+---------+----------------+
