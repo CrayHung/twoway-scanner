@@ -64,21 +64,38 @@ http://localhost:8080/api/post-work-order-details
 
 BODY 範例(JSON):
 
-{
-  "workOrderNumber": "WO-001",
-  "detail_id": 7,
-  "SN": "SN001",
-  "QR_RFTray": "RF001",
-  "QR_PS": "PS001",
-  "QR_HS": "HS001",
-  "QR_backup1": "BK001",
-  "QR_backup2": "BK002",
-  "QR_backup3": "BK003",
-  "QR_backup4": "BK004",
-  "note": "測試註記",
-  "create_user": "tester",
-  "edit_user": "tester"
-}
+[
+  {
+    "workOrderNumber": "WO-001",
+    "SN": "SN001",
+    "QR_RFTray": "RF001",
+    "QR_PS": "PS001",
+    "QR_HS": "HS001",
+    "QR_backup1": "BK001",
+    "QR_backup2": "BK002",
+    "QR_backup3": "BK003",
+    "QR_backup4": "BK004",
+    "note": "測試註記",
+    "create_user": "tester",
+    "edit_user": "tester"
+  },
+  {
+    "workOrderNumber": "WO-002",
+    "SN": "SN002",
+    "QR_RFTray": "RF002",
+    "QR_PS": "PS002",
+    "QR_HS": "HS002",
+    "QR_backup1": "BK005",
+    "QR_backup2": "BK006",
+    "QR_backup3": "BK007",
+    "QR_backup4": "BK008",
+    "note": "另一個測試註記",
+    "create_user": "tester2",
+    "edit_user": "tester2"
+  }
+]
+
+注意：可以一次性提交多個工單詳細信息。
 
 #### Search API (GET)
 
@@ -137,28 +154,44 @@ JSON 可用名稱範例
 
 #### UPDATE/EDIT API (PUT)
 
-http://localhost:8080/api/update-work-order-details/{id}
-
-URL 範例：
-http://localhost:8080/api/update-work-order-details/10
+http://localhost:8080/api/update-work-order-details
 
 BODY 範例(JSON):
-{
-  "workOrderNumber": "WO-001",
-  "detail_id": 7,
-  "SN": "SN001",
-  "QR_RFTray": "RF001",
-  "QR_PS": "PS001",
-  "QR_HS": "HS001",
-  "QR_backup1": "BK001",
-  "QR_backup2": "BK002",
-  "QR_backup3": "BK003",
-  "QR_backup4": "BK004",
-  "note": "編輯註記",
-  "edit_user": "edit_user"
-}
-同樣，日期的部分會由當前資料庫時間自動判定，無需自行輸入
-且不修改 createUser
+[
+  {
+    "id": 13,
+    "SN": "SN010-updated",
+    "QR_RFTray": "QRRF008-updated",
+    "QR_PS": "QRPS008-updated",
+    "QR_HS": "QRHS008-updated",
+    "QR_backup1": "QRBU029-updated",
+    "QR_backup2": "QRBU030-updated",
+    "QR_backup3": "QRBU031-updated",
+    "QR_backup4": "QRBU032-updated",
+    "note": "Note for WO-003 中文 - 已更新",
+    "edit_user": "user1-updated"
+  },
+  {
+    "id": 14,
+    "SN": "SN011-updated",
+    "QR_RFTray": "QRRF009-updated",
+    "QR_PS": "QRPS009-updated",
+    "QR_HS": "QRHS009-updated",
+    "QR_backup1": "QRBU033-updated",
+    "QR_backup2": "QRBU034-updated",
+    "QR_backup3": "QRBU035-updated",
+    "QR_backup4": "QRBU036-updated",
+    "note": "Note for WO-003 正確 - 已更新",
+    "edit_user": "user1-updated"
+  }
+]
+
+注意：
+
+1. 可以一次性更新多個工單詳細信息。
+2. 必須提供每個要更新的記錄的 id。
+3. edit_date 會由系統自動設置為當前日期，無需手動提供。
+4. 不允許更改 create_user 和 create_date。
 
 #### DELETE API (DELETE)
 http://localhost:8080/api/delete-work-order-details/{id}
@@ -175,6 +208,7 @@ http://localhost:8080/api/delete-work-order-details/10
 | work_order_number | varchar(255) | NO   | UNI | NULL    |                |
 | quantity          | int          | NO   |     | NULL    |                |
 | part_number       | varchar(255) | NO   |     | NULL    |                |
+| company           | varchar(255) | YES  |     | NULL    |                |
 | create_user       | varchar(255) | YES  |     | NULL    |                |
 | create_date       | date         | YES  |     | NULL    |                |
 | edit_user         | varchar(255) | YES  |     | NULL    |                |

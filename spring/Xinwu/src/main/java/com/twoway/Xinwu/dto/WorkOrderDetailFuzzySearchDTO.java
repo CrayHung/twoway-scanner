@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class WorkOrderDetailDTO {
+public class WorkOrderDetailFuzzySearchDTO {
 
     @JsonProperty("SN")
     private List<String> sn;

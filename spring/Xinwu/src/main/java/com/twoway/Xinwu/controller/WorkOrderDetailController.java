@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.*;
 // import org.springframework.util.MultiValueMap;
 
 import com.twoway.Xinwu.entity.WorkOrderDetail;
-import com.twoway.Xinwu.dto.WorkOrderDetailDTO;
+import com.twoway.Xinwu.dto.UpdateWorkOrderDetailDTO;
+import com.twoway.Xinwu.dto.WorkOrderDetailFuzzySearchDTO;
 import com.twoway.Xinwu.dto.WorkOrderFieldSearchDTO;
 import com.twoway.Xinwu.entity.WorkOrder;
 // import com.twoway.Xinwu.repository.WorkOrderDetailDTO;
@@ -181,38 +182,64 @@ public class WorkOrderDetailController {
        }
 
     //edit/upadate API
-    @PutMapping("/update-work-order-details/{id}")
-    public ResponseEntity<String> updateWorkOrderDetail(@PathVariable Long id, @RequestBody WorkOrderDetailRequest request) {
-        WorkOrderDetail workOrderDetail = workOrderDetailRepository.findById(id).orElse(null);
-        if (workOrderDetail == null) {
-            return ResponseEntity.notFound().build();
+    @PutMapping("/update-work-order-details")
+      public ResponseEntity<String> updateWorkOrderDetails(@RequestBody List<UpdateWorkOrderDetailDTO> requests) {
+          StringBuilder response = new StringBuilder();
+          List<String> errors = new ArrayList<>();
+
+          for (UpdateWorkOrderDetailDTO request : requests) {
+              try {
+                  WorkOrderDetail workOrderDetail = workOrderDetailRepository.findById(request.getId()).orElse(null);
+                  if (workOrderDetail == null) {
+                      errors.add("找不到ID為 " + request.getId() + " 的工單詳細信息");
+                      continue;
+                  }
+
+            // 更新 WorkOrderDetail
+            updateWorkOrderDetailFromDTO(workOrderDetail, request);
+
+            workOrderDetailRepository.save(workOrderDetail);
+
+            // 更新對應的 WorkOrder
+            updateWorkOrder(workOrderDetail, request.getEdit_user());
+
+            response.append("工單詳細信息已成功更新: ID ").append(request.getId()).append("\n");
+        } catch (Exception e) {
+            errors.add("更新ID為 " + request.getId() + " 的工單時發生錯誤: " + e.getMessage());
         }
-
-        // 更新WorkOrderDetail
-        workOrderDetail.setSn(request.getSN());
-        workOrderDetail.setQrRfTray(request.getQR_RFTray());
-        workOrderDetail.setQrPs(request.getQR_PS());
-        workOrderDetail.setQrHs(request.getQR_HS());
-        workOrderDetail.setQrBackup1(request.getQR_backup1());
-        workOrderDetail.setQrBackup2(request.getQR_backup2());
-        workOrderDetail.setQrBackup3(request.getQR_backup3());
-        workOrderDetail.setQrBackup4(request.getQR_backup4());
-        workOrderDetail.setNote(request.getNote());
-        workOrderDetail.setEdit_date(LocalDate.now());
-        workOrderDetail.setEdit_user(request.getEdit_user());
-
-        workOrderDetailRepository.save(workOrderDetail);
-
-        // 更新對應的WorkOrder, & Dateime 
-        WorkOrder workOrder = workOrderRepository.findByWorkOrderNumber(workOrderDetail.getParentWorkOrderNumber());
-        if (workOrder != null) {
-            workOrder.setEditDate(LocalDate.now());
-            workOrder.setEditUser(request.getEdit_user());
-            workOrderRepository.save(workOrder);
-        }
-
-        return ResponseEntity.ok("工單詳細信息已成功更新");
     }
+
+        if (!errors.isEmpty()) {
+            response.append("\n錯誤信息:\n");
+            errors.forEach(error -> response.append(error).append("\n"));
+            return ResponseEntity.badRequest().body(response.toString());
+        }
+
+        return ResponseEntity.ok(response.toString());
+    }
+
+      private void updateWorkOrderDetailFromDTO(WorkOrderDetail workOrderDetail, UpdateWorkOrderDetailDTO dto) {
+          workOrderDetail.setSn(dto.getSn());
+          workOrderDetail.setQrRfTray(dto.getQrRfTray());
+          workOrderDetail.setQrPs(dto.getQrPs());
+          workOrderDetail.setQrHs(dto.getQrHs());
+          workOrderDetail.setQrBackup1(dto.getQrBackup1());
+          workOrderDetail.setQrBackup2(dto.getQrBackup2());
+          workOrderDetail.setQrBackup3(dto.getQrBackup3());
+          workOrderDetail.setQrBackup4(dto.getQrBackup4());
+          workOrderDetail.setNote(dto.getNote());
+          workOrderDetail.setEdit_date(LocalDate.now());
+          workOrderDetail.setEdit_user(dto.getEdit_user());
+      }
+
+      private void updateWorkOrder(WorkOrderDetail workOrderDetail, String editUser) {
+          WorkOrder workOrder = workOrderRepository.findByWorkOrderNumber(workOrderDetail.getParentWorkOrderNumber());
+          if (workOrder != null) {
+              workOrder.setEditDate(LocalDate.now());
+              workOrder.setEditUser(editUser);
+              workOrderRepository.save(workOrder);
+          }
+      }
 
 
     //SN與日期範圍，其餘搜尋API
@@ -230,7 +257,7 @@ public class WorkOrderDetailController {
 
     // SN 模糊搜尋 API
     @PostMapping("/snfuzzy-search-details")
-    public ResponseEntity<List<WorkOrderDetail>> fuzzySearchWorkOrderDetails(@RequestBody WorkOrderDetailDTO searchCriteria) {
+    public ResponseEntity<List<WorkOrderDetail>> fuzzySearchWorkOrderDetails(@RequestBody WorkOrderDetailFuzzySearchDTO searchCriteria) {
         try {
             List<WorkOrderDetail> results = searchService.fuzzySearch(searchCriteria);
             return ResponseEntity.ok(results);

@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import com.twoway.Xinwu.dto.WorkOrderDetailDTO;
+import com.twoway.Xinwu.dto.WorkOrderDetailFuzzySearchDTO;
 import com.twoway.Xinwu.dto.WorkOrderFieldSearchDTO;
 
 
@@ -22,7 +22,7 @@ public class WorkOrderDetailSearchService {
     @Autowired
     private WorkOrderDetailRepository workOrderDetailRepository;
 
-    public List<WorkOrderDetail> fuzzySearch(WorkOrderDetailDTO criteria) {
+    public List<WorkOrderDetail> fuzzySearch(WorkOrderDetailFuzzySearchDTO criteria) {
         return workOrderDetailRepository.findAll((Specification<WorkOrderDetail>) (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
