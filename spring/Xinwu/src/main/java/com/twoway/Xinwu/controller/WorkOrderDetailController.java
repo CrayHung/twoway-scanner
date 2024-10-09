@@ -65,12 +65,21 @@ public class WorkOrderDetailController {
                 .map(WorkOrderDetailRequest::getWorkOrderNumber)
                 .collect(Collectors.toSet());
 
+        // 檢查工單是否存在
+        List<WorkOrderDetail> existingDetails = workOrderDetailRepository.findByParentWorkOrderNumbers(workOrderNumbers);
+        Set<String> existingWorkOrderNumbers = existingDetails.stream()
+                .map(detail -> detail.getWorkOrder().getWorkOrderNumber())
+                .collect(Collectors.toSet());
+
         // 獲取當前每個工單的最大 detailId
         Map<String, Integer> maxDetailIds = workOrderNumbers.stream()
-            .collect(Collectors.toMap(
-                    workOrderNumber -> workOrderNumber,
-                    workOrderNumber -> workOrderDetailRepository.findMaxDetailIdByWorkOrderNumber(workOrderNumber)
-            ));
+        .collect(Collectors.toMap(
+                workOrderNumber -> workOrderNumber,
+                workOrderNumber -> {
+                    Integer maxId = workOrderDetailRepository.findMaxDetailIdByWorkOrderNumber(workOrderNumber);
+                    return maxId != null ? maxId : 0;  // 如果沒有找到，返回 0
+                }
+        ));
 
         //API測試
         System.out.println("Received request: " + requests);
@@ -79,21 +88,22 @@ public class WorkOrderDetailController {
         // 數據驗證
   for (WorkOrderDetailRequest request : requests) {
     try {
-        if (request.getWorkOrderNumber() == null || request.getWorkOrderNumber().isEmpty()) {
-            logger.warn("Work order number is empty or null");
-            return ResponseEntity.badRequest().body("工單編號不能為空");
-        }
-        if (request.getSN() == null || request.getSN().isEmpty()) {
-            logger.warn("Sn is empty or null");
-            return ResponseEntity.badRequest().body("SN不能為空");
-        }
+      if (request.getWorkOrderNumber() == null || request.getWorkOrderNumber().isEmpty()) {
+        errors.add("工單編號不能為空: " + request.getSN());
+        continue;
+    }
+    if (request.getSN() == null || request.getSN().isEmpty()) {
+        errors.add("SN不能為空: " + request.getWorkOrderNumber());
+        continue;
+    }
 
-        // 檢查對應的WorkOrder是否存在
-        WorkOrder workOrder = workOrderRepository.findByWorkOrderNumber(request.getWorkOrderNumber());
-        if (workOrder == null) {
-            logger.warn("Work order not found for number: {}", request.getWorkOrderNumber());
-            return ResponseEntity.badRequest().body("找不到對應的工單");
-        }
+    // 檢查對應的WorkOrder是否存在
+    if (!existingWorkOrderNumbers.contains(request.getWorkOrderNumber())) {
+        errors.add("找不到對應的工單: " + request.getWorkOrderNumber());
+        continue;
+    }
+
+    WorkOrder workOrder = workOrderRepository.findByWorkOrderNumber(request.getWorkOrderNumber());
 
         // 獲取當前 detailId 並檢查是否超過數量限制
         Integer currentDetailId = maxDetailIds.get(request.getWorkOrderNumber());
