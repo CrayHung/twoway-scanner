@@ -101,6 +101,7 @@ public class WorkOrderController {
         }
         
         // 更新工單信息
+        existingWorkOrder.updateWorkOrderNumber(request.getWorkOrderNumber());
         existingWorkOrder.setWorkOrderNumber(request.getWorkOrderNumber());
         existingWorkOrder.setQuantity(request.getQuantity());
         existingWorkOrder.setPartNumber(request.getPartNumber());

@@ -97,7 +97,7 @@ CREATE TABLE work_order_details (
   edit_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   edit_user VARCHAR(255),
   PRIMARY KEY (id),
-  FOREIGN KEY (work_order_number) REFERENCES work_orders(work_order_number),
+  FOREIGN KEY (work_order_number) REFERENCES work_orders(work_order_number) ON UPDATE CASCADE,
   UNIQUE (work_order_number, detail_id)
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

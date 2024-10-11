@@ -245,4 +245,10 @@ public class WorkOrderDetail {
     public String getParentCompany() {
         return workOrder != null ? workOrder.getCompany() : null;
     }
+
+    // 當更動 workOrdernumber 時
+    public void updateWorkOrderNumber(String newWorkOrderNumber) {
+        // This method will be called by WorkOrder when its work order number changes
+        // You don't need to update the workOrder reference here, as it will be updated by the parent
+    }
 }

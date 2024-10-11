@@ -146,4 +146,12 @@ public class WorkOrder {
         workOrderDetails.remove(detail);
         detail.setWorkOrder(null);
     }
+
+    // 當更動 workOrdernumber 時
+    public void updateWorkOrderNumber(String newWorkOrderNumber) {
+        this.workOrderNumber = newWorkOrderNumber;
+        for (WorkOrderDetail detail : workOrderDetails) {
+            detail.updateWorkOrderNumber(newWorkOrderNumber);
+        }
+    }
 }
