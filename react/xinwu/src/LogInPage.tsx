@@ -8,7 +8,7 @@ const LogInPage = () => {
     const [input2, setInput2] = useState<string>('');
     const [error, setError] = useState<string>('');
 
-    const {  jwtToken , setJwtToken ,isLoggedIn, setIsLoggedIn,globalUrl } = useGlobalContext();
+    const {  jwtToken , setJwtToken ,isLoggedIn, setIsLoggedIn,globalUrl,currentUser, setCurrentUser } = useGlobalContext();
 
 
     const fetchLogin = async () => {
@@ -44,6 +44,8 @@ const LogInPage = () => {
     const handleLogin = async() => {
         await fetchLogin();
         console.log("jwtToken=" + jwtToken);
+        alert("登入成功")
+        setCurrentUser(input1);
       };
 
     const handleInput1Change = (e: React.ChangeEvent<HTMLInputElement>) => {

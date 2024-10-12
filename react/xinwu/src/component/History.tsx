@@ -10,27 +10,27 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 import { useGlobalContext } from '../global';
 
-interface Record {
-    plateNumber: string;
-    recognitionTime: Date;
-    recognitionTimeStr: string;
-    carType: string;
-    imagePath: string;
-    cameraId: string;
-    plateIn: boolean;
-
+interface TableRow {
+    id: string | number;
+    SN: string | number;
+    QR1: string | number;
+    QR2: string | number;
+    QR3: string | number;
+    QR4: string | number;
+    note: string | number;
+    date: string;
+    user: string;
 }
+
 
 
 const History = () => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [record, setRecord] = useState<Record[]>([]);
-
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
 
-    const { jwtToken, setJwtToken, isLoggedIn, setIsLoggedIn, globalUrl } = useGlobalContext();
+    const { jwtToken, setJwtToken, isLoggedIn, setIsLoggedIn, globalUrl,testData, setTestData  } = useGlobalContext();
 
     const handleChangePage = (event: any, newPage: number) => {
         setPage(newPage);
@@ -42,43 +42,45 @@ const History = () => {
 
     useEffect(() => {
         setPage(0);
-    }, [record]);
+    }, [testData]);
 
-    const fetchHistoryData = async () => {
-        try {
-            const response = await fetch(`${globalUrl.url}/lpr/all`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-            });
+    //取得所有工單
+    // const fetchHistoryData = async () => {
+    //     try {
+    //         const response = await fetch(`${globalUrl.url}/lpr/all`, {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             },
+    //         });
 
-            if (!response.ok) {
-                throw new Error('Failed to get record');
-            }
+    //         if (!response.ok) {
+    //             throw new Error('Failed to get record');
+    //         }
 
-            const data: Record[] = await response.json();
-            console.log("allowlist : " + JSON.stringify(data));
-            setRecord(data);
+    //         const data: TableRow[] = await response.json();
+    //         console.log("所有工單 : " + JSON.stringify(data));
+    //         setTestData(data);
 
-        } catch (error) {
-            console.error('Error fetching token:', error);
-        }
-    };
+    //     } catch (error) {
+    //         console.error('Error fetching token:', error);
+    //     }
+    // };
 
-    useEffect(() => {
-        fetchHistoryData();
-    }, [])
+    // //一開始取得所有工單
+    // useEffect(() => {
+    //     fetchHistoryData();
+    // }, [])
 
 
-
+    //搜尋特定工單
     const handleSearch = async () => {
         try {
             const response = await fetch(`${globalUrl.url}/lpr/all/searchDateBetween`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${jwtToken}`,
+                    // 'Authorization': `Bearer ${jwtToken}`,
                 },
                 body: JSON.stringify({
                     startDate: startDate.toISOString(),
@@ -89,8 +91,8 @@ const History = () => {
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-            const data: Record[] = await response.json();
-            setRecord(data);
+            const data: TableRow[] = await response.json();
+            setTestData(data);
 
         } catch (error) {
             console.error('Error downloading Excel file:', error);
@@ -104,7 +106,6 @@ const History = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${jwtToken}`,
                 },
                 body: JSON.stringify({
                     startDate: startDate.toISOString(),
@@ -164,7 +165,7 @@ const History = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {record.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)?.map((row: any, index: any) => (
+                            {testData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)?.map((row: any, index: any) => (
                                 <TableRow key={index} hover>
                                     <TableCell align="center">{row.plateNumber}</TableCell>
                                     <TableCell align="center">{row.recognitionTimeStr}</TableCell>
@@ -182,7 +183,7 @@ const History = () => {
             <TablePagination
                 rowsPerPageOptions={[5, 10, 25, 100]}
                 component="div"
-                count={record.length}
+                count={testData.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={handleChangePage}

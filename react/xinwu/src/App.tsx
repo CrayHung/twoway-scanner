@@ -4,20 +4,19 @@ import { useGlobalContext } from './global';
 import { BrowserRouter as Router, Route, Routes,Navigate } from 'react-router-dom';
 
 import Header from './Header';
-import Main from './Main';
 import Menu from './Menu';
 
 import "./App.css";
-import RealTime from './component/RealTime';
-import History from './component/History';
 import LogInPage from './LogInPage';
-import AllowList from './component/AllowList';
 import Register from './Register';
 import ForgetPassword from './ForgetPassword';
 import ResetPassword from './ResetPassword';
-import UploadDownload from './component/UploadDownload';
 
+import AllowList from './component/AllowList';
+import SearchForm from './component/SearchForm';
+import SearchTable1 from './component/SearchTable1';
 
+import ShowAllWork from './component/ShowAllWork';
 
 
 
@@ -25,9 +24,6 @@ function App() {
 
 
   const { isLoggedIn, setIsLoggedIn } = useGlobalContext();
-
-
-
   return (
     <Router>
       <div className="app">
@@ -35,18 +31,23 @@ function App() {
         <Header/>
 
         <div className="container" >
+        <div className="menu"> {/* 固定的左側 Menu */}
+        <Menu />
+        </div>
 
-          <Menu />
 
           <Routes>
           {isLoggedIn ? (
             <>
-            <Route path="/" element={<Navigate to="/main" />} />
-            <Route path="/main" Component={Main} />
-            <Route path="/realtime" Component={RealTime} />
-            <Route path="/history" Component={History} />
+            {/* <Route path="/" element={<Navigate to="/searchTable1" />} /> */}
             <Route path="/allowlist" Component={AllowList} /> 
-            <Route path="/upload&download" Component={UploadDownload} /> 
+            <Route path="/searchForm" Component={SearchForm} /> 
+            <Route path="/searchTable1" Component={SearchTable1} /> 
+
+
+
+            <Route path="/" Component={ShowAllWork} /> 
+
             </>
              ) : (
               <>

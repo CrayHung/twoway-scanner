@@ -5,10 +5,10 @@ import "./Menu.css"
 const Menu = () => {
   return (
     <div className="menu">
-      {/* <Link to="/realtime">即時畫面</Link> */}
-      <Link to="/history">進出紀錄</Link>
-      <Link to="/allowlist">黑白名單</Link>
-      <Link to="/upload&download">紀錄下載</Link>
+      
+      <Link to="/"> - 所有工單 (編輯)</Link>
+      <Link to="/allowlist"> - 新增工單</Link>
+      <Link to="/searchTable1">- 查詢+下載</Link>
     </div>
   );
 };
