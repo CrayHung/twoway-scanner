@@ -33,7 +33,9 @@ public class SecurityConfiguration {
         "/password/**",
         "/reset/**",
         "/forget/**",
-        "/lpr/**"
+        "/lpr/**", 
+        //以下開發中API 測試完後需加入安全限制
+        "/api/**"
     };
 
 
@@ -94,6 +96,7 @@ public class SecurityConfiguration {
                                 .requestMatchers("/parking/modifyparkinglots/**").hasAuthority( "ADMIN")
                                 .requestMatchers("/admin/**").hasAuthority("ADMIN")
                                 .requestMatchers("/upload/**").hasAuthority("ADMIN")
+                                .requestMatchers("/api/**").permitAll() //測試用日後需刪除
                                 .anyRequest()
                                 .authenticated()
                 )

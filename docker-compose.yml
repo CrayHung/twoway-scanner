@@ -1,14 +1,14 @@
 version: '3'
 services:
 
-  # cms:
-  #   image: twoway-react
-  #   restart: unless-stopped
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./react/xinwu:/app
-  #   container_name: twoway-react
+  cms:
+    image: twoway-react
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./react/xinwu:/app
+    container_name: twoway-react
 
 # 如果要把mysql獨立出來,則註解掉這段 , 另外執行mysql-docker-compose.yml
   database:
