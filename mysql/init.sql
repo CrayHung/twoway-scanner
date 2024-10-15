@@ -151,9 +151,11 @@ VALUES
 -- 測試數據 for 工單 work_orders 
 INSERT INTO work_orders (work_order_number, quantity, part_number, company, create_user, create_date, edit_user, edit_date)
 VALUES
-  ('WO-001', 100, 'PART-A', 'Twoway', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
-  ('WO-002', 200, 'PART-B', 'ACI', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
-  ('WO-003', 150, 'PART-C', 'Twoway', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00');
+  ('WO-001', 3, 'PART-A', 'Twoway', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00');
+  -- ('WO-002', 200, 'PART-B', 'ACI', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
+  -- ('WO-003', 200, 'PART-C', 'ACI', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
+  -- ('WO-004', 200, 'PART-D', 'ACI', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
+  -- ('WO-005', 150, 'PART-E', 'Twoway', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00');
 
 SELECT COUNT(*) FROM work_orders;
 
@@ -162,17 +164,19 @@ INSERT INTO work_order_details (work_order_number, detail_id, sn, qr_rf_tray, qr
 VALUES
   ('WO-001', 1, 'SN001', 'QRRF001', 'QRPS001', 'QRHS001', 'QRBU001', 'QRBU002', 'QRBU003', 'QRBU004', 'Note for WO-001 #1', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
   ('WO-001', 2, 'SN002', 'QRRF002', 'QRPS002', 'QRHS002', 'QRBU005', 'QRBU006', 'QRBU007', 'QRBU008', 'Note for WO-001 #2', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
-  ('WO-001', 3, 'SN003', 'QRRF003', 'QRPS003', 'QRHS003', 'QRBU009', 'QRBU010', 'QRBU011', 'QRBU012', 'Note for WO-001 #3', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
-  ('WO-002', 1, 'SN004', 'QRRF004', 'QRPS004', 'QRHS004', 'QRBU013', 'QRBU014', 'QRBU015', 'QRBU016', 'Note for WO-002 #1', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
-  ('WO-002', 2, 'SN005', 'QRRF005', 'QRPS005', 'QRHS005', 'QRBU017', 'QRBU018', 'QRBU019', 'QRBU020', 'Note for WO-002 #2', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
-  ('WO-003', 1, 'SN006', 'QRRF006', 'QRPS006', 'QRHS006', 'QRBU021', 'QRBU022', 'QRBU023', 'QRBU024', 'Note for WO-003 #1', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00');
+  ('WO-001', 3, 'SN003', 'QRRF003', 'QRPS003', 'QRHS003', 'QRBU009', 'QRBU010', 'QRBU011', 'QRBU012', 'Note for WO-001 #3', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00');
+  -- ('WO-002', 1, 'SN004', 'QRRF004', 'QRPS004', 'QRHS004', 'QRBU013', 'QRBU014', 'QRBU015', 'QRBU016', 'Note for WO-002 #1', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
+  -- ('WO-002', 2, 'SN005', 'QRRF005', 'QRPS005', 'QRHS005', 'QRBU017', 'QRBU018', 'QRBU019', 'QRBU020', 'Note for WO-002 #2', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
+  -- ('WO-003', 1, 'SN006', 'QRRF006', 'QRPS006', 'QRHS006', 'QRBU021', 'QRBU022', 'QRBU023', 'QRBU024', 'Note for WO-003 #1', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00'),
+  -- ('WO-004', 1, 'SN007', 'QRRF007', 'QRPS007', 'QRHS007', 'QRBU025', 'QRBU026', 'QRBU027', 'QRBU028', 'Note for WO-004 #1', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00'),
+  -- ('WO-005', 1, 'SN008', 'QRRF008', 'QRPS008', 'QRHS008', 'QRBU029', 'QRBU030', 'QRBU031', 'QRBU032', 'Note for WO-005 #1', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00');
 
 -- 插入測試數據到 input_modes 表
 INSERT INTO input_modes (part_number, input_mode) VALUES
-  ('PART-A', 'Manual'),
-  ('PART-B', 'Automatic'),
-  ('PART-C', 'Semi-Automatic'),
-  ('PART-D', 'Manual'),
-  ('PART-E', 'Automatic');
+  ('PART-A', 'A'),
+  ('PART-B', 'B'),
+  ('PART-C', 'C'),
+  ('PART-D', 'D'),
+  ('PART-E', 'E');
   -- 確認插入的數據
 SELECT COUNT(*) FROM input_modes;

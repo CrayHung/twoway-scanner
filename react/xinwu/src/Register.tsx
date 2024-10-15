@@ -1,15 +1,19 @@
 import React, { useState } from "react";
 import { TextField, Button ,Stack,Box,Container  } from "@mui/material";
 import { useGlobalContext } from './global';
+import { useIntl } from "react-intl";
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
 
     const [input1, setInput1] = useState<string>('');
     const [input2, setInput2] = useState<string>('');
     const [error, setError] = useState<string>('');
+    const { formatMessage } = useIntl();
 
     const { jwtToken,setJwtToken,isLoggedIn, setIsLoggedIn,globalUrl } = useGlobalContext();
 
+    const navigate = useNavigate();
 
     const fetchRegister = async () => {
         try {
@@ -42,6 +46,7 @@ const Register = () => {
           setJwtToken(token);
 
           setIsLoggedIn(true);
+          navigate("/");
         }
         } catch (error: any) {
             console.error('Error fetching token:', error);
@@ -71,11 +76,11 @@ const Register = () => {
             height: '100vh',
           }}
         >
-            <>註冊</>
+            <>{formatMessage({ id: 'register' })}</>
             {error && <div style={{ color: 'red' }}>{error}</div>}
             {/* <Stack spacing={2}> */}
                 <TextField
-                    label="帳號"
+                    label={formatMessage({ id: 'account' })}
                     variant="outlined"
                     value={input1}
                     onChange={handleInput1Change}
@@ -83,7 +88,7 @@ const Register = () => {
                     sx={{ width: '300px' }}
                 />
                 <TextField
-                    label="密碼"
+                    label={formatMessage({ id: 'password' })}
                     variant="outlined"
                     value={input2}
                     onChange={handleInput2Change}
@@ -98,7 +103,7 @@ const Register = () => {
                     }}
                 >
                     <Button variant="contained" onClick={handleButtonClick} sx={{ marginRight: 1 }}>
-                    註冊
+                    {formatMessage({ id: 'submit' })}
                     </Button>
                 </Box>
         </Box>

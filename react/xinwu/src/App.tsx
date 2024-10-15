@@ -18,13 +18,21 @@ import SearchTable1 from './component/SearchTable1';
 
 import ShowAllWork from './component/ShowAllWork';
 
+import { IntlProvider } from "react-intl";
+import useNavigatorLanguage, { LocaleContext } from "./language/useNavigatorLanguage";
+import useGetMessage from "./language/useGetMessage";
 
 
 function App() {
-
+  const [locale, setLocale] = useNavigatorLanguage();
+  const messages = useGetMessage();
 
   const { isLoggedIn, setIsLoggedIn } = useGlobalContext();
   return (
+    <LocaleContext.Provider value={[locale, setLocale]}>
+    <IntlProvider locale={locale} messages={messages && messages[locale]}>
+
+
     <Router>
       <div className="app">
 
@@ -64,7 +72,8 @@ function App() {
         </div>
       </div>
     </Router>
-
+    </IntlProvider>
+    </LocaleContext.Provider>
   );
 }
 

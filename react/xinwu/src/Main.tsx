@@ -6,6 +6,7 @@ import {
   Table, TableCell, TableHead, TableRow, TableContainer, TableBody,
   TablePagination
 } from "@mui/material";
+import { useIntl } from "react-intl";
 
 interface Record {
   plateNumber: string;
@@ -26,6 +27,7 @@ const Main = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [record, setRecord] = useState<Record[]>([]);
+  const { formatMessage } = useIntl();
 
   const handleChangePage = (event: any, newPage: number) => {
     setPage(newPage);
@@ -77,8 +79,8 @@ const Main = () => {
             <Table stickyHeader aria-label="sticky table">
               <TableHead>
                 <TableRow>
-                  <TableCell align="center">項次</TableCell>
-                  <TableCell align="center">序號SN</TableCell>
+                  <TableCell align="center">{formatMessage({ id: 'id' })}</TableCell>
+                  <TableCell align="center">{formatMessage({ id: 'SN' })}</TableCell>
                   <TableCell align="center">序號QR_RFTray</TableCell>
                   <TableCell align="center">序號QR_PS</TableCell>
                   <TableCell align="center">序號QR_HS</TableCell>

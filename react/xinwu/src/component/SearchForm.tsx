@@ -7,11 +7,12 @@ import React, { useEffect, useState } from 'react';
 import { TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, SelectChangeEvent, Select } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useGlobalContext } from '../global';
+import { useIntl } from "react-intl";
 
 
 
 const SearchForm = () => {
-
+    const { formatMessage } = useIntl();
     const { currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, table3Data, setTable3Data, workNo, setWorkNo, part, setPart, quant, setQuant, model, setModel } = useGlobalContext();
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -52,6 +53,14 @@ const SearchForm = () => {
      * 將該筆workNo從table1 , 
      * 將該筆workNo從table2拉出來 , 並設定給originalData
      */
+
+    useEffect(() => {
+        console.log("選到的公單號碼:" + workNo);
+        console.log("公單號碼的數量:" + quant);
+        console.log("公單號碼的料號:" + part);
+        console.log("公單號碼的料號對應模式:" + model);
+
+    }, [workNo, quant, part, model])
 
     // 把originalData清空
     useEffect(() => {
@@ -133,10 +142,10 @@ const SearchForm = () => {
             }
             return row; // 不符合條件的行，返回原始行
         });
-        setTable1Data(updatedTable1Data);
+        // setTable1Data(updatedTable1Data);
 
         // 將所有的table1Data資料UPDATE資料庫
-        const fetchUpdateTable1 = async (id: string, updatedData: any) => {
+        const fetchUpdateTable1 = async (id: number, updatedData: any) => {
             try {
                 const response = await fetch(`${globalUrl.url}/api/update-work-orders/${id}`, {
                     method: 'PUT',
@@ -156,18 +165,15 @@ const SearchForm = () => {
             }
         };
 
-        // 遍歷 updatedTable1Data，找到被修改的行並發送 API 請求
-        for (const row of updatedTable1Data) {
-            if (
-                (updateWorkNo && updateWorkNo !== row.workOrderNumber) ||
-                (updateWorkQuantity && updateWorkQuantity !== row.quantity) ||
-                (updateWorkPart && updateWorkPart !== row.partNumber)
-            ) {
-                // 發送 API 請求更新後端資料
+         // 只針對相同 workOrderNumber 的行發送 API 請求
+         for (const row of updatedTable1Data) {
+            // 只發送更新符合 workNo 的資料
+            if (row.workOrderNumber === workNo) {
+                // 更新後端資料
                 await fetchUpdateTable1(row.id, {
-                    workOrderNumber: row.workOrderNumber,
-                    quantity: row.quantity,
-                    partNumber: row.partNumber,
+                    workOrderNumber: updateWorkNo,
+                    quantity: updateWorkQuantity,
+                    partNumber: updateWorkPart
                 });
             }
         }
@@ -282,14 +288,14 @@ const SearchForm = () => {
         //         const additionalRows = Array.from({ length: rowsToAdd }, (_, index) => ({
         //             workOrderNumber: updateWorkNo || workNo, // 如果updateWork有值則使用 , 沒有則用舊的
         //             detailId: originalRows.length + index + 1,
-        //             SN: '',
-        //             QR_RFTray: '',
-        //             QR_PS: '',
-        //             QR_HS: '',
-        //             QR_backup1: '',
-        //             QR_backup2: '',
-        //             QR_backup3: '',
-        //             QR_backup4: '',
+        //             sn: '',
+        //             qr_RFTray: '',
+        //             qr_PS: '',
+        //             qr_HS: '',
+        //             qr_backup1: '',
+        //             qr_backup2: '',
+        //             qr_backup3: '',
+        //             qr_backup4: '',
         //             note: '',
         //             create_date: today,
         //             create_user: currentUser,
@@ -338,7 +344,7 @@ const SearchForm = () => {
         //根據料號part , 找出table3該料號對應的model是哪個 , 更新setModel
         const selectedData = table3Data.find((data: any) => data.partNumber === updateWorkPart);
         if (selectedData) {
-            setModel(selectedData.inputModel);
+            setModel(selectedData.inputMode);
         }
 
         //將編輯按鈕顯現出來 ,關閉原本的3個input框
@@ -374,15 +380,16 @@ const SearchForm = () => {
         const colKey = Object.keys(originalData[rowIndex])
             .filter((key) => key !== 'id')[colIndex];
 
+        /*這邊要取消註解一下*/
         // 只允許編輯note的欄位
-        if (
-            colKey === 'id' || colKey === 'workOrderNumber' || colKey === 'detailId' || colKey === 'SN' || colKey === 'QR_RFTray' ||
-            colKey === 'QR_PS' || colKey === 'QR_HS' || colKey === 'QR_backup1' || colKey === 'QR_backup2' ||
-            colKey === 'QR_backup3' || colKey === 'QR_backup4' ||
-            colKey === 'create_date' || colKey === 'create_user' || colKey === 'edit_date' || colKey === 'edit_user'
-        ) {
-            return;
-        }
+        // if (
+        //     colKey === 'id' || colKey === 'workOrderNumber' || colKey === 'detailId' || colKey === 'SN' || colKey === 'QR_RFTray' ||
+        //     colKey === 'QR_PS' || colKey === 'QR_HS' || colKey === 'QR_backup1' || colKey === 'QR_backup2' ||
+        //     colKey === 'QR_backup3' || colKey === 'QR_backup4' ||
+        //     colKey === 'create_date' || colKey === 'create_user' || colKey === 'edit_date' || colKey === 'edit_user'
+        // ) {
+        //     return;
+        // }
         setEditCell({ rowIndex, colIndex });
     };
 
@@ -433,7 +440,7 @@ const SearchForm = () => {
                 // 根據當前模式和欄位，填入不同的條碼數據
 
                 if (model === 'A') {
-                    // A模式: 依次填入 SN 和 QR_HS
+                    // A模式: 依次填入 sn 和 qr_HS
                     if (currentColumn === 2) { // 填入SN欄位
                         updatedRow.SN = newValue;
                         setCurrentColumn(5); // 跳到QR_HS欄位
@@ -442,7 +449,7 @@ const SearchForm = () => {
                         moveToNextRowOrEnd(); // 完成該筆資料
                     }
                 } else if (model === 'B') {
-                    // B模式: 依次填入 SN 和 QR_RFTray
+                    // B模式: 依次填入 sn 和 qr_RFTray
                     if (currentColumn === 2) { // 填入SN欄位
                         updatedRow.SN = newValue;
                         setCurrentColumn(3); // 跳到QR_RFTray欄位
@@ -451,7 +458,7 @@ const SearchForm = () => {
                         moveToNextRowOrEnd(); // 完成該筆資料
                     }
                 } else if (model === 'C') {
-                    // C模式: 依次填入 SN 和 QR_PS
+                    // C模式: 依次填入 sn 和 qr_PS
                     if (currentColumn === 2) { // 填入SN欄位
                         updatedRow.SN = newValue;
                         setCurrentColumn(4); // 跳到QR_PS欄位
@@ -460,7 +467,7 @@ const SearchForm = () => {
                         moveToNextRowOrEnd(); // 完成該筆資料
                     }
                 } else if (model === 'D') {
-                    // D模式: 依次填入 SN, QR_PS, QR_HS
+                    // D模式: 依次填入 sn, qr_PS, qr_HS
                     if (currentColumn === 2) { // 填入SN欄位
                         updatedRow.SN = newValue;
                         setCurrentColumn(4); // 跳到QR_PS欄位
@@ -472,7 +479,7 @@ const SearchForm = () => {
                         moveToNextRowOrEnd(); // 完成該筆資料
                     }
                 } else if (model === 'E') {
-                    // E模式: 依次填入 SN, QR_RFTray, QR_PS, QR_HS
+                    // E模式: 依次填入 sn, qr_RFTray, qr_PS, qr_HS
                     if (currentColumn === 2) { // 填入SN欄位
                         updatedRow.SN = newValue;
                         setCurrentColumn(3); // 跳到QR_RFTray欄位
@@ -500,7 +507,7 @@ const SearchForm = () => {
     };
     // 處理是否需要跳到下一行或標記掃描完成
     const moveToNextRowOrEnd = () => {
-        setCurrentColumn(2); // 重置到 SN 欄位
+        setCurrentColumn(2); // 重置到 sn 欄位
         if (currentRow !== null && currentRow + 1 >= rows) {
             setIsComplete(true); // 已經完成所有行的掃描
             setCurrentColumn(null);
@@ -524,7 +531,7 @@ const SearchForm = () => {
             setIsComplete(true);
             setContinueInput(false);
             setCurrentRow(null);
-            setCurrentColumn(null);
+            setCurrentColumn(2);
         }
         //如果有尚未填寫的欄位 , 將目前的currentRow和currentColumn設定到尚未輸入的該單元格上
         else {
@@ -542,7 +549,7 @@ const SearchForm = () => {
 
         for (let rowIndex = 0; rowIndex < data.length; rowIndex++) {
             const row = data[rowIndex];
-            // A 模式需要檢查 SN 和 QR_HS 欄位
+            // A 模式需要檢查 sn 和 qr_HS 欄位
             if (model === 'A') {
                 if (!row.SN) {
                     return { rowIndex, column: 2 }; // 找到SN尚未填寫，返回對應的行和列
@@ -551,7 +558,7 @@ const SearchForm = () => {
                     return { rowIndex, column: 5 }; // 找到QR_HS尚未填寫，返回對應的行和列
                 }
             } else if (model === 'B') {
-                // B 模式檢查 SN 和 QR_RFTray
+                // B 模式檢查 sn 和 qr_RFTray
                 if (!row.SN) {
                     return { rowIndex, column: 2 };
                 }
@@ -559,7 +566,7 @@ const SearchForm = () => {
                     return { rowIndex, column: 3 };
                 }
             } else if (model === 'C') {
-                // C 模式檢查 SN 和 QR_PS
+                // C 模式檢查 sn 和 qr_PS
                 if (!row.SN) {
                     return { rowIndex, column: 2 };
                 }
@@ -567,7 +574,7 @@ const SearchForm = () => {
                     return { rowIndex, column: 4 };
                 }
             } else if (model === 'D') {
-                // D 模式檢查 SN, QR_PS, QR_HS
+                // D 模式檢查 sn, qr_PS, qr_HS
                 if (!row.SN) {
                     return { rowIndex, column: 2 };
                 }
@@ -578,7 +585,7 @@ const SearchForm = () => {
                     return { rowIndex, column: 5 };
                 }
             } else if (model === 'E') {
-                // E 模式檢查 SN, QR_RFTray, QR_PS, QR_HS
+                // E 模式檢查 sn, qr_RFTray, qr_PS, qr_HS
                 if (!row.SN) {
                     return { rowIndex, column: 2 };
                 }
@@ -658,6 +665,65 @@ const SearchForm = () => {
     // };
 
     const handleSaveData = async () => {
+
+
+        // 將相同 workOrderNumber 的行更新table1Data的 editUser 和 editDate
+
+        const updatedTable1Data = table1Data.map((row: any) => {
+            if (row.workOrderNumber === workNo) {
+                // 如果 workOrderNumber 匹配，更新 editUser 和 editDate
+                return {
+                    ...row,
+                    editUser: currentUser,
+                    editDate: today,
+                };
+            }
+            return row; // 如果不匹配，保持原數據不變
+        });
+        //測試用setTable1Data(updatedTable1Data);
+
+        console.log("table1要更新的資料:" + JSON.stringify(updatedTable1Data));
+
+        // 這邊用API將table1Data資料回存到DB
+        // 將所有的table1Data資料UPDATE資料庫
+        const fetchUpdateTable1 = async (id: number, updatedData: any) => {
+            try {
+                const response = await fetch(`${globalUrl.url}/api/update-work-orders/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedData),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update work order');
+                } else {
+                    console.log(`完成更新table1資料`);
+                }
+            } catch (error) {
+                console.error('Error updating work order:', error);
+            }
+        };
+
+        // 只針對相同 workOrderNumber 的行發送 API 請求
+        for (const row of updatedTable1Data) {
+            // 只發送更新符合 workNo 的資料
+            if (row.workOrderNumber === workNo) {
+                // 更新後端資料
+                await fetchUpdateTable1(row.id, {
+                    workOrderNumber: row.workOrderNumber,
+                    editUser: row.editUser,
+                    editDate: row.editDate,
+                    quantity: row.quantity,
+                    partNumber: row.partNumber
+                });
+            }
+        }
+
+
+
+
         const updatedTable2Data = [...table2Data];
         const updatedRows: any[] = [];
 
@@ -692,7 +758,9 @@ const SearchForm = () => {
         });
 
         // 更新 table2Data 狀態
-        setTable2Data(updatedTable2Data);
+        //setTable2Data(updatedTable2Data);
+
+        console.log("table2要更新的資料:" + JSON.stringify(updatedRows));
 
         // 將table2有變更的資料更新
         if (updatedRows.length > 0) {
@@ -709,7 +777,7 @@ const SearchForm = () => {
                     if (!response.ok) {
                         throw new Error('Failed to 更新已存在資料');
                     } else {
-                        console.log('完成更新現有資料');
+                        console.log('完成table2更新現有資料');
                     }
                 } catch (error) {
                     console.error('Error updating rows:', error);
@@ -719,54 +787,7 @@ const SearchForm = () => {
         }
 
 
-        // 將相同 workOrderNumber 的行更新table1Data的 editUser 和 editDate
 
-        const updatedTable1Data = table1Data.map((row: any) => {
-            if (row.workOrderNumber === workNo) {
-                // 如果 workOrderNumber 匹配，更新 editUser 和 editDate
-                return {
-                    ...row,
-                    editUser: currentUser,
-                    editDate: today,
-                };
-            }
-            return row; // 如果不匹配，保持原數據不變
-        });
-        setTable1Data(updatedTable1Data);
-
-        // 這邊用API將table1Data資料回存到DB
-        // 將所有的table1Data資料UPDATE資料庫
-        const fetchUpdateTable1 = async (id: string, updatedData: any) => {
-            try {
-                const response = await fetch(`${globalUrl.url}/api/update-work-orders/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(updatedData),
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to update work order');
-                } else {
-                    console.log(`Updated work order ID: ${id}`);
-                }
-            } catch (error) {
-                console.error('Error updating work order:', error);
-            }
-        };
-
-        // 遍歷 updatedTable1Data，找到被修改的行並發送 API 請求
-        for (const row of updatedTable1Data) {
-            if (
-                (updateWorkNo && updateWorkNo !== row.workOrderNumber)
-            ) {
-                // 發送 API 請求更新後端資料
-                await fetchUpdateTable1(row.id, {
-                    workOrderNumber: row.workOrderNumber,
-                });
-            }
-        }
         //save資料後將所有欄位都清空
         // setOriginalData([]);
         setContinueInput(false);
@@ -784,7 +805,7 @@ const SearchForm = () => {
 
     return (
         <div>
-            <div>
+            {/* <div>
                 <label>使用者(測試用)：</label>
                 <input
                     type="text"
@@ -792,10 +813,10 @@ const SearchForm = () => {
                     onChange={(e) => setCurrentUser(e.target.value)}
                     placeholder="輸入使用者名稱"
                 />
-            </div>
+            </div> */}
             <>
                 {!updateData && !continueInput &&
-                    <button onClick={handleUpdate}>編輯</button>
+                    <button onClick={handleUpdate}>{formatMessage({ id: 'edit' })}</button>
                 }
             </>
             {/* <>
@@ -805,9 +826,9 @@ const SearchForm = () => {
             </> */}
             <>
                 {continueInput ? (
-                    <button onClick={handleSaveData}>儲存</button>
+                    <button onClick={handleSaveData}>{formatMessage({ id: 'save' })}</button>
                 ) : (
-                    <button onClick={handleContinueInput}>繼續輸入</button>
+                    <button onClick={handleContinueInput}>{formatMessage({ id: 'continueinput' })}</button>
                 )}
             </>
 
@@ -816,7 +837,7 @@ const SearchForm = () => {
                     <>
                         <div>
                             <>
-                                <label>新工單號碼：</label>
+                                <label>{formatMessage({ id: 'newworkordernumber' })}：</label>
                                 <input
                                     type="text"
                                     value={updateWorkNo}
@@ -824,9 +845,9 @@ const SearchForm = () => {
                                 />
                             </>
                             <>
-                                <label>料號：</label>
+                                <label>{formatMessage({ id: 'part' })}：</label>
                                 <select value={updateWorkPart} onChange={(e) => setUpdateWorkPart(e.target.value)}>
-                                    <option value="">料號</option>
+                                    <option value="">{formatMessage({ id: 'part' })}</option>
                                     {table3Data.map((item: any) => (
                                         <option key={item.id} value={item.partNumber}>
                                             {item.partNumber}
@@ -835,11 +856,11 @@ const SearchForm = () => {
                                 </select>
                             </>
                             <>
-                                <label>工單數量：</label>
+                                <label>{formatMessage({ id: 'quantity' })}：</label>
                                 <input type="number" value={updateWorkQuantity} onChange={(e) => setUpdateWorkQuantity(parseInt(e.target.value))} />
                             </>
-                            <button onClick={handleCancel}>取消</button>
-                            <button onClick={handleConfirm}>確認更改</button>
+                            <button onClick={handleCancel}>{formatMessage({ id: 'cancel' })}</button>
+                            <button onClick={handleConfirm}>{formatMessage({ id: 'submit' })}</button>
 
                         </div>
 
@@ -911,7 +932,7 @@ const SearchForm = () => {
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={handleBarcodeInput}
-                        placeholder="請掃描條碼"
+                        placeholder={formatMessage({ id: 'text' })}
                         disabled={isComplete} // 當掃描完成後禁用輸入框
                         autoFocus />
                 </>
@@ -920,33 +941,32 @@ const SearchForm = () => {
             {
                 isComplete &&
                 <>
-                    <p>所有條碼已完成掃描。</p>
+                    <p>{formatMessage({ id: 'text1' })}</p>
                 </>
             }
             {
                 originalData.length > 0 &&
                 <>
-                    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-
+                    <Paper sx={{ width: '100%', overflow: 'hidden', height: '90%' }}>
                         <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'scroll' }}>
-                            <Table >
+                            <Table stickyHeader aria-label="sticky table">
                                 <TableHead >
                                     <TableRow style={{ border: '1px solid #ccc' }}>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>工單號碼</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>細項</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>序號SN</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>QR_RFTray</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>QR_PS</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>QR_HS</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>QR_backup1</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>QR_backup2</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>QR_backup3</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>QR_backup4</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>備註</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>創建日期</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>創建使用者</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>編輯日期</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>編輯使用者</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup4' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'note' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 {/* 使用colKey */}

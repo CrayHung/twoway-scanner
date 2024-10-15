@@ -10,16 +10,17 @@ import { useNavigate } from 'react-router-dom';
 
 import { useGlobalContext } from '../global';
 import './hightlight.css';
+import { useIntl } from "react-intl";
 
 
 function AllowList() {
-
-    const { currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, table3Data, setTable3Data, workNo, setWorkNo, part, setPart, quant, setQuant, setModel } = useGlobalContext();
+    const { formatMessage } = useIntl();
+    const { currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, table3Data, setTable3Data, workNo, setWorkNo, part, setPart, quant, setQuant, model, setModel } = useGlobalContext();
 
     const [workNumber, setWorkNumber] = useState('');    //工單號碼
     const [rows, setRows] = useState(0);  // 工單數量資料筆數
     const [selectedPartNumber, setSelectedPartNumber] = useState('');    //下拉料號
-    const [inputModel, setInputModel] = useState("");    //料號對應的模式
+    const [inputMode, setinputMode] = useState("");    //料號對應的模式
 
     const [data, setData] = useState<any[]>([]);
 
@@ -43,6 +44,12 @@ function AllowList() {
     const today = new Date().toISOString().split('T')[0]; // 當前日期 (YYYY-MM-DD 格式)
 
 
+    useEffect(() => {
+        console.log('目前所有table1的內容是:', JSON.stringify(table1Data, null, 2));
+        console.log('目前所有table2的內容是:', JSON.stringify(table2Data, null, 2));
+        console.log('目前所有table3的內容是:', JSON.stringify(table3Data, null, 2));
+
+    }, []);
 
     /**************************************************************************************************************** */
     /**
@@ -53,8 +60,8 @@ function AllowList() {
 
     /**
      * 
-     "id" ,"workOrderNumber", "detailId", "SN", "QR_RFTray", "QR_PS", "QR_HS", 
-     "QR_backup1", "QR_backup2", "QR_backup3", "QR_backup4", 
+     "id" ,"workOrderNumber", "detailId", "sn", "qr_RFTray", "qr_PS", "qr_HS", 
+     "qr_backup1", "qr_backup2", "qr_backup3", "qr_backup4", 
      "note", "create_date", "create_user", "edit_date", "edit_user"
     
      */
@@ -132,7 +139,7 @@ function AllowList() {
      * 
      */
     // const keyMap = [
-    //     "id" , "workOrderNumber", "detailId", "SN", "QR_RFTray", "QR_PS", "QR_HS", "QR_backup1", "QR_backup2", "QR_backup3", "QR_backup4", "note", "create_date", "create_user", "edit_date", "edit_user"
+    //     "id" , "workOrderNumber", "detailId", "sn", "qr_RFTray", "qr_PS", "qr_HS", "qr_backup1", "qr_backup2", "qr_backup3", "qr_backup4", "note", "create_date", "create_user", "edit_date", "edit_user"
     // ];
     // 處理條碼輸入
     const handleBarcodeInput = (event: any) => {
@@ -148,8 +155,8 @@ function AllowList() {
                 let updatedRow = { ...updatedData[currentRow] };
 
                 // 根據當前模式和欄位，填入不同的條碼數據
-                if (inputModel === 'A') {
-                    // A模式: 依次填入 SN 和 QR_HS
+                if (inputMode === 'A') {
+                    // A模式: 依次填入 sn 和 qr_HS
                     if (currentColumn === 1) { // 填入SN欄位
                         updatedRow.SN = newValue;
                         setCurrentColumn(4); // 跳到QR_HS欄位
@@ -157,8 +164,8 @@ function AllowList() {
                         updatedRow.QR_HS = newValue;
                         moveToNextRowOrEnd(); // 完成該筆資料
                     }
-                } else if (inputModel === 'B') {
-                    // B模式: 依次填入 SN 和 QR_RFTray
+                } else if (inputMode === 'B') {
+                    // B模式: 依次填入 sn 和 qr_RFTray
                     if (currentColumn === 1) { // 填入SN欄位
                         updatedRow.SN = newValue;
                         setCurrentColumn(2); // 跳到QR_RFTray欄位
@@ -166,8 +173,8 @@ function AllowList() {
                         updatedRow.QR_RFTray = newValue;
                         moveToNextRowOrEnd(); // 完成該筆資料
                     }
-                } else if (inputModel === 'C') {
-                    // C模式: 依次填入 SN 和 QR_PS
+                } else if (inputMode === 'C') {
+                    // C模式: 依次填入 sn 和 qr_PS
                     if (currentColumn === 1) { // 填入SN欄位
                         updatedRow.SN = newValue;
                         setCurrentColumn(3); // 跳到QR_PS欄位
@@ -175,8 +182,8 @@ function AllowList() {
                         updatedRow.QR_PS = newValue;
                         moveToNextRowOrEnd(); // 完成該筆資料
                     }
-                } else if (inputModel === 'D') {
-                    // D模式: 依次填入 SN, QR_PS, QR_HS
+                } else if (inputMode === 'D') {
+                    // D模式: 依次填入 sn, qr_PS, qr_HS
                     if (currentColumn === 1) { // 填入SN欄位
                         updatedRow.SN = newValue;
                         setCurrentColumn(3); // 跳到QR_PS欄位
@@ -187,8 +194,8 @@ function AllowList() {
                         updatedRow.QR_HS = newValue;
                         moveToNextRowOrEnd(); // 完成該筆資料
                     }
-                } else if (inputModel === 'E') {
-                    // E模式: 依次填入 SN, QR_RFTray, QR_PS, QR_HS
+                } else if (inputMode === 'E') {
+                    // E模式: 依次填入 sn, qr_RFTray, qr_PS, qr_HS
                     if (currentColumn === 1) { // 填入SN欄位
                         updatedRow.SN = newValue;
                         setCurrentColumn(2); // 跳到QR_RFTray欄位
@@ -215,11 +222,11 @@ function AllowList() {
     };
     // 處理是否需要跳到下一行或標記掃描完成
     const moveToNextRowOrEnd = () => {
-        setCurrentColumn(1); // 重置到 SN 欄位
+        setCurrentColumn(1); // 重置到 sn 欄位
 
         if (currentRow !== null && currentRow + 1 >= rows) {
             setIsComplete(true); // 已經完成所有行的掃描
-            setCurrentColumn(null);
+            setCurrentColumn(1);
             setCurrentRow(null);
         } else {
             setCurrentRow((prevRow) => {
@@ -236,9 +243,9 @@ function AllowList() {
     // const handleCellClick = (rowIndex: number, colKey: string) => {
     //     //只開放note欄位可手動新增
     //     if (
-    //         colKey === 'workOrderNumber' || colKey === 'id' || colKey === 'SN' || colKey === 'QR_RFTray' ||
-    //         colKey === 'QR_PS' || colKey === 'QR_HS' || colKey === 'QR_backup1' || colKey === 'QR_backup2' ||
-    //         colKey === 'QR_backup3' || colKey === 'QR_backup4' ||
+    //         colKey === 'workOrderNumber' || colKey === 'id' || colKey === 'sn' || colKey === 'qr_RFTray' ||
+    //         colKey === 'qr_PS' || colKey === 'qr_HS' || colKey === 'qr_backup1' || colKey === 'qr_backup2' ||
+    //         colKey === 'qr_backup3' || colKey === 'qr_backup4' ||
     //         colKey === 'create_date' || colKey === 'create_user' || colKey === 'edit_date' || colKey === 'edit_user') {
     //         return;
     //     }
@@ -301,6 +308,9 @@ function AllowList() {
     // 儲存表格資料
     const handleSaveData = () => {
 
+
+
+
         const newFormattedData = data.map((row: any, index: any) => {
 
             // 如果原始資料不存在，設定為空物件，避免 undefined 錯誤
@@ -309,9 +319,9 @@ function AllowList() {
             // 如果之前有儲存的資料，使用已儲存的資料，否則使用當前 row 資料
             const savedRow = savedData[index] || {
                 workOrderNumber: row.workOrderNumber,
-                detailId: row.detailId,
+                // detailId: row.detailId,
                 SN: row.SN,
-                QR_RFTray: row.QR_RFTray,
+                QR_RFTray: row.qr_RFTray,
                 QR_PS: row.QR_PS,
                 QR_HS: row.QR_HS,
                 QR_backup1: row.QR_backup1,
@@ -319,16 +329,16 @@ function AllowList() {
                 QR_backup3: row.QR_backup3,
                 QR_backup4: row.QR_backup4,
                 note: row.note,
-                create_date: row.create_date,
+                // create_date: row.create_date,
                 create_user: row.create_user,
-                edit_date: row.edit_date,
+                // edit_date: row.edit_date,
                 edit_user: row.edit_user,
             };
 
             // 判斷該行是否有資料變動
             const hasChanged =
                 originalRow.workOrderNumber !== savedRow.workOrderNumber ||
-                originalRow.detailId !== savedRow.detailId ||
+                // originalRow.detailId !== savedRow.detailId ||
                 originalRow.SN !== savedRow.SN ||
                 originalRow.QR_RFTray !== savedRow.QR_RFTray ||
                 originalRow.QR_PS !== savedRow.QR_PS ||
@@ -340,82 +350,90 @@ function AllowList() {
                 originalRow.note !== savedRow.note;
             // 如果資料有變動，更新資料，並更新日期和使用者
             if (hasChanged) {
-                return {
-                    ...row,          // 保留其餘欄位的值
-                    edit_date: today,
-                    edit_user: currentUser,
+                const updatedRow = {
+                    ...savedRow,          // 保留其餘欄位的值
+                    edit_user: currentUser,  // 更新使用者
                 };
+
+                // 移除不需要的欄位 (detailId, create_date, edit_date)
+                const { detailId, create_date, edit_date, ...filteredRow } = updatedRow;
+                return filteredRow;
             } else {
                 // 如果沒有變動，返回原始資料，保持 date 和 user 不變
                 return savedRow;
             }
+
+
         });
 
-        //測試用 ,先將資料加入到table2Data後面...但沒有加id欄位...所以測試編輯會錯
-        const updatedTestData = [...table2Data, ...newFormattedData];
-        setTable2Data(updatedTestData);
+        // 這邊用API將新增的資料存到DB中的 table1 table2
+        console.log("要新增table2的資料:" + JSON.stringify(newFormattedData));
+        //將新增的表格加入到table2資料庫
+        const fetchData2 = async () => {
+            try {
+                const response = await fetch(`${globalUrl.url}/api/post-work-order-details`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newFormattedData),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const res = await response.json();
+                console.log("新增table2成功" + res);
+            } catch (error: any) {
+                console.error('Error :', error);
 
-        //測試用 ,將資料加到table2Dat1
+            }
+        };
+
+        //將資料加到table1Data
         const newTestData1 = {
             workOrderNumber: workNumber,
             quantity: rows,
             partNumber: selectedPartNumber,
+            company: '',
             createUser: currentUser,
             createDate: today,
             editUser: currentUser,
             editDate: today
         };
-        setTable1Data((prevData: any) => [...prevData, newTestData1]);
-
-
-
         // 這邊用API將新增的資料存到DB中的 table1 table2
-        //將新增的表格加入到table2資料庫
-        // const fetchData2 = async () => {
-        //     try {
-        //         const response = await fetch(`${globalUrl.url}/api/add-news`, {
-        //             method: 'POST',
-        //             headers: {
-        //                 'Content-Type': 'application/json',
-        //             },
-        //             body: JSON.stringify(data),
-        //         });
-        //         if (!response.ok) {
-        //             throw new Error(`HTTP error! Status: ${response.status}`);
-        //         }
-        //         const res = await response.json();
-        //         console.log("新增成功"+ res);
-        //     } catch (error: any) {
-        //         console.error('Error :', error);
-
-        //     }
-        // };
-        // fetchData2();
-
         //將新增的表格加入到table1資料庫
-        // const fetchData1 = async () => {
-        //     try {
-        //         const response = await fetch(`${globalUrl.url}/api/add-news`, {
-        //             method: 'POST',
-        //             headers: {
-        //                 'Content-Type': 'application/json',
-        //             },
-        //             body: JSON.stringify(newTestData1),
-        //         });
-        //         if (!response.ok) {
-        //             throw new Error(`HTTP error! Status: ${response.status}`);
-        //         }
-        //         const res = await response.json();
-        //         console.log("新增成功"+ res);
-        //     } catch (error: any) {
-        //         console.error('Error :', error);
+        const fetchData1 = async () => {
+            try {
+                const response = await fetch(`${globalUrl.url}/api/post-work-orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newTestData1),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                // const res = await response.json();
+                console.log("新增table1成功" + response);
 
-        //     }
-        // };
-        // fetchDat1();
+                await fetchData2();
+
+            } catch (error: any) {
+                console.error('Error :', error);
+
+            }
+        };
 
 
-        navigate('/');
+
+
+
+
+
+        fetchData1();
+
+        // navigate('/');
 
     };
 
@@ -428,47 +446,39 @@ function AllowList() {
      * 將table3的料號對應model儲存起來
      */
 
-    useEffect(() => {
-        // 從 table3Data 提取 inputModel
-        const model = table3Data.map((item: { inputModel: any; }) => item.inputModel);
-        setInputModel(model);
-    }, []);
-
     //一進頁面先將資料初始化
     useEffect(() => {
         setWorkNo('');
         setQuant(0);
         setPart('');
+        setModel('');
     }, [])
 
-    // 根據 selectedPartNumber 找到對應的 inputModel
+    // 根據 selectedPartNumber 找到對應的 inputMode
     useEffect(() => {
         const foundItem = table3Data.find((item: { partNumber: string; }) => item.partNumber === selectedPartNumber);
         if (foundItem) {
-            setInputModel(foundItem.inputModel);
+            setinputMode(foundItem.inputMode);
         }
     }, [selectedPartNumber, table3Data]);
 
-    // useEffect(() => {
-    //     console.log('目前所有table1的內容是:', JSON.stringify(table1Data, null, 2));
-    //     console.log('目前所有table2的內容是:', JSON.stringify(table2Data, null, 2));
-    // }, [table1Data]);
+
 
     // useEffect(() => {
     //     console.log('新增的表單:', JSON.stringify(data, null, 2));
     // }, [data])
 
     // useEffect(() => {
-    //     alert("工單號碼"+workNumber+"數量"+rows+"料號"+selectedPartNumber+"模式"+inputModel);
-    // }, [workNumber,rows,selectedPartNumber,inputModel]);
+    //     alert("工單號碼"+workNumber+"數量"+rows+"料號"+selectedPartNumber+"模式"+inputMode);
+    // }, [workNumber,rows,selectedPartNumber,inputMode]);
 
 
 
     return (
         <>
             <div className="content" style={{ flex: 1 }}>
-                <h1>條碼掃描系統</h1>
-                <div>
+                <h1>{formatMessage({ id: 'newwork' })}</h1>
+                {/* <div>
                     <label>使用者(測試用)：</label>
                     <input
                         type="text"
@@ -476,10 +486,10 @@ function AllowList() {
                         onChange={(e) => setCurrentUser(e.target.value)}
                         placeholder="輸入使用者名稱"
                     />
-                </div>
+                </div> */}
                 <div>
                     <>
-                        <label>工單號碼：</label>
+                        <label>{formatMessage({ id: 'workOrderNumber' })}：</label>
                         <input
                             type="text"
                             value={workNumber}
@@ -487,9 +497,9 @@ function AllowList() {
                         />
                     </>
                     <>
-                        <label>料號：</label>
+                        <label>{formatMessage({ id: 'part' })}：</label>
                         <select value={selectedPartNumber} onChange={(e) => setSelectedPartNumber(e.target.value)}>
-                            <option value="">料號</option>
+                            <option value="">{formatMessage({ id: 'part' })}</option>
                             {table3Data.map((item: any) => (
                                 <option key={item.id} value={item.partNumber}>
                                     {item.partNumber}
@@ -498,46 +508,47 @@ function AllowList() {
                         </select>
                     </>
                     <>
-                        <label>工單數量：</label>
+                        <label>{formatMessage({ id: 'quantity' })}：</label>
                         <input type="number" value={rows} onChange={handleRowChange} />
                     </>
-                    <button onClick={handleGenerateTable}>生成表格</button>
+                    <button onClick={handleGenerateTable}>{formatMessage({ id: 'generate' })}</button>
                 </div>
 
 
 
                 {data.length > 0 &&
                     <>
-                        <button onClick={handleSaveData}>儲存</button>
+                        <button onClick={handleSaveData}>{formatMessage({ id: 'save' })}</button>
 
                         <input
                             type="text"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyDown={handleBarcodeInput}
-                            placeholder="請掃描條碼"
+                            placeholder={formatMessage({ id: 'text' })}
                             disabled={isComplete} // 當掃描完成後禁用輸入框
                         />
-                        {isComplete && <p>所有條碼已完成掃描。</p>}
-                        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-                            <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'scroll' }}>
-                                <Table >
+                        {isComplete && <p>{formatMessage({ id: 'text1' })}</p>}
+                        <Paper sx={{ width: '100%', overflow: 'hidden',height: '90%' }}>
+                        <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'scroll' }}>
+
+                            <Table stickyHeader aria-label="sticky table">
                                     <TableHead >
                                         <TableRow style={{ border: '1px solid #ccc' }}>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>細項</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>序號SN</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>QR_RFTray</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>QR_PS</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>QR_HS</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>QR_backup1</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>QR_backup2</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>QR_backup3</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>QR_backup4</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>備註</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>創建日期</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>創建使用者</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>編輯日期</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>編輯使用者</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup4' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'note' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     {/* 使用colKey */}
@@ -577,13 +588,13 @@ function AllowList() {
                                                     .map((colKey, colIndex) => (
                                                         <TableCell
                                                             key={colKey}
-                                                            onClick={() => handleCellClick(rowIndex, colIndex)} 
+                                                            onClick={() => handleCellClick(rowIndex, colIndex)}
                                                             className={currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : ''}
                                                         >
                                                             {editCell.rowIndex === rowIndex && editCell.colIndex === colIndex ? (
                                                                 <TextField
                                                                     value={row[colKey]}
-                                                                    onChange={(e) => handleCellChange(e, rowIndex, colIndex)} 
+                                                                    onChange={(e) => handleCellChange(e, rowIndex, colIndex)}
                                                                     onBlur={handleCellBlur}
                                                                     autoFocus
                                                                 />

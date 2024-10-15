@@ -1,14 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import "./Menu.css"
+import { useIntl } from "react-intl";
 
 const Menu = () => {
+  const { formatMessage } = useIntl();
   return (
     <div className="menu">
       
-      <Link to="/"> - 所有工單 (編輯)</Link>
-      <Link to="/allowlist"> - 新增工單</Link>
-      <Link to="/searchTable1">- 查詢+下載</Link>
+      <Link to="/">  {formatMessage({ id: 'Menu-All-WorkOrders' })}</Link>
+      <Link to="/allowlist"> {formatMessage({ id: 'Menu-Add-WorkOrders' })}</Link>
+      <Link to="/searchTable1">{formatMessage({ id: 'Menu-Search-WorkOrders' })}</Link>
     </div>
   );
 };

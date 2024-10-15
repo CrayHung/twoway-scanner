@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, IconButton } from '@mui/material';
 import * as XLSX from 'xlsx';
 import { useGlobalContext } from '../global';
+import { useIntl } from "react-intl";
 
 
 const modalStyle = {
@@ -65,14 +66,14 @@ interface ExcelRow {
     shipping_date: string;
     shipping_company_contractor: string;
     tracking_number: string;
-    QR_HS?: string;
-    QR_PS?: string;
-    QR_RFTray?: string;
+    qr_HS?: string;
+    qr_PS?: string;
+    qr_RFTray?: string;
 }
 
 
 const SearchTable1 = () => {
-
+    const { formatMessage } = useIntl();
     const { currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, workNo, setWorkNo, part, setPart, quant, setQuant } = useGlobalContext();
 
     const [open, setOpen] = useState(true);
@@ -96,14 +97,14 @@ const SearchTable1 = () => {
     //     workOrderNumber: '',
     //     productionDateStart: '',
     //     productionDateEnd: '',
-    //     SN: '',
-    //     QR_RFTray: '',
-    //     QR_PS: '',
-    //     QR_HS: '',
-    //     QR_backup1: '',
-    //     QR_backup2: '',
-    //     QR_backup3: '',
-    //     QR_backup4: '',
+    //     sn: '',
+    //     qr_RFTray: '',
+    //     qr_PS: '',
+    //     qr_HS: '',
+    //     qr_backup1: '',
+    //     qr_backup2: '',
+    //     qr_backup3: '',
+    //     qr_backup4: '',
     // });
 
 
@@ -115,8 +116,8 @@ const SearchTable1 = () => {
         productionDateEnd: '',
         SNs: [''],
         QR_RFTrays: [''],
-        QR_PS: '',
-        QR_HS: ''
+        qr_PS: '',
+        qr_HS: ''
     });
     const handleAddField = (field: keyof typeof formData) => {
         setFormData((prev) => ({
@@ -148,14 +149,14 @@ const SearchTable1 = () => {
             productionDateEnd: '',
             SNs: [''],
             QR_RFTrays: [''],
-            QR_PS: '',
-            QR_HS: ''
+            qr_PS: '',
+            qr_HS: ''
         });
     };
 
 
     //點擊任一行工單資料, 記錄當下是按了哪一筆工單號碼,工單數量,料號 
-    // 跳轉頁面顯示該筆工單的詳細內容(QR_PS,QR_HS...)
+    // 跳轉頁面顯示該筆工單的詳細內容(qr_PS,qr_HS...)
     const handleRowClick = (workOrder: any, quantity: any, partnumber: any) => {
         setWorkNo(workOrder);
         setQuant(quantity);
@@ -388,7 +389,7 @@ const SearchTable1 = () => {
                                         <Grid item xs={10}>
                                             <TextField
                                                 select
-                                                label="工單號碼"
+                                                label={formatMessage({ id: 'workOrderNumber' })}
                                                 value={workOrderNumber}
                                                 onChange={(e) => handleFieldChange('workOrderNumbers', index, e.target.value)}
                                                 fullWidth
@@ -411,12 +412,12 @@ const SearchTable1 = () => {
 
                             {/* 序號欄位 */}
                             <Grid item xs={12}>
-                                {formData.SNs.map((SN, index) => (
+                                {formData.SNs.map((sn, index) => (
                                     <Grid container spacing={1} key={index}>
                                         <Grid item xs={10}>
                                             <TextField
-                                                label="序號"
-                                                value={SN}
+                                                label={formatMessage({ id: 'SN' })}
+                                                value={sn}
                                                 onChange={(e) => handleFieldChange('SNs', index, e.target.value)}
                                                 fullWidth
                                             />
@@ -432,12 +433,12 @@ const SearchTable1 = () => {
 
                             {/* 序號QR_RFTray欄位 */}
                             <Grid item xs={12}>
-                                {formData.QR_RFTrays.map((QR_RFTray, index) => (
+                                {formData.QR_RFTrays.map((qr_RFTray, index) => (
                                     <Grid container spacing={1} key={index}>
                                         <Grid item xs={10}>
                                             <TextField
-                                                label="序號QR_RFTray"
-                                                value={QR_RFTray}
+                                                label={formatMessage({ id: 'QR_RFTray' })}
+                                                value={qr_RFTray}
                                                 onChange={(e) => handleFieldChange('QR_RFTrays', index, e.target.value)}
                                                 fullWidth
                                             />
@@ -454,7 +455,7 @@ const SearchTable1 = () => {
                             {/* 其他欄位 */}
                             <Grid item xs={6}>
                                 <TextField
-                                    label="生產日期 (開始)"
+                                    label={formatMessage({ id: 'startdate' })}
                                     type="date"
                                     InputLabelProps={{ shrink: true }}
                                     value={formData.productionDateStart}
@@ -464,7 +465,7 @@ const SearchTable1 = () => {
                             </Grid>
                             <Grid item xs={6}>
                                 <TextField
-                                    label="生產日期 (結束)"
+                                    label={formatMessage({ id: 'enddate' })}
                                     type="date"
                                     InputLabelProps={{ shrink: true }}
                                     value={formData.productionDateEnd}
@@ -475,9 +476,9 @@ const SearchTable1 = () => {
 
                             <Grid item xs={12}>
                                 <TextField
-                                    label="序號QR_PS"
-                                    value={formData.QR_PS}
-                                    onChange={(e) => setFormData({ ...formData, QR_PS: e.target.value })}
+                                    label={formatMessage({ id: 'QR_PS' })}
+                                    value={formData.qr_PS}
+                                    onChange={(e) => setFormData({ ...formData, qr_PS: e.target.value })}
                                     fullWidth
                                 />
                             </Grid>
@@ -485,13 +486,13 @@ const SearchTable1 = () => {
                             {/* 按鈕區域 */}
                             <Grid item xs={4}>
                                 <Button variant="contained" color="secondary" fullWidth onClick={handleEmpty}>
-                                    清除
+                                    {formatMessage({ id: 'clear' })}
                                 </Button>
                             </Grid>
 
                             <Grid item xs={4}>
                                 <Button variant="contained" color="primary" fullWidth onClick={handleSearchTable1ByForm}>
-                                    查詢
+                                    {formatMessage({ id: 'submit' })}
                                 </Button>
                             </Grid>
                         </Grid>
@@ -502,24 +503,26 @@ const SearchTable1 = () => {
             {table1Data.length &&
                 <>
                     <div>
-                        <button onClick={handleDownloadTwowayExcel}>達運下載 Excel</button>
+                        <button onClick={handleDownloadTwowayExcel}>{formatMessage({ id:'twowayexcel'})}</button>
                     </div>
                     <div>
-                        <button onClick={handleDownloadCustomerExcel}>客戶下載 Excel</button>
+                        <button onClick={handleDownloadCustomerExcel}>{formatMessage({ id: 'customexcel' })}</button>
                     </div>
                     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
 
                         <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'scroll' }}>
-                            <Table >
+                        <Table stickyHeader aria-label="sticky table">
                                 <TableHead >
                                     <TableRow style={{ border: '1px solid #ccc' }}>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>工單號碼</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>工單數量</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>料號</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>創建使用者</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>創建日期</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>編輯使用者</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>編輯日期</TableCell>
+                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'quantity' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'part' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'company' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>

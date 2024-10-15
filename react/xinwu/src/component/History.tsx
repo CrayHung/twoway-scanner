@@ -12,7 +12,7 @@ import { useGlobalContext } from '../global';
 
 interface TableRow {
     id: string | number;
-    SN: string | number;
+    sn: string | number;
     QR1: string | number;
     QR2: string | number;
     QR3: string | number;

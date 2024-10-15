@@ -2,8 +2,10 @@ import { Box, Button, Container, TextField } from '@mui/material';
 import { useState } from 'react';
 import { BrowserRouter as Router, Route, useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom'
+import { useIntl } from "react-intl";
 
 const ResetPassword: React.FC = () => {
+  const { formatMessage } = useIntl();
 
     const navigate = useNavigate();
     const [newPassword, setnewPassword] = useState<string>('');

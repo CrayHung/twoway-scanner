@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { TextField, Button ,Stack,Box,Container,Link   } from "@mui/material";
 import { useGlobalContext } from './global';
+import { useIntl } from "react-intl";
 
 const LogInPage = () => {
 
@@ -9,7 +10,7 @@ const LogInPage = () => {
     const [error, setError] = useState<string>('');
 
     const {  jwtToken , setJwtToken ,isLoggedIn, setIsLoggedIn,globalUrl,currentUser, setCurrentUser } = useGlobalContext();
-
+    const { formatMessage } = useIntl();
 
     const fetchLogin = async () => {
         try {
@@ -26,6 +27,7 @@ const LogInPage = () => {
   
           if (!response.ok) {
             throw new Error('Failed to login');
+            alert("登入失敗")
           }
   
           const data = await response.json();
@@ -33,7 +35,7 @@ const LogInPage = () => {
 
   
           await setJwtToken(token);
-
+          alert("登入成功")
           await setIsLoggedIn(true);
 
         } catch (error: any) {
@@ -44,7 +46,6 @@ const LogInPage = () => {
     const handleLogin = async() => {
         await fetchLogin();
         console.log("jwtToken=" + jwtToken);
-        alert("登入成功")
         setCurrentUser(input1);
       };
 
@@ -75,11 +76,11 @@ const LogInPage = () => {
           }}
         >
 
-            <>登入</>
+            <>{formatMessage({ id: 'login' })}</>
             {error && <div style={{ color: 'red' }}>{error}</div>}
             {/* <Stack spacing={2}> */}
                 <TextField
-                    label="帳號"
+                    label={formatMessage({ id: 'account' })}
                     variant="outlined"
                     value={input1}
                     onChange={handleInput1Change}
@@ -87,7 +88,7 @@ const LogInPage = () => {
                     sx={{ width: '300px' }}
                 />
                 <TextField
-                    label="密碼"
+                    label={formatMessage({ id: 'password' })}
                     variant="outlined"
                     value={input2}
                     onChange={handleInput2Change}
@@ -108,7 +109,7 @@ const LogInPage = () => {
                     </Link>
                     <br />
                     <Button variant="contained" onClick={handleButtonClick} sx={{ marginRight: 1 }}>
-                        提交
+                    {formatMessage({ id: 'submit' })}
                     </Button>
                     </>
                 {/* </Box> */}
