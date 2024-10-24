@@ -5,7 +5,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, IconButton } from '@mui/material';
+import { TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, IconButton, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import * as XLSX from 'xlsx';
 import { useGlobalContext } from '../global';
 import { useIntl } from "react-intl";
@@ -25,51 +25,6 @@ const modalStyle = {
     maxHeight: '90vh',
     overflowY: 'auto',
 };
-interface Table1Row {
-    workOrderNumber: string | number;
-    quantity: string | number;
-    partNumber: string | number;
-    createUser: string | number;
-    createDate: string | number;
-    editUser: string | number;
-    editDate: string | number;
-}
-
-interface Table2Row {
-    workOrderNumber: string | number;
-    id: string | number;
-    SN: string | number;
-    QR_RFTray: string | number;
-    QR_PS: string | number;
-    QR_HS: string | number;
-    QR_backup1: string | number;
-    QR_backup2: string | number;
-    QR_backup3: string | number;
-    QR_backup4: string | number;
-    note: string | number;
-    create_date: string;
-    create_user: string;
-    edit_date: string;
-    edit_user: string;
-}
-
-interface SNData {
-    id: number;
-    SN: string;
-}
-
-interface ExcelRow {
-    ASN_Number: string;
-    manufacture_batch_number_or_identifier: string;
-    manufacture_country: string;
-    purchase_order_received_date: string;
-    shipping_date: string;
-    shipping_company_contractor: string;
-    tracking_number: string;
-    qr_HS?: string;
-    qr_PS?: string;
-    qr_RFTray?: string;
-}
 
 
 const SearchTable1 = () => {
@@ -79,6 +34,9 @@ const SearchTable1 = () => {
     const [open, setOpen] = useState(true);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+
+    // 查詢結果存放 , 用來渲染table的
+    const [resultData, setResultData] = useState<any[]>([]);
     const navigate = useNavigate();
 
     //達運專用excel格式
@@ -90,41 +48,65 @@ const SearchTable1 = () => {
 
 
     //為了要在下拉選單中可以渲染 , 一進頁面就先取得所有工單
-    const [tmpData, setTmpData] = useState<Table1Row[]>(table1Data);
-
-    //搜尋表單
-    // const [formData, setFormData] = useState({
-    //     workOrderNumber: '',
-    //     productionDateStart: '',
-    //     productionDateEnd: '',
-    //     sn: '',
-    //     qr_RFTray: '',
-    //     qr_PS: '',
-    //     qr_HS: '',
-    //     qr_backup1: '',
-    //     qr_backup2: '',
-    //     qr_backup3: '',
-    //     qr_backup4: '',
-    // });
-
-
+    const [tmpData, setTmpData] = useState<any[]>(table1Data);
 
     //搜尋表單,這樣可以對欄位的多組搜尋(workOrderNumbers , SNs , QR_Trays)
     const [formData, setFormData] = useState({
-        workOrderNumbers: [''],
-        productionDateStart: '',
-        productionDateEnd: '',
-        SNs: [''],
-        QR_RFTrays: [''],
-        qr_PS: '',
-        qr_HS: ''
+        workOrderNumber: [''],
+        productionDateStart: [''],
+        productionDateEnd: [''],
+        SN: [''],
+        QR_RFTray: [''],
+        QR_PS: [''],
+        QR_HS: [''],
+        snStart: [''],
+        snEnd: ['']
     });
+
     const handleAddField = (field: keyof typeof formData) => {
         setFormData((prev) => ({
             ...prev,
             [field]: [...(prev[field] as string[]), '']
         }));
     };
+    //range SN欄位
+    const handleSnRangeChange = (field: 'snStart' | 'snEnd', index: number, value: string) => {
+        const newRange = [...(formData[field] as string[])];
+        newRange[index] = value;
+        setFormData({ ...formData, [field]: newRange });
+    };
+    // 新增SN範圍
+    const handleAddRange = () => {
+        setFormData({
+            ...formData,
+            snStart: [...formData.snStart, ''],
+            snEnd: [...formData.snEnd, '']
+        });
+    };
+
+    // SN切換模式
+    const handleModeChange = (e: any) => {
+        const selectedMode = e.target.value;
+        setMode(selectedMode);
+
+        // 如果切換到單一模式，重置範圍的 snStart 和 snEnd
+        if (selectedMode === 'single') {
+            setFormData((prevData) => ({
+                ...prevData,
+                snStart: [''],
+                snEnd: ['']
+            }));
+        }
+
+        // 如果切換到範圍模式，重置 SN 列表
+        if (selectedMode === 'range') {
+            setFormData((prevData) => ({
+                ...prevData,
+                SN: ['']
+            }));
+        }
+    };
+
     const handleFieldChange = (field: keyof typeof formData, index: number, value: string) => {
         const updatedFields = [...(formData[field] as string[])];
         updatedFields[index] = value;
@@ -144,43 +126,19 @@ const SearchTable1 = () => {
     //清除表單內容
     const handleEmpty = () => {
         setFormData({
-            workOrderNumbers: [''],
-            productionDateStart: '',
-            productionDateEnd: '',
-            SNs: [''],
-            QR_RFTrays: [''],
-            qr_PS: '',
-            qr_HS: ''
+            workOrderNumber: [''],
+            productionDateStart: [''],
+            productionDateEnd: [''],
+            SN: [''],
+            QR_RFTray: [''],
+            QR_PS: [''],
+            QR_HS: [''],
+            snStart: [''],
+            snEnd: ['']
         });
     };
 
 
-    //點擊任一行工單資料, 記錄當下是按了哪一筆工單號碼,工單數量,料號 
-    // 跳轉頁面顯示該筆工單的詳細內容(qr_PS,qr_HS...)
-    const handleRowClick = (workOrder: any, quantity: any, partnumber: any) => {
-        setWorkNo(workOrder);
-        setQuant(quantity);
-        setPart(partnumber)
-
-        // 將相同 workOrderNumber 的行更新 editUser 和 editDate
-        setTable1Data((prevData: any) =>
-            prevData.map((row: any) => {
-                if (row.workOrderNumber === workOrder) {
-                    // 如果 workOrderNumber 匹配，更新 editUser 和 editDate
-                    return {
-                        ...row,
-                        editUser: currentUser,
-                        editDate: today,
-                    };
-                }
-                return row; // 如果不匹配，保持原數據不變
-            })
-        );
-
-
-        navigate('/changeWorkContent');
-        // navigate('/searchForm');
-    };
 
     useEffect(() => {
         console.log("選到的工號是:" + workNo);
@@ -208,8 +166,8 @@ const SearchTable1 = () => {
                 throw new Error('Failed to get 所有工單');
             }
 
-            const data: Table1Row[] = await response.json();
-            console.log("所有工單 : " + JSON.stringify(data));
+            const data: any[] = await response.json();
+            // console.log("所有工單 : " + JSON.stringify(data));
             setTmpData(data);
 
         } catch (error) {
@@ -221,52 +179,66 @@ const SearchTable1 = () => {
     }, []);
 
 
-    //根據form內容搜尋table1資料庫 , 並將搜尋出來的幾筆table1資料設給table1Data
-    // const handleSearchTable1ByForm = async () => {
-    //     try {
-    //         const response = await fetch(`${globalUrl.url}/api/`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json'
-    //             },
-    //             body: formData,
-    //         });
-    //         if (!response.ok) {
-    //             throw new Error('Failed to get record');
-    //         }
-    //         const data: Table1Row[] = await response.json();
-    //         setTable1Data(data);
-    //     } catch (error) {
-    //         console.error('Error fetching :', error);
-    //     }
-    // };
 
 
     //根據選到的工單號碼(workNumber),fetch該工單號碼的table2資料 , 並將資料設定給tabel2Data
-    // 增加邏輯,將所有資料的SN按照順序輸出成excel
-    // const handleSearchTable2ByWorkNumber = async () => {
-    //     try {
-    //         const response = await fetch(`${globalUrl.url}/api/`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json'
-    //             },
-    //             body: JSON.stringify({
-    //                 workOrderNumber: workNo,
-    //             }),
-    //         });
+    const handleSearchTable2ByForm = async () => {
+        handleClose();
+        console.log('搜尋的Form資料為:', JSON.stringify(formData, null, 2));
 
-    //         if (!response.ok) {
-    //             throw new Error('Failed to get record');
-    //         }
-    //         const data: Table2Row[] = await response.json();
-    //         setTable2Data(data);
+        try {
+            const response = await fetch(`${globalUrl.url}/api/snfield-search-details `, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ formData }),
+            });
 
+            if (!response.ok) {
+                throw new Error('Failed to get ');
+            }
+            const data: any[] = await response.json();
 
-    //     } catch (error) {
-    //         console.error('Error fetching:', error);
-    //     }
-    // };
+            //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
+            //並且重新排序順序
+            const mappedData = data.map(item => ({
+                id: item.id,
+                workOrderNumber: item.parentWorkOrderNumber,
+                detailId: item.detailId,
+                SN: item.SN,
+                QR_RFTray: item.QR_RFTray,
+                QR_PS: item.QR_PS,
+                QR_HS: item.QR_HS,
+                QR_backup1: item.QR_backup1,
+                QR_backup2: item.QR_backup2,
+                QR_backup3: item.QR_backup3,
+                QR_backup4: item.QR_backup4,
+                note: item.note,
+                create_date: item.create_date,
+                create_user: item.create_user,
+                edit_date: item.edit_date,
+                edit_user: item.edit_user,
+                ...item,
+
+            }));
+
+            //用來將table2的不要欄位過濾掉(quantity,company,partNumber)
+            const filteredData = mappedData.map(({
+                parentPartNumber,
+                parentWorkOrderNumber,
+                parentCompany,
+                parentQuantity,
+                ...rest
+            }) => rest);
+
+            setResultData(filteredData);
+            console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
+
+        } catch (error) {
+            console.error('Error fetching:', error);
+        }
+    };
 
 
 
@@ -365,15 +337,8 @@ const SearchTable1 = () => {
         console.log(customerExcelData);
     }, [customerExcelData]);
 
-
-
-    //測試用
-    const handleSearchTable1ByForm = () => {
-        // 關閉 Modal
-        handleClose();
-        console.log('Form資料為:', JSON.stringify(formData, null, 2));
-
-    };
+    //SN選一種模式   用來切換模式 1.single 2.range
+    const [mode, setMode] = useState('single');
 
     return (
         <div>
@@ -384,14 +349,14 @@ const SearchTable1 = () => {
                         <Grid container spacing={2}>
                             {/* 工單號碼欄位 */}
                             <Grid item xs={12}>
-                                {formData.workOrderNumbers.map((workOrderNumber, index) => (
+                                {formData.workOrderNumber.map((workOrderNumber, index) => (
                                     <Grid container spacing={1} key={index}>
                                         <Grid item xs={10}>
                                             <TextField
                                                 select
                                                 label={formatMessage({ id: 'workOrderNumber' })}
                                                 value={workOrderNumber}
-                                                onChange={(e) => handleFieldChange('workOrderNumbers', index, e.target.value)}
+                                                onChange={(e) => handleFieldChange('workOrderNumber', index, e.target.value)}
                                                 fullWidth
                                             >
                                                 {tmpData.map((row: any, index: number) => (
@@ -402,7 +367,7 @@ const SearchTable1 = () => {
                                             </TextField>
                                         </Grid>
                                         <Grid item xs={2}>
-                                            <IconButton onClick={() => handleAddField('workOrderNumbers')}>
+                                            <IconButton onClick={() => handleAddField('workOrderNumber')}>
                                                 +
                                             </IconButton>
                                         </Grid>
@@ -411,40 +376,73 @@ const SearchTable1 = () => {
                             </Grid>
 
                             {/* 序號欄位 */}
-                            <Grid item xs={12}>
-                                {formData.SNs.map((sn, index) => (
-                                    <Grid container spacing={1} key={index}>
-                                        <Grid item xs={10}>
-                                            <TextField
-                                                label={formatMessage({ id: 'SN' })}
-                                                value={sn}
-                                                onChange={(e) => handleFieldChange('SNs', index, e.target.value)}
-                                                fullWidth
-                                            />
+                            <FormControl component="fieldset">
+                                <FormLabel component="legend">Choose Mode</FormLabel>
+                                <RadioGroup row value={mode} onChange={handleModeChange}>
+                                    <FormControlLabel value="single" control={<Radio />} label="Single SN" />
+                                    <FormControlLabel value="range" control={<Radio />} label="SN Range" />
+                                </RadioGroup>
+                            </FormControl>
+
+                            {mode === 'single' ? (
+                                <Grid item xs={12}>
+                                    {formData.SN.map((SN, index) => (
+                                        <Grid container spacing={1} key={index}>
+                                            <Grid item xs={10}>
+                                                <TextField
+                                                    label="SN"
+                                                    value={SN}
+                                                    onChange={(e) => handleFieldChange('SN', index, e.target.value)}
+                                                    fullWidth
+                                                />
+                                            </Grid>
+                                            <Grid item xs={2}>
+                                                <IconButton onClick={() => handleAddField('SN')}>
+                                                    +
+                                                </IconButton>
+                                            </Grid>
                                         </Grid>
-                                        <Grid item xs={2}>
-                                            <IconButton onClick={() => handleAddField('SNs')}>
-                                                +
-                                            </IconButton>
+                                    ))}
+                                </Grid>
+                            ) : (
+                                <Grid item xs={12}>
+                                    {formData.snStart.map((start, index) => (
+                                        <Grid container spacing={1} key={index}>
+                                            <Grid item xs={5}>
+                                                <TextField
+                                                    label="SN Start"
+                                                    value={start}
+                                                    onChange={(e) => handleSnRangeChange('snStart', index, e.target.value)}
+                                                    fullWidth
+                                                />
+                                            </Grid>
+                                            <Grid item xs={5}>
+                                                <TextField
+                                                    label="SN End"
+                                                    value={formData.snEnd[index]}
+                                                    onChange={(e) => handleSnRangeChange('snEnd', index, e.target.value)}
+                                                    fullWidth
+                                                />
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
-                                ))}
-                            </Grid>
+                                    ))}
+                                </Grid>
+                            )}
 
                             {/* 序號QR_RFTray欄位 */}
                             <Grid item xs={12}>
-                                {formData.QR_RFTrays.map((qr_RFTray, index) => (
+                                {formData.QR_RFTray.map((QR_RFTray, index) => (
                                     <Grid container spacing={1} key={index}>
                                         <Grid item xs={10}>
                                             <TextField
                                                 label={formatMessage({ id: 'QR_RFTray' })}
-                                                value={qr_RFTray}
-                                                onChange={(e) => handleFieldChange('QR_RFTrays', index, e.target.value)}
+                                                value={QR_RFTray}
+                                                onChange={(e) => handleFieldChange('QR_RFTray', index, e.target.value)}
                                                 fullWidth
                                             />
                                         </Grid>
                                         <Grid item xs={2}>
-                                            <IconButton onClick={() => handleAddField('QR_RFTrays')}>
+                                            <IconButton onClick={() => handleAddField('QR_RFTray')}>
                                                 +
                                             </IconButton>
                                         </Grid>
@@ -454,33 +452,56 @@ const SearchTable1 = () => {
 
                             {/* 其他欄位 */}
                             <Grid item xs={6}>
-                                <TextField
-                                    label={formatMessage({ id: 'startdate' })}
-                                    type="date"
-                                    InputLabelProps={{ shrink: true }}
-                                    value={formData.productionDateStart}
-                                    onChange={(e) => setFormData({ ...formData, productionDateStart: e.target.value })}
-                                    fullWidth
-                                />
+                                {formData.productionDateStart.map((productionDateStart, index) => (
+                                    <Grid container spacing={1} key={index}>
+                                        <Grid item xs={10}>
+                                            <TextField
+                                                label={formatMessage({ id: 'startdate' })}
+                                                type="date"
+                                                value={productionDateStart}
+                                                onChange={(e) => handleFieldChange('productionDateStart', index, e.target.value)}
+                                                fullWidth
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                ))}
+
                             </Grid>
                             <Grid item xs={6}>
-                                <TextField
-                                    label={formatMessage({ id: 'enddate' })}
-                                    type="date"
-                                    InputLabelProps={{ shrink: true }}
-                                    value={formData.productionDateEnd}
-                                    onChange={(e) => setFormData({ ...formData, productionDateEnd: e.target.value })}
-                                    fullWidth
-                                />
+                                {formData.productionDateEnd.map((productionDateEnd, index) => (
+                                    <Grid container spacing={1} key={index}>
+                                        <Grid item xs={10}>
+                                            <TextField
+                                                label={formatMessage({ id: 'enddate' })}
+                                                type="date"
+                                                value={productionDateEnd}
+                                                onChange={(e) => handleFieldChange('productionDateEnd', index, e.target.value)}
+                                                fullWidth
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                ))}
+
                             </Grid>
 
                             <Grid item xs={12}>
-                                <TextField
-                                    label={formatMessage({ id: 'QR_PS' })}
-                                    value={formData.qr_PS}
-                                    onChange={(e) => setFormData({ ...formData, qr_PS: e.target.value })}
-                                    fullWidth
-                                />
+                                {formData.QR_PS.map((QR_PS, index) => (
+                                    <Grid container spacing={1} key={index}>
+                                        <Grid item xs={10}>
+                                            <TextField
+                                                label={formatMessage({ id: 'QR_PS' })}
+                                                value={QR_PS}
+                                                onChange={(e) => handleFieldChange('QR_PS', index, e.target.value)}
+                                                fullWidth
+                                            />
+                                        </Grid>
+                                        <Grid item xs={2}>
+                                            <IconButton onClick={() => handleAddField('QR_PS')}>
+                                                +
+                                            </IconButton>
+                                        </Grid>
+                                    </Grid>
+                                ))}
                             </Grid>
 
                             {/* 按鈕區域 */}
@@ -491,7 +512,7 @@ const SearchTable1 = () => {
                             </Grid>
 
                             <Grid item xs={4}>
-                                <Button variant="contained" color="primary" fullWidth onClick={handleSearchTable1ByForm}>
+                                <Button variant="contained" color="primary" fullWidth onClick={handleSearchTable2ByForm}>
                                     {formatMessage({ id: 'submit' })}
                                 </Button>
                             </Grid>
@@ -500,34 +521,40 @@ const SearchTable1 = () => {
                 </Box>
             </Modal>
 
-            {table1Data.length &&
+            {resultData.length &&
                 <>
                     <div>
-                        <button onClick={handleDownloadTwowayExcel}>{formatMessage({ id:'twowayexcel'})}</button>
+                        <button onClick={handleDownloadTwowayExcel}>{formatMessage({ id: 'twowayexcel' })}</button>
                     </div>
                     <div>
                         <button onClick={handleDownloadCustomerExcel}>{formatMessage({ id: 'customexcel' })}</button>
                     </div>
-                    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-
+                    <Paper sx={{ width: '100%', overflow: 'hidden', height: '90%' }}>
                         <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'scroll' }}>
-                        <Table stickyHeader aria-label="sticky table">
+                            <Table stickyHeader aria-label="sticky table">
                                 <TableHead >
                                     <TableRow style={{ border: '1px solid #ccc' }}>
-                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'quantity' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'part' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'company' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup4' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'note' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {table1Data.map((row: any, rowIndex: number) => (
-                                        <TableRow key={rowIndex} onClick={() => handleRowClick(row.workOrderNumber, row.quantity, row.partNumber)}>
+                                    {resultData.map((row: any, rowIndex: number) => (
+                                        <TableRow key={rowIndex} >
                                             {Object.keys(row).map((colKey) => (
                                                 <TableCell >
                                                     {row[colKey]}

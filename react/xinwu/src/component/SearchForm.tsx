@@ -171,9 +171,14 @@ const SearchForm = () => {
             if (row.workOrderNumber === workNo) {
                 // 更新後端資料
                 await fetchUpdateTable1(row.id, {
-                    workOrderNumber: updateWorkNo,
-                    quantity: updateWorkQuantity,
-                    partNumber: updateWorkPart
+
+                    workOrderNumber: row.workOrderNumber,
+                    quantity: row.quantity,
+                    partNumber: row.partNumber
+
+                    // workOrderNumber: updateWorkNo,
+                    // quantity: updateWorkQuantity,
+                    // partNumber: updateWorkPart
                 });
             }
         }
