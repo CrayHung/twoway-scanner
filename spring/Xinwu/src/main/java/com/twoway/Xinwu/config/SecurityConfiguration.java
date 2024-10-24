@@ -35,7 +35,19 @@ public class SecurityConfiguration {
         "/forget/**",
         "/lpr/**", 
         //以下開發中API 測試完後需加入安全限制
-        "/api/**"
+        "/api/**",
+        "/v2/api-docs",
+        "/v3/api-docs", // OpenAPI 路徑
+        "/configuration/ui",
+        "/swagger-resources/**",
+        "/configuration/security",
+        "/swagger-ui.html",
+        "/swagger-ui/**", // Swagger UI 靜態資源
+        "/webjars/**",
+        "/v2/api-docs/**",
+        "/v3/api-docs/**",
+        "/swagger.json",
+        "/swagger-resources/**"
     };
 
 
