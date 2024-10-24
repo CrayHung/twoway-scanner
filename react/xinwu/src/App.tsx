@@ -17,6 +17,7 @@ import SearchForm from './component/SearchForm';
 import SearchTable1 from './component/SearchTable1';
 
 import ShowAllWork from './component/ShowAllWork';
+import PartTable from './component/partTable';
 
 import { IntlProvider } from "react-intl";
 import useNavigatorLanguage, { LocaleContext } from "./language/useNavigatorLanguage";
@@ -51,6 +52,7 @@ function App() {
             <Route path="/allowlist" Component={AllowList} /> 
             <Route path="/searchForm" Component={SearchForm} /> 
             <Route path="/searchTable1" Component={SearchTable1} /> 
+            <Route path="/partTable" Component={PartTable} /> 
 
 
 

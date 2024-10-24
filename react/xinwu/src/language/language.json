@@ -1,5 +1,11 @@
 {
 	"zh-TW": {
+        "part-table":"料號對應表",
+        "part-shipping-model":"出貨模式",
+        "add-part":"新增料號",
+        "edit-part":"編輯料號",
+        "delete-part":"刪除料號",
+                
         "text":"請掃描條碼",
         "text1":"所有條碼已完成掃描。",
         "twowayexcel":"達運下載 Excel",
@@ -57,6 +63,12 @@
 	},
 
 	"en-US": {
+        "part-table":"part table",  
+        "part-shipping-model":"shipping model",
+        "add-part":"add",
+        "edit-part":"edit",
+        "delete-part":"delete",
+
         "text":"scan QR code",
         "text1":"finished scan。",
         "twowayexcel":"Twoway Excel",
