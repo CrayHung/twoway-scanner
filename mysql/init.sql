@@ -63,6 +63,22 @@ CREATE TABLE IF NOT EXISTS speeding (
   PRIMARY KEY (id)
 );
 
+-- 創建 input_modes 表
+CREATE TABLE IF NOT EXISTS input_modes (
+  id INT AUTO_INCREMENT,
+  part_number VARCHAR(255) NOT NULL,
+  input_mode VARCHAR(255) NOT NULL,
+  number_per_pallet INT NOT NULL,
+  summary TEXT,
+  note TEXT,
+  create_user VARCHAR(255),
+  create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  edit_user VARCHAR(255),
+  edit_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE (part_number)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS work_orders (
   id INT AUTO_INCREMENT,
   work_order_number VARCHAR(255) NOT NULL,
@@ -74,8 +90,9 @@ CREATE TABLE IF NOT EXISTS work_orders (
   edit_user VARCHAR(255),
   edit_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
+  FOREIGN KEY (part_number) REFERENCES input_modes(part_number) ON UPDATE CASCADE,
   UNIQUE (work_order_number)
-)CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- 修改 work_order_details 表結構
 DROP TABLE IF EXISTS work_order_details;
@@ -99,14 +116,6 @@ CREATE TABLE work_order_details (
   PRIMARY KEY (id),
   FOREIGN KEY (work_order_number) REFERENCES work_orders(work_order_number) ON UPDATE CASCADE,
   UNIQUE (work_order_number, detail_id)
-)CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- 創建 input_modes 表
-CREATE TABLE IF NOT EXISTS input_modes (
-  id INT AUTO_INCREMENT,
-  part_number VARCHAR(255) NOT NULL,
-  input_mode VARCHAR(255) NOT NULL,
-  PRIMARY KEY (id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- 以下為測試用數據
@@ -130,12 +139,12 @@ INSERT INTO parking_lot (id,amount, car_type) VALUES
   (1,100, 'car'),
   (2,100, 'truck');
 
--- 因為password藥用加密的儲存,所以創建的時候給明碼沒用,用API  /registerAdmin註冊
--- INSERT INTO users (id,username, password, role)
--- VALUES
---   (1,'john', '123456', 'ADMIN'),
---   (2,'admin', '123456', 'ADMIN'),
---   (3,'cray5', '123456', 'USER');
+-- 因password會加密儲存,所以創建的時候給明碼沒用,用API  /registerAdmin註冊
+INSERT INTO users (username, password, role)
+VALUES
+  ('test', '$2a$10$sEo9Vh3mWscdSDjANOHLiulyQoncOzRbwAmZEIQmsw5HrrhXLj.LS', 'ADMIN');
+-- 確認插入的數據
+SELECT COUNT(*) FROM users;
 
 -- INSERT INTO refresh_token (id,user_id, token, createdDate, expirationDate)
 -- VALUES
@@ -148,15 +157,25 @@ VALUES
   (2,'AAA-789', '2023-12-14 12:30:00.000000', '2023-12-14 12:30:00.000000', 'truck', '2.jpg', 'cam2', 7),
   (3,'123-XYZ', '2023-12-14 12:30:00.000000', '2023-12-14 12:30:00.000000', 'truck', '3.jpg', 'cam1', 10);
 
+-- 插入測試數據到 input_modes 表
+INSERT INTO input_modes (part_number, input_mode, number_per_pallet, summary, create_user, create_date, edit_user, edit_date)
+VALUES
+  ('P1A00G0-003G', 'E', 104, 'AMT-MB851TC2RN0/ASEM/Moto MB/1794MHz/ 204/258 /51dB FWD/32dB RTN/23.0dB Slope/Plug-in Sidactor/ASEM Housing/With Power Supply/GaN Forward Hybrids/RoHS/For ACI', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
+  ('K1A0000-036G', 'D', 48, 'HSG01-MB-PS/ASEM/Moto MB Housing/Port 1 to 4 W/45-90 VPS W/Internal Ground Strap/Without Seizure Screw/With Dust Cover/Individually Boxed/RoHS/For', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
+  ('K1A0000-032G', 'C', 20, 'MB-MPPS-II/ASEM/Moto MB Cable Power/45-90V AC Input/ 24V/1.8A DC Output /Triac & Sidactor Type/Input Control/With Pillar Screws/Heat Sinks x 2/For', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
+  ('K1A00G0-013G', 'B', 104, 'AMT-MB851TM2RN0/ASEM/Moto MB/1794MHz/ 204/258 /51dB FWD/32dB RTN/20.0dB Slope/Plug-in Sidactor/Module Only/GaN Forward Hybrids/RoHS/For', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
+  ('K1A0000-037G', 'A', 48, 'HSG01-MB-00/ASEM/Moto MB Housing/Port 1 to 4 W/O PWS W/internal Ground strap/ W/O Seizure Screw /With Dust Cover/Individually Boxed/RoHS/For ACI', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00');
+-- 確認插入的數據
+SELECT COUNT(*) FROM input_modes;
+
 -- 測試數據 for 工單 work_orders 
 INSERT INTO work_orders (work_order_number, quantity, part_number, company, create_user, create_date, edit_user, edit_date)
 VALUES
-  ('WO-001', 3, 'PART-A', 'Twoway', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00');
-  -- ('WO-002', 200, 'PART-B', 'ACI', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
-  -- ('WO-003', 200, 'PART-C', 'ACI', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
-  -- ('WO-004', 200, 'PART-D', 'ACI', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
-  -- ('WO-005', 150, 'PART-E', 'Twoway', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00');
-
+  ('WO-001', 3, 'K1A0000-037G', 'Twoway', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
+  ('WO-002', 200, 'K1A00G0-013G', 'ACI', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
+  ('WO-003', 200, 'K1A0000-032G', 'ACI', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
+  ('WO-004', 200, 'K1A0000-036G', 'ACI', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
+  ('WO-005', 150, 'P1A00G0-003G', 'Twoway', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00');
 SELECT COUNT(*) FROM work_orders;
 
 -- 測試數據 for work_order_details
@@ -164,19 +183,10 @@ INSERT INTO work_order_details (work_order_number, detail_id, sn, qr_rf_tray, qr
 VALUES
   ('WO-001', 1, 'SN001', 'QRRF001', 'QRPS001', 'QRHS001', 'QRBU001', 'QRBU002', 'QRBU003', 'QRBU004', 'Note for WO-001 #1', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
   ('WO-001', 2, 'SN002', 'QRRF002', 'QRPS002', 'QRHS002', 'QRBU005', 'QRBU006', 'QRBU007', 'QRBU008', 'Note for WO-001 #2', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
-  ('WO-001', 3, 'SN003', 'QRRF003', 'QRPS003', 'QRHS003', 'QRBU009', 'QRBU010', 'QRBU011', 'QRBU012', 'Note for WO-001 #3', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00');
-  -- ('WO-002', 1, 'SN004', 'QRRF004', 'QRPS004', 'QRHS004', 'QRBU013', 'QRBU014', 'QRBU015', 'QRBU016', 'Note for WO-002 #1', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
-  -- ('WO-002', 2, 'SN005', 'QRRF005', 'QRPS005', 'QRHS005', 'QRBU017', 'QRBU018', 'QRBU019', 'QRBU020', 'Note for WO-002 #2', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
-  -- ('WO-003', 1, 'SN006', 'QRRF006', 'QRPS006', 'QRHS006', 'QRBU021', 'QRBU022', 'QRBU023', 'QRBU024', 'Note for WO-003 #1', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00'),
-  -- ('WO-004', 1, 'SN007', 'QRRF007', 'QRPS007', 'QRHS007', 'QRBU025', 'QRBU026', 'QRBU027', 'QRBU028', 'Note for WO-004 #1', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00'),
-  -- ('WO-005', 1, 'SN008', 'QRRF008', 'QRPS008', 'QRHS008', 'QRBU029', 'QRBU030', 'QRBU031', 'QRBU032', 'Note for WO-005 #1', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00');
-
--- 插入測試數據到 input_modes 表
-INSERT INTO input_modes (part_number, input_mode) VALUES
-  ('PART-A', 'A'),
-  ('PART-B', 'B'),
-  ('PART-C', 'C'),
-  ('PART-D', 'D'),
-  ('PART-E', 'E');
-  -- 確認插入的數據
-SELECT COUNT(*) FROM input_modes;
+  ('WO-001', 3, 'SN003', 'QRRF003', 'QRPS003', 'QRHS003', 'QRBU009', 'QRBU010', 'QRBU011', 'QRBU012', 'Note for WO-001 #3', 'user1', '2023-06-01 09:00:00', 'user2', '2023-06-02 10:30:00'),
+  ('WO-002', 1, 'SN004', 'QRRF004', 'QRPS004', 'QRHS004', 'QRBU013', 'QRBU014', 'QRBU015', 'QRBU016', 'Note for WO-002 #1', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
+  ('WO-002', 2, 'SN005', 'QRRF005', 'QRPS005', 'QRHS005', 'QRBU017', 'QRBU018', 'QRBU019', 'QRBU020', 'Note for WO-002 #2', 'user2', '2023-06-03 14:15:00', 'user3', '2023-06-04 16:45:00'),
+  ('WO-003', 1, 'SN006', 'QRRF006', 'QRPS006', 'QRHS006', 'QRBU021', 'QRBU022', 'QRBU023', 'QRBU024', 'Note for WO-003 #1', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00'),
+  ('WO-004', 1, 'SN007', 'QRRF007', 'QRPS007', 'QRHS007', 'QRBU025', 'QRBU026', 'QRBU027', 'QRBU028', 'Note for WO-004 #1', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00'),
+  ('WO-005', 1, 'SN008', 'QRRF008', 'QRPS008', 'QRHS008', 'QRBU029', 'QRBU030', 'QRBU031', 'QRBU032', 'Note for WO-005 #1', 'user3', '2023-06-05 11:30:00', 'user1', '2023-06-06 13:20:00');
+SELECT COUNT(*) FROM work_order_details;

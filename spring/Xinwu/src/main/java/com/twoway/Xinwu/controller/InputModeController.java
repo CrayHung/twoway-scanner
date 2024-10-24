@@ -3,6 +3,7 @@ package com.twoway.Xinwu.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
 
 import com.twoway.Xinwu.entity.InputMode;
 import com.twoway.Xinwu.repository.InputModeRepository;
@@ -25,14 +26,29 @@ public class InputModeController {
         if (request.getInputMode() == null || request.getInputMode().isEmpty()) {
             return ResponseEntity.badRequest().body("輸入模式不能為空");
         }
+        if (request.getNumberPerPallet() <= 0) {
+            return ResponseEntity.badRequest().body("每棧板機台數不能為空");
+        }
 
         InputMode inputMode = new InputMode();
         inputMode.setPartNumber(request.getPartNumber());
         inputMode.setInputMode(request.getInputMode());
+        inputMode.setNumberPerPallet(request.getNumberPerPallet());
+        inputMode.setCreateUser(request.getCreateUser());
+        inputMode.setCreateDate(LocalDate.now());
+
+        // 非必要欄位, 若為null則不更新
+        if (request.getSummary() != null) {
+            inputMode.setSummary(request.getSummary());
+        }
+
+        if (request.getNote() != null) {
+            inputMode.setNote(request.getNote());
+        }
 
         inputModeRepository.save(inputMode);
 
-        return ResponseEntity.ok("輸入模式已成功創建");
+        return ResponseEntity.ok("料號已成功創建");
     }
 
     // GET API
@@ -67,9 +83,24 @@ public class InputModeController {
         if (request.getInputMode() == null || request.getInputMode().isEmpty()) {
             return ResponseEntity.badRequest().body("輸入模式不能為空");
         }
+        if (request.getNumberPerPallet() <= 0) {
+            return ResponseEntity.badRequest().body("每棧板機台數不能為空");
+        }
 
         existingInputMode.setPartNumber(request.getPartNumber());
         existingInputMode.setInputMode(request.getInputMode());
+        existingInputMode.setNumberPerPallet(request.getNumberPerPallet());
+        existingInputMode.setEditUser(request.getEditUser());
+        existingInputMode.setEditDate(LocalDate.now());
+
+        // 非必要欄位, 若為null則不更新
+        if (request.getSummary() != null) {
+            existingInputMode.setSummary(request.getSummary());
+        }
+
+        if (request.getNote() != null) {
+            existingInputMode.setNote(request.getNote());
+        } 
 
         InputMode updatedInputMode = inputModeRepository.save(existingInputMode);
 
@@ -88,29 +119,80 @@ public class InputModeController {
 
         inputModeRepository.delete(existingInputMode);
 
-        return ResponseEntity.ok("輸入模式已成功刪除");
+        return ResponseEntity.ok("料號已成功刪除");
     }
 }
 
 class InputModeRequest {
     private String partNumber;
+
     private String inputMode;
 
-    // Getters
+    private int numberPerPallet;
+
+    private String summary;
+
+    private String note;
+
+    private String createUser;
+
+    private String editUser;
+
+    // Getters and Setters
     public String getPartNumber() {
         return partNumber;
+    }
+
+    public void setPartNumber(String partNumber) {
+        this.partNumber = partNumber;
     }
 
     public String getInputMode() {
         return inputMode;
     }
 
-    // Setters
-    public void setPartNumber(String partNumber) {
-        this.partNumber = partNumber;
-    }
-
     public void setInputMode(String inputMode) {
         this.inputMode = inputMode;
     }
+
+    public int getNumberPerPallet() {
+        return numberPerPallet;
+    }
+
+    public void setNumberPerPallet(int numberPerPallet) {
+        this.numberPerPallet = numberPerPallet;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public String getCreateUser() {
+        return createUser;
+    }
+
+    public void setCreateUser(String createUser) {
+        this.createUser = createUser;
+    }
+
+    public String getEditUser() {
+        return editUser;
+    }
+
+    public void setEditUser(String editUser) {
+        this.editUser = editUser;
+    }
+
 }
