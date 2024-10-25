@@ -16,6 +16,9 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
     wsurl: 'ws://127.0.0.1:8080/ws',          //loacl
   });
 
+  //取得目前的使用者身分
+  const [userRole ,setUserRole]=useState('');
+
   //從localStorage中取得token
   const [jwtToken, setJwtToken] = useState<string | null>(null);
 
@@ -140,6 +143,8 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
 
 
   const contextValue = {
+    userRole,
+    setUserRole,
     isLoggedIn,
     setIsLoggedIn,
     globalUrl,

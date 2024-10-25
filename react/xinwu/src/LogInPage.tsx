@@ -9,7 +9,7 @@ const LogInPage = () => {
     const [input2, setInput2] = useState<string>('');
     const [error, setError] = useState<string>('');
 
-    const {  jwtToken , setJwtToken ,isLoggedIn, setIsLoggedIn,globalUrl,currentUser, setCurrentUser } = useGlobalContext();
+    const {  userRole,setUserRole,jwtToken , setJwtToken ,isLoggedIn, setIsLoggedIn,globalUrl,currentUser, setCurrentUser } = useGlobalContext();
     const { formatMessage } = useIntl();
 
     const fetchLogin = async () => {
@@ -29,12 +29,16 @@ const LogInPage = () => {
             throw new Error('Failed to login');
             alert("登入失敗")
           }
-  
+          
+          
           const data = await response.json();
+          alert("fetch res:"+ JSON.stringify(data));
           const token = data.token; 
+          const userRole = data.role; 
 
   
           await setJwtToken(token);
+          await setUserRole(userRole);
           alert("登入成功")
           await setIsLoggedIn(true);
 

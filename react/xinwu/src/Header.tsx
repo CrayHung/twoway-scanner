@@ -14,7 +14,7 @@ interface HeaderProps {
 
 const Header = () => {
 
-  const { isLoggedIn, setIsLoggedIn } = useGlobalContext();
+  const { userRole, isLoggedIn, setIsLoggedIn } = useGlobalContext();
 
   const { formatMessage } = useIntl();
 
@@ -32,13 +32,18 @@ const Header = () => {
       <Link to="/main" style={{ float: 'left' }} >home img</Link>
 
       {isLoggedIn ? (
-        <Link to="/" style={{ float: 'right' }} onClick={handleLogout}>Logout</Link>
+        <>
+          <Link to="/" style={{ float: 'right' }} onClick={handleLogout}>{formatMessage({ id: 'logout' })}</Link>
 
+          {userRole === 'admin' || userRole === 'ADMIN' ? (
+            <Link to="/register" style={{ float: 'right' }}>{formatMessage({ id: 'register' })}</Link>
+          ) : null}
+        </>
       ) : (
         <>
 
-          <Link to="/register" style={{ float: 'right' }}>Register</Link>
-          <Link to="/" style={{ float: 'right' }}>Login</Link>
+          {/* <Link to="/register" style={{ float: 'right' }}>Register</Link> */}
+          <Link to="/" style={{ float: 'right' }}>{formatMessage({ id: 'login' })}</Link>
         </>
       )}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginRight: 'auto' }}>

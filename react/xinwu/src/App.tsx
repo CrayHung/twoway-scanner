@@ -28,7 +28,7 @@ function App() {
   const [locale, setLocale] = useNavigatorLanguage();
   const messages = useGetMessage();
 
-  const { isLoggedIn, setIsLoggedIn } = useGlobalContext();
+  const {     userRole,isLoggedIn, setIsLoggedIn } = useGlobalContext();
   return (
     <LocaleContext.Provider value={[locale, setLocale]}>
     <IntlProvider locale={locale} messages={messages && messages[locale]}>
@@ -57,6 +57,10 @@ function App() {
 
 
             <Route path="/" Component={ShowAllWork} /> 
+
+            {userRole === 'ADMIN' || userRole === 'admin' && (
+               <Route path="/register" element={<Register />} />
+               )}
 
             </>
              ) : (

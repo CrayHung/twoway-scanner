@@ -17,7 +17,8 @@ const Register = () => {
 
     const fetchRegister = async () => {
         try {
-          const response = await fetch(`${globalUrl.url}/auth/registerAdmin`, {
+          const response = await fetch(`${globalUrl.url}/auth/register`, {
+          // const response = await fetch(`${globalUrl.url}/auth/registerAdmin`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

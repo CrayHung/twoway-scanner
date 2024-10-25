@@ -19,7 +19,7 @@ const modalStyle = {
 };
 
 //將A~E轉換呈現
-const formatInputMode = (mode:any) => {
+const formatInputMode = (mode: any) => {
     switch (mode) {
         case 'A':
             return 'QR_HS';
@@ -49,6 +49,7 @@ const PartTable = () => {
     const navigate = useNavigate();
     const { formatMessage } = useIntl();
     const { currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, workNo, setWorkNo, part, setPart, quant, setQuant } = useGlobalContext();
+    const today = new Date().toISOString().split('T')[0]; // 當前日期 (YYYY-MM-DD 格式)
 
     //fetch 料號對應表並渲染
     const fetchAll = async () => {
@@ -80,6 +81,9 @@ const PartTable = () => {
     const [selectedPartNumber, setSelectedPartNumber] = useState('');
     const [selectedInputModel, setselectedInputModel] = useState('');
 
+    const [numberPerPallet, setNumberPerPallet] = useState(1);
+    const [summary, setSummary] = useState('');
+    const [note, setNote] = useState('');
 
     //新增表單
     const [openAddForm, setOpenAddForm] = useState(false);
@@ -89,7 +93,12 @@ const PartTable = () => {
         const newData = {
             partNumber: selectedPartNumber,
             inputMode: selectedInputModel,
-            
+            numberPerPallet: numberPerPallet,
+            summary: summary,
+            note: note,
+            createUser:currentUser,
+            createDate:today,
+
         };
 
 
@@ -123,14 +132,21 @@ const PartTable = () => {
     const [editPart, setEditPart] = useState({
         id: "",
         partNumber: "",
-        inputMode: ""
+        inputMode: "",
+        numberPerPallet: "",
+        summary: "",
+        note: "",
     });
 
     const handleEdit = (rowData: any) => {
         setEditPart({
             id: rowData.id,
             partNumber: rowData.partNumber,
-            inputMode: rowData.inputMode
+            inputMode: rowData.inputMode,
+
+            numberPerPallet: rowData.numberPerPallet,
+            summary: rowData.summary,
+            note: rowData.note,
         });
 
         setOpenEditForm(true);
@@ -148,6 +164,24 @@ const PartTable = () => {
             inputMode: inputmode
         });
     };
+    const handleNumberPerPalletChange = (pallet: any) => {
+        setEditPart({
+            ...editPart,
+            numberPerPallet: pallet
+        });
+    };
+    const handleSummaryChange = (summary: any) => {
+        setEditPart({
+            ...editPart,
+            summary: summary
+        });
+    };
+    const handleNoteChange = (note: any) => {
+        setEditPart({
+            ...editPart,
+            note: note
+        });
+    };
     const saveChanges = async () => {
 
 
@@ -159,7 +193,13 @@ const PartTable = () => {
                 },
                 body: JSON.stringify({
                     partNumber: editPart.partNumber,
-                    inputMode: editPart.inputMode
+                    inputMode: editPart.inputMode,
+
+                    numberPerPallet: editPart.numberPerPallet,
+                    summary: editPart.summary,
+                    note: editPart.note,
+                    editUser:currentUser,
+                    editDate:today,
                 })
             });
 
@@ -220,7 +260,7 @@ const PartTable = () => {
         <div style={{ width: '100vw', position: 'relative', left: 0 }}>
             <Modal open={openAddForm} onClose={handleAddClose}>
                 <Box sx={modalStyle}>
-                <Typography variant="h6" component="h2">
+                    <Typography variant="h6" component="h2">
                         {formatMessage({ id: 'add-part' })}
                     </Typography>
                     <form>
@@ -247,13 +287,54 @@ const PartTable = () => {
                                     onChange={(e) => setselectedInputModel(e.target.value)}
                                     fullWidth
                                 >
-               
+
                                     {Array.from(new Set(partTableData.map((row: any) => row.inputMode))).map((uniqueMode, index) => (
                                         <MenuItem key={index} value={uniqueMode}>
-                                            {index + 1}.{formatInputMode(uniqueMode)} 
+                                            {index + 1}.{formatInputMode(uniqueMode)}
                                         </MenuItem>
                                     ))}
                                 </TextField>
+                            </Grid>
+
+
+
+
+                            <Grid item xs={12}>
+                                <Grid container spacing={1} >
+                                    <Grid item xs={10}>
+                                        <TextField
+                                            label={formatMessage({ id: 'number_per_pallet' })}
+                                            value={numberPerPallet}
+                                            onChange={(e) => setNumberPerPallet(Number(e.target.value))}
+                                            fullWidth
+                                            type="number"
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Grid container spacing={1} >
+                                    <Grid item xs={10}>
+                                        <TextField
+                                            label={formatMessage({ id: 'summary' })}
+                                            value={summary}
+                                            onChange={(e) => setSummary(e.target.value)}
+                                            fullWidth
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Grid container spacing={1} >
+                                    <Grid item xs={10}>
+                                        <TextField
+                                            label={formatMessage({ id: 'note' })}
+                                            value={note}
+                                            onChange={(e) => setNote(e.target.value)}
+                                            fullWidth
+                                        />
+                                    </Grid>
+                                </Grid>
                             </Grid>
 
 
@@ -303,12 +384,54 @@ const PartTable = () => {
                                 >
                                     {Array.from(new Set(partTableData.map((row: any) => row.inputMode))).map((uniqueMode, index) => (
                                         <MenuItem key={index} value={uniqueMode}>
-                                             {index + 1}.{formatInputMode(uniqueMode)}
+                                            {index + 1}.{formatInputMode(uniqueMode)}
                                         </MenuItem>
                                     ))}
 
 
                                 </TextField>
+                            </Grid>
+
+
+
+
+
+                            <Grid item xs={12}>
+                                <Grid container spacing={1} >
+                                    <Grid item xs={10}>
+                                        <TextField
+                                            label={formatMessage({ id: 'number_per_pallet' })}
+                                            value={editPart.numberPerPallet}
+                                            onChange={(e) => handleNumberPerPalletChange(Number(e.target.value))}
+                                            fullWidth
+                                            type="number"
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Grid container spacing={1} >
+                                    <Grid item xs={10}>
+                                        <TextField
+                                            label={formatMessage({ id: 'summary' })}
+                                            value={editPart.summary}
+                                            onChange={(e) => handleSummaryChange(e.target.value)}
+                                            fullWidth
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Grid container spacing={1} >
+                                    <Grid item xs={10}>
+                                        <TextField
+                                            label={formatMessage({ id: 'note' })}
+                                            value={editPart.note}
+                                            onChange={(e) => handleNoteChange(e.target.value)}
+                                            fullWidth
+                                        />
+                                    </Grid>
+                                </Grid>
                             </Grid>
 
 
@@ -332,7 +455,7 @@ const PartTable = () => {
                         {formatMessage({ id: 'part' })}: {deletePart.partNumber}
                     </Typography>
                     <Typography>
-                        {formatMessage({ id: 'part-shipping-model' })}:  {formatInputMode(deletePart.inputMode)} 
+                        {formatMessage({ id: 'part-shipping-model' })}:  {formatInputMode(deletePart.inputMode)}
                     </Typography>
                     <Grid container spacing={2} mt={2}>
                         <Grid item xs={4}>
@@ -359,6 +482,17 @@ const PartTable = () => {
                                     <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
                                     <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'part' })}</TableCell>
                                     <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'part-shipping-model' })}</TableCell>
+
+
+                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'number_per_pallet' })}</TableCell>
+                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'summary' })}</TableCell>
+                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'note' })}</TableCell>
+                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
+                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
+                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
+                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
+
+
                                     <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit-part' })}</TableCell>
                                     <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'delete-part' })}</TableCell>
                                 </TableRow>

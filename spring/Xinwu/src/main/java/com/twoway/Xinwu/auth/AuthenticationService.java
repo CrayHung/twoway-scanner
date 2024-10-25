@@ -109,6 +109,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
             .token(jwtToken)
             .refreshToken(refreshToken.getToken())
+            .role(user.getRole().name())
             .build();
     }
     public AuthenticationResponse refreshTokens(String refreshToken) {
