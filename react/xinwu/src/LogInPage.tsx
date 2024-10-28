@@ -32,9 +32,9 @@ const LogInPage = () => {
           
           
           const data = await response.json();
-          alert("fetch res:"+ JSON.stringify(data));
           const token = data.token; 
           const userRole = data.role; 
+          alert("登入腳色:"+ userRole);
 
   
           await setJwtToken(token);

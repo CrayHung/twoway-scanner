@@ -18,6 +18,7 @@ import SearchTable1 from './component/SearchTable1';
 
 import ShowAllWork from './component/ShowAllWork';
 import PartTable from './component/partTable';
+import AccountPage from './component/AccountPage';
 
 import { IntlProvider } from "react-intl";
 import useNavigatorLanguage, { LocaleContext } from "./language/useNavigatorLanguage";
@@ -48,25 +49,19 @@ function App() {
           <Routes>
           {isLoggedIn ? (
             <>
-            {/* <Route path="/" element={<Navigate to="/searchTable1" />} /> */}
             <Route path="/allowlist" Component={AllowList} /> 
             <Route path="/searchForm" Component={SearchForm} /> 
             <Route path="/searchTable1" Component={SearchTable1} /> 
             <Route path="/partTable" Component={PartTable} /> 
-
-
-
+            <Route path="/register" Component={Register} /> 
             <Route path="/" Component={ShowAllWork} /> 
 
-            {userRole === 'ADMIN' || userRole === 'admin' && (
-               <Route path="/register" element={<Register />} />
-               )}
+            <Route path="/accountPage" Component={AccountPage} /> 
 
             </>
              ) : (
               <>
               <Route path="/" element={<LogInPage />} />
-              <Route path="/register" element={<Register />} />
               <Route path="/forgetpassword" element={<ForgetPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
               </>

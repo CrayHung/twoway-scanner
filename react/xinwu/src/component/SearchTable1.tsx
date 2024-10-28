@@ -75,21 +75,13 @@ const SearchTable1 = () => {
         newRange[index] = value;
         setFormData({ ...formData, [field]: newRange });
     };
-    // 新增SN範圍
-    const handleAddRange = () => {
-        setFormData({
-            ...formData,
-            snStart: [...formData.snStart, ''],
-            snEnd: [...formData.snEnd, '']
-        });
-    };
 
     // SN切換模式
     const handleModeChange = (e: any) => {
         const selectedMode = e.target.value;
         setMode(selectedMode);
 
-        // 如果切換到單一模式，重置範圍的 snStart 和 snEnd
+        // 如果切換到單一SN的搜尋模式，重置範圍的 snStart 和 snEnd
         if (selectedMode === 'single') {
             setFormData((prevData) => ({
                 ...prevData,
@@ -98,7 +90,7 @@ const SearchTable1 = () => {
             }));
         }
 
-        // 如果切換到範圍模式，重置 SN 列表
+        // 如果切換到範圍的SN搜尋模式，  重置 SN 列表
         if (selectedMode === 'range') {
             setFormData((prevData) => ({
                 ...prevData,
@@ -106,6 +98,10 @@ const SearchTable1 = () => {
             }));
         }
     };
+
+
+
+
 
     const handleFieldChange = (field: keyof typeof formData, index: number, value: string) => {
         const updatedFields = [...(formData[field] as string[])];
@@ -186,58 +182,58 @@ const SearchTable1 = () => {
         handleClose();
         console.log('搜尋的Form資料為:', JSON.stringify(formData, null, 2));
 
-        try {
-            const response = await fetch(`${globalUrl.url}/api/snfield-search-details `, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ formData }),
-            });
+        // try {
+        //     const response = await fetch(`${globalUrl.url}/api/snfield-search-details `, {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify({ formData }),
+        //     });
 
-            if (!response.ok) {
-                throw new Error('Failed to get ');
-            }
-            const data: any[] = await response.json();
+        //     if (!response.ok) {
+        //         throw new Error('Failed to get ');
+        //     }
+        //     const data: any[] = await response.json();
 
-            //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
-            //並且重新排序順序
-            const mappedData = data.map(item => ({
-                id: item.id,
-                workOrderNumber: item.parentWorkOrderNumber,
-                detailId: item.detailId,
-                SN: item.SN,
-                QR_RFTray: item.QR_RFTray,
-                QR_PS: item.QR_PS,
-                QR_HS: item.QR_HS,
-                QR_backup1: item.QR_backup1,
-                QR_backup2: item.QR_backup2,
-                QR_backup3: item.QR_backup3,
-                QR_backup4: item.QR_backup4,
-                note: item.note,
-                create_date: item.create_date,
-                create_user: item.create_user,
-                edit_date: item.edit_date,
-                edit_user: item.edit_user,
-                ...item,
+        //     //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
+        //     //並且重新排序順序
+        //     const mappedData = data.map(item => ({
+        //         id: item.id,
+        //         workOrderNumber: item.parentWorkOrderNumber,
+        //         detailId: item.detailId,
+        //         SN: item.SN,
+        //         QR_RFTray: item.QR_RFTray,
+        //         QR_PS: item.QR_PS,
+        //         QR_HS: item.QR_HS,
+        //         QR_backup1: item.QR_backup1,
+        //         QR_backup2: item.QR_backup2,
+        //         QR_backup3: item.QR_backup3,
+        //         QR_backup4: item.QR_backup4,
+        //         note: item.note,
+        //         create_date: item.create_date,
+        //         create_user: item.create_user,
+        //         edit_date: item.edit_date,
+        //         edit_user: item.edit_user,
+        //         ...item,
 
-            }));
+        //     }));
 
-            //用來將table2的不要欄位過濾掉(quantity,company,partNumber)
-            const filteredData = mappedData.map(({
-                parentPartNumber,
-                parentWorkOrderNumber,
-                parentCompany,
-                parentQuantity,
-                ...rest
-            }) => rest);
+        //     //用來將table2的不要欄位過濾掉(quantity,company,partNumber)
+        //     const filteredData = mappedData.map(({
+        //         parentPartNumber,
+        //         parentWorkOrderNumber,
+        //         parentCompany,
+        //         parentQuantity,
+        //         ...rest
+        //     }) => rest);
 
-            setResultData(filteredData);
-            console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
+        //     setResultData(filteredData);
+        //     console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
 
-        } catch (error) {
-            console.error('Error fetching:', error);
-        }
+        // } catch (error) {
+        //     console.error('Error fetching:', error);
+        // }
     };
 
 

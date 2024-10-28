@@ -35,14 +35,13 @@ const Header = () => {
         <>
           <Link to="/" style={{ float: 'right' }} onClick={handleLogout}>{formatMessage({ id: 'logout' })}</Link>
 
-          {userRole === 'admin' || userRole === 'ADMIN' ? (
-            <Link to="/register" style={{ float: 'right' }}>{formatMessage({ id: 'register' })}</Link>
+          { userRole === 'ADMIN' ? (
+            <Link to="/register" style={{ float: 'right' }} >{formatMessage({ id: 'register' })}</Link>
           ) : null}
         </>
       ) : (
         <>
 
-          {/* <Link to="/register" style={{ float: 'right' }}>Register</Link> */}
           <Link to="/" style={{ float: 'right' }}>{formatMessage({ id: 'login' })}</Link>
         </>
       )}

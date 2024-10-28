@@ -1,5 +1,8 @@
 {
         "zh-TW": {
+                "account-page":"帳號管理",
+                "role":"身分",
+
                 "number_per_pallet": "棧板數量",
                 "summary": "摘要",
                 "part-table": "料號對應表",
@@ -20,6 +23,7 @@
                 "register": "註冊",
                 "save": "儲存",
                 "edit": "編輯",
+                "delete":"刪除",
                 "continueinput": "繼續輸入",
                 "cancel": "取消",
                 "header": "條碼掃描器",
@@ -53,6 +57,9 @@
                 "enddate": "結束日期"
         },
         "en-US": {
+                "account-page":"account-page",
+                "role":"role",
+
                 "number_per_pallet": "number_per_pallet",
                 "summary": "summary",
                 "part-table": "part table",
@@ -73,6 +80,7 @@
                 "register": "register",
                 "save": "save",
                 "edit": "edit",
+                "delete":"delete",
                 "continueinput": "continue input",
                 "cancel": "cancel",
                 "header": "Barcode Reader",

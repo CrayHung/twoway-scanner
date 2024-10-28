@@ -27,37 +27,20 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenService refreshTokenService;
 
+    /*
+     * 權限修改為 admin , supervisor , operator , user
+     */
 
-
-    public AuthenticationResponse register(RegisterRequest request) {
-
-        var user = User.builder()
-        .username(request.getUsername())
-        .password(passwordEncoder.encode(request.getPassword()))
-        .role(Role.USER)
-        .build();
-
-        userRepository.save(user);
-        var jwtToken = jwtService.generateToken(user);
-        var refreshToken = refreshTokenService.generateRefreshToken(user);
-
-        return AuthenticationResponse.builder()
-            .token(jwtToken)
-            .refreshToken(refreshToken.getToken())
-            .build();
-    }
-
-    public ResponseEntity<AuthenticationResponse> registerAdmin(RegisterRequest request) {
+    public ResponseEntity<AuthenticationResponse> registerSupervisor(RegisterRequest request) {
 
         // 檢查 username 和 password 是否為空白
         if (request.getUsername() == null || request.getUsername().isEmpty() ||
-        request.getPassword() == null || request.getPassword().isEmpty()) {
+                request.getPassword() == null || request.getPassword().isEmpty()) {
             // 如果為空白 回錯誤
             return ResponseEntity.badRequest().body(
-                AuthenticationResponse.builder()
-                .error("Username password 不可空白")
-                .build()
-            );
+                    AuthenticationResponse.builder()
+                            .error("Username password 不可空白")
+                            .build());
         }
 
         // 檢查 username 是否已存在
@@ -66,18 +49,16 @@ public class AuthenticationService {
             // 如果已存在，你可以根據你的需求拋出異常或者回傳錯誤訊息
             // throw new IllegalArgumentException("Username already exists");
             return ResponseEntity.badRequest().body(
-                AuthenticationResponse.builder()
-                .error(" 已存在相同Username")
-                .build()
-            );
+                    AuthenticationResponse.builder()
+                            .error(" 已存在相同Username")
+                            .build());
         }
-        
 
         var user = User.builder()
-        .username(request.getUsername())
-        .password(passwordEncoder.encode(request.getPassword()))
-        .role(Role.ADMIN)
-        .build();
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.SUPERVISOR)
+                .build();
 
         userRepository.save(user);
         // 生成 JWT Token 和 Refresh Token
@@ -85,48 +66,169 @@ public class AuthenticationService {
         var refreshToken = refreshTokenService.generateRefreshToken(user);
 
         return ResponseEntity.ok(
-            AuthenticationResponse.builder()
-            .token(jwtToken)
-            .refreshToken(refreshToken.getToken())
-            .build()
-        );
+                AuthenticationResponse.builder()
+                        .token(jwtToken)
+                        .refreshToken(refreshToken.getToken())
+                        .build());
     }
 
+    public ResponseEntity<AuthenticationResponse> registerOperator(RegisterRequest request) {
+
+        // 檢查 username 和 password 是否為空白
+        if (request.getUsername() == null || request.getUsername().isEmpty() ||
+                request.getPassword() == null || request.getPassword().isEmpty()) {
+            // 如果為空白 回錯誤
+            return ResponseEntity.badRequest().body(
+                    AuthenticationResponse.builder()
+                            .error("Username password 不可空白")
+                            .build());
+        }
+
+        // 檢查 username 是否已存在
+        Optional<User> existingUser = userRepository.findByUsername(request.getUsername());
+        if (existingUser.isPresent()) {
+            // 如果已存在，你可以根據你的需求拋出異常或者回傳錯誤訊息
+            // throw new IllegalArgumentException("Username already exists");
+            return ResponseEntity.badRequest().body(
+                    AuthenticationResponse.builder()
+                            .error(" 已存在相同Username")
+                            .build());
+        }
+
+        var user = User.builder()
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.OPERATOR)
+                .build();
+
+        userRepository.save(user);
+        // 生成 JWT Token 和 Refresh Token
+        var jwtToken = jwtService.generateToken(user);
+        var refreshToken = refreshTokenService.generateRefreshToken(user);
+
+        return ResponseEntity.ok(
+                AuthenticationResponse.builder()
+                        .token(jwtToken)
+                        .refreshToken(refreshToken.getToken())
+                        .build());
+    }
+
+    /********************************************************************** */
+    public ResponseEntity<AuthenticationResponse> registerUser(RegisterRequest request) {
+
+        // 檢查 username 和 password 是否為空白
+        if (request.getUsername() == null || request.getUsername().isEmpty() ||
+                request.getPassword() == null || request.getPassword().isEmpty()) {
+            // 如果為空白 回錯誤
+            return ResponseEntity.badRequest().body(
+                    AuthenticationResponse.builder()
+                            .error("Username password 不可空白")
+                            .build());
+        }
+
+        // 檢查 username 是否已存在
+        Optional<User> existingUser = userRepository.findByUsername(request.getUsername());
+        if (existingUser.isPresent()) {
+            // 如果已存在，你可以根據你的需求拋出異常或者回傳錯誤訊息
+            // throw new IllegalArgumentException("Username already exists");
+            return ResponseEntity.badRequest().body(
+                    AuthenticationResponse.builder()
+                            .error(" 已存在相同Username")
+                            .build());
+        }
+
+        var user = User.builder()
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.USER)
+                .build();
+
+        userRepository.save(user);
+        // 生成 JWT Token 和 Refresh Token
+        var jwtToken = jwtService.generateToken(user);
+        var refreshToken = refreshTokenService.generateRefreshToken(user);
+
+        return ResponseEntity.ok(
+                AuthenticationResponse.builder()
+                        .token(jwtToken)
+                        .refreshToken(refreshToken.getToken())
+                        .build());
+    }
+
+    public ResponseEntity<AuthenticationResponse> registerAdmin(RegisterRequest request) {
+
+        // 檢查 username 和 password 是否為空白
+        if (request.getUsername() == null || request.getUsername().isEmpty() ||
+                request.getPassword() == null || request.getPassword().isEmpty()) {
+            // 如果為空白 回錯誤
+            return ResponseEntity.badRequest().body(
+                    AuthenticationResponse.builder()
+                            .error("Username password 不可空白")
+                            .build());
+        }
+
+        // 檢查 username 是否已存在
+        Optional<User> existingUser = userRepository.findByUsername(request.getUsername());
+        if (existingUser.isPresent()) {
+            // 如果已存在，你可以根據你的需求拋出異常或者回傳錯誤訊息
+            // throw new IllegalArgumentException("Username already exists");
+            return ResponseEntity.badRequest().body(
+                    AuthenticationResponse.builder()
+                            .error(" 已存在相同Username")
+                            .build());
+        }
+
+        var user = User.builder()
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.ADMIN)
+                .build();
+
+        userRepository.save(user);
+        // 生成 JWT Token 和 Refresh Token
+        var jwtToken = jwtService.generateToken(user);
+        var refreshToken = refreshTokenService.generateRefreshToken(user);
+
+        return ResponseEntity.ok(
+                AuthenticationResponse.builder()
+                        .token(jwtToken)
+                        .refreshToken(refreshToken.getToken())
+                        .build());
+    }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                request.getUsername(), 
-                request.getPassword()
-            )
-        );
-        //username , password正確 , 
+                new UsernamePasswordAuthenticationToken(
+                        request.getUsername(),
+                        request.getPassword()));
+        // username , password正確 ,
         var user = userRepository.findByUsername(request.getUsername())
-            .orElseThrow();
+                .orElseThrow();
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = refreshTokenService.generateRefreshToken(user);
 
         return AuthenticationResponse.builder()
-            .token(jwtToken)
-            .refreshToken(refreshToken.getToken())
-            .role(user.getRole().name())
-            .build();
+                .token(jwtToken)
+                .refreshToken(refreshToken.getToken())
+                .role(user.getRole().name())
+                .build();
     }
+
     public AuthenticationResponse refreshTokens(String refreshToken) {
 
-        //refreshToken過期
+        // refreshToken過期
         if (refreshTokenService.isRefreshTokenExpired(refreshToken)) {
             return AuthenticationResponse.builder()
-                        .token("expired")
-                        .refreshToken("expired")
-                        .build();
+                    .token("expired")
+                    .refreshToken("expired")
+                    .build();
         }
 
         var user = refreshTokenService.validateRefreshToken(refreshToken);
         var jwtToken = jwtService.generateToken(user);
 
-        /* 如果使用refreshToken後,不再回傳refreshToken的話,可以把refreshToken刪掉*/
-        //refreshTokenService.deleteRefreshToken(refreshToken);
+        /* 如果使用refreshToken後,不再回傳refreshToken的話,可以把refreshToken刪掉 */
+        // refreshTokenService.deleteRefreshToken(refreshToken);
 
         return AuthenticationResponse.builder()
                 .token(jwtToken)
