@@ -1,12 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { SelectChangeEvent, TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, formControlLabelClasses, Select } from '@mui/material';
+import { SelectChangeEvent, TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, formControlLabelClasses, Select, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useGlobalContext } from '../global';
 import { useIntl } from "react-intl";
+import { setDefaultResultOrder } from 'dns';
+const modalStyle = {
+    position: 'absolute' as 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '90%',
+    maxWidth: 500,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+    maxHeight: '90vh',
+    overflowY: 'auto',
+};
 
 const ShowAllWork = () => {
     const { formatMessage } = useIntl();
-    const { currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, table3Data,
+    const { userRole, currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, table3Data,
         setTable3Data, workNo, setWorkNo, part, setPart, quant, setQuant, model, setModel } = useGlobalContext();
 
     const today = new Date().toISOString().split('T')[0]; // 當前日期 (YYYY-MM-DD 格式)
@@ -74,7 +89,7 @@ const ShowAllWork = () => {
             }
 
             const data: any[] = await response.json();
- 
+
 
             const updatedData = removeWorkOrderDetails(data);
             setTable1Data(updatedData);
@@ -126,12 +141,12 @@ const ShowAllWork = () => {
             }));
 
             //用來將table2的不要欄位過濾掉(quantity,company,partNumber)
-            const filteredData = mappedData.map(({ 
-                parentPartNumber, 
+            const filteredData = mappedData.map(({
+                parentPartNumber,
                 parentWorkOrderNumber,
-                parentCompany, 
-                parentQuantity, 
-                ...rest 
+                parentCompany,
+                parentQuantity,
+                ...rest
             }) => rest);
 
 
@@ -176,14 +191,83 @@ const ShowAllWork = () => {
         setModel();
     }, [])
 
+
+    //fetch All
+    const fetchAll = async () => {
+        fetchAllTable1();
+        fetchAllTable2();
+        fetchAllTable3();
+        setWorkNo();
+        setQuant();
+        setPart();
+        setModel();
+    };
+
+
+    //刪除工單
+    const [openDeleteForm, setOpenDeleteForm] = useState(false);
+    const [deleteWorkOrderNumber, setDeleteWorkOrderNumber] = useState({
+        id: "",
+        workOrderNumber: "",
+    });
+    const handleDeleteClose = () => setOpenDeleteForm(false);
+    const handleDeleteClick = (row: any) => {
+        setDeleteWorkOrderNumber(row);
+        setOpenDeleteForm(true);
+    };
+    const handleDeleteConfirm = async () => {
+
+        const deleteId = deleteWorkOrderNumber.id;
+        try {
+            const response = await fetch(`${globalUrl.url}/api/delete-work-orders/${deleteId}`, {
+                method: 'DELETE',
+            })
+            if (response.ok) {
+                console.log('刪除成功:');
+                setOpenDeleteForm(false);
+                fetchAll();
+
+            } else {
+                console.error('更新失敗:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error fetching:', error);
+        }
+    };
+
+
+
+
     return (
         <div>
+
+            <Modal open={openDeleteForm} onClose={handleDeleteClose}>
+                <Box sx={modalStyle}>
+                    <Typography variant="h6" component="h2">
+                        {formatMessage({ id: 'id' })}: {deleteWorkOrderNumber.id}
+                    </Typography>
+                    <Typography>
+                        {formatMessage({ id: 'workOrderNumber' })}: {deleteWorkOrderNumber.workOrderNumber}
+                    </Typography>
+
+
+                    <Grid container spacing={2} mt={2}>
+                        <Grid item xs={4}>
+                            <Button variant="contained" color="primary" fullWidth onClick={handleDeleteConfirm}>
+                                {formatMessage({ id: 'submit' })}
+                            </Button>
+                        </Grid>
+
+                    </Grid>
+                </Box>
+            </Modal>
+
             {table1Data.length &&
                 <>
-                    <Paper sx={{ width: '100%', overflow: 'hidden',height: '90%' }}>
+                    <Paper sx={{ width: '100%', overflow: 'hidden', height: '90%' }}>
                         <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'scroll' }}>
 
-                        <Table stickyHeader aria-label="sticky table">
+                            <Table stickyHeader aria-label="sticky table">
                                 <TableHead >
                                     <TableRow style={{ border: '1px solid #ccc' }}>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
@@ -195,6 +279,13 @@ const ShowAllWork = () => {
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
+
+                                        {['ADMIN', 'SUPERVISOR'].includes(userRole) && (
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>
+                                                {formatMessage({ id: 'delete-part' })}
+                                            </TableCell>
+                                        )}
+
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -207,6 +298,17 @@ const ShowAllWork = () => {
                                                         {row[colKey]}
                                                     </TableCell>
                                                 ))}
+                                            {['ADMIN', 'SUPERVISOR'].includes(userRole) &&
+                                                <TableCell>
+                                                    <button onClick={(e) => {
+                                                        e.stopPropagation();    //避免handleRowClick和handleDeleteClick衝突
+                                                        handleDeleteClick(row)
+                                                    }}>
+                                                        {formatMessage({ id: 'delete-part' })}</button>
+                                                </TableCell>
+                                            }
+
+
 
                                         </TableRow>
                                     ))}

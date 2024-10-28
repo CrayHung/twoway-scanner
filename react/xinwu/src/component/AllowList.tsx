@@ -15,7 +15,7 @@ import { useIntl } from "react-intl";
 
 function AllowList() {
     const { formatMessage } = useIntl();
-    const { currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, table3Data, setTable3Data, workNo, setWorkNo, part, setPart, quant, setQuant, model, setModel } = useGlobalContext();
+    const { userRole,currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, table3Data, setTable3Data, workNo, setWorkNo, part, setPart, quant, setQuant, model, setModel } = useGlobalContext();
 
     const [workNumber, setWorkNumber] = useState('');    //工單號碼
     const [rows, setRows] = useState(0);  // 工單數量資料筆數
@@ -258,11 +258,9 @@ function AllowList() {
         const colKey = Object.keys(data[rowIndex])
             .filter((key) => key !== 'id' && key !== 'workOrderNumber')[colIndex];
 
-        // 只允許編輯note的欄位
+        // 只允許編輯QR_RFTray ,QR_PS,QR_HS ,QR_backup1,QR_backup2,QR_backup3,QR_backup4note的欄位
         if (
-            colKey === 'id' || colKey === 'workOrderNumber' || colKey === 'detailId' || colKey === 'SN' || colKey === 'QR_RFTray' ||
-            colKey === 'QR_PS' || colKey === 'QR_HS' || colKey === 'QR_backup1' || colKey === 'QR_backup2' ||
-            colKey === 'QR_backup3' || colKey === 'QR_backup4' ||
+            colKey === 'id' || colKey === 'workOrderNumber' || colKey === 'detailId' || colKey === 'SN' ||
             colKey === 'create_date' || colKey === 'create_user' || colKey === 'edit_date' || colKey === 'edit_user'
         ) {
             return;

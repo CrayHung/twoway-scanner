@@ -13,7 +13,7 @@ import { useIntl } from "react-intl";
 
 const SearchForm = () => {
     const { formatMessage } = useIntl();
-    const { currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, table3Data, setTable3Data, workNo, setWorkNo, part, setPart, quant, setQuant, model, setModel } = useGlobalContext();
+    const { userRole, currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, table3Data, setTable3Data, workNo, setWorkNo, part, setPart, quant, setQuant, model, setModel } = useGlobalContext();
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -165,8 +165,8 @@ const SearchForm = () => {
             }
         };
 
-         // 只針對相同 workOrderNumber 的行發送 API 請求
-         for (const row of updatedTable1Data) {
+        // 只針對相同 workOrderNumber 的行發送 API 請求
+        for (const row of updatedTable1Data) {
             // 只發送更新符合 workNo 的資料
             if (row.workOrderNumber === workNo) {
                 // 更新後端資料
@@ -386,15 +386,13 @@ const SearchForm = () => {
             .filter((key) => key !== 'id')[colIndex];
 
         /*這邊要取消註解一下*/
-        // 只允許編輯note的欄位
-        // if (
-        //     colKey === 'id' || colKey === 'workOrderNumber' || colKey === 'detailId' || colKey === 'SN' || colKey === 'QR_RFTray' ||
-        //     colKey === 'QR_PS' || colKey === 'QR_HS' || colKey === 'QR_backup1' || colKey === 'QR_backup2' ||
-        //     colKey === 'QR_backup3' || colKey === 'QR_backup4' ||
-        //     colKey === 'create_date' || colKey === 'create_user' || colKey === 'edit_date' || colKey === 'edit_user'
-        // ) {
-        //     return;
-        // }
+        // 只允許編輯QR_RFTray,QR_PS,QR_HS,QR_backup1,QR_backup2,QR_backup3,QR_backup4,note的欄位
+        if (
+            colKey === 'id' || colKey === 'workOrderNumber' || colKey === 'detailId' || colKey === 'SN' ||
+            colKey === 'create_date' || colKey === 'create_user' || colKey === 'edit_date' || colKey === 'edit_user'
+        ) {
+            return;
+        }
         setEditCell({ rowIndex, colIndex });
     };
 
@@ -819,24 +817,27 @@ const SearchForm = () => {
                     placeholder="輸入使用者名稱"
                 />
             </div> */}
-            <>
-                {!updateData && !continueInput &&
-                    <button onClick={handleUpdate}>{formatMessage({ id: 'edit' })}</button>
-                }
-            </>
+            {userRole !== 'USER' || userRole !== 'OPERATOR' && (
+                <>
+                    {!updateData && !continueInput &&
+                        <button onClick={handleUpdate}>{formatMessage({ id: 'edit' })}</button>
+                    }
+                </>
+            )}
             {/* <>
                 {!continueInput && 
                     <button onClick={handleContinueInput}>繼續輸入</button>
                 }
             </> */}
-            <>
-                {continueInput ? (
-                    <button onClick={handleSaveData}>{formatMessage({ id: 'save' })}</button>
-                ) : (
-                    <button onClick={handleContinueInput}>{formatMessage({ id: 'continueinput' })}</button>
-                )}
-            </>
-
+            {userRole !== 'USER'  && (
+                <>
+                    {continueInput ? (
+                        <button onClick={handleSaveData}>{formatMessage({ id: 'save' })}</button>
+                    ) : (
+                        <button onClick={handleContinueInput}>{formatMessage({ id: 'continueinput' })}</button>
+                    )}
+                </>
+            )}
             <>
                 {updateData &&
                     <>
@@ -869,59 +870,6 @@ const SearchForm = () => {
 
                         </div>
 
-                        {/* <form>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        label="新工單號碼"
-                                        value={updateWorkNo}
-                                        onChange={(e) => setUpdateWorkNo(e.target.value)}
-                                        fullWidth
-                                    >
-                                    </TextField>
-                                </Grid>
-
-                                <Grid item xs={6}>
-                                    <TextField
-                                        placeholder="新工單數量"
-                                        value={updateWorkQuantity}
-                                        onChange={(e) => setUpdateWorkQuantity(parseInt(e.target.value))}
-                                        fullWidth
-                                    />
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Select
-                                        value={updateWorkPart}
-                                        onChange={handlePartNumberChange}
-                                        fullWidth
-                                        displayEmpty
-                                    >
-                                        <MenuItem value="" disabled>
-                                            請選擇料號
-                                        </MenuItem>
-                                        {table3Data.map((data: any, index: any) => (
-                                            <MenuItem key={index} value={data.partNumber}>
-                                                {data.partNumber}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </Grid>
-
-                                <Grid item xs={4}>
-                                    <Button variant="contained" color="secondary" fullWidth onClick={handleCancel}>
-                                        取消
-                                    </Button>
-                                </Grid>
-
-                                <Grid item xs={4}>
-                                    <Button variant="contained" color="primary" fullWidth onClick={handleConfirm}>
-                                        確認更改
-                                    </Button>
-                                </Grid>
-
-
-                            </Grid>
-                        </form> */}
 
                     </>
                 }
@@ -1006,11 +954,22 @@ const SearchForm = () => {
                                             {Object.keys(row)
                                                 .filter((colKey) => colKey !== 'id')
                                                 .map((colKey, colIndex) => (
+                                                    // <TableCell
+                                                    //     key={colKey}
+                                                    //     onClick={() => handleCellClick(rowIndex, colIndex)}  // 傳遞 rowIndex 和 colIndex
+                                                    //     className={currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : ''}
+                                                    // >
                                                     <TableCell
                                                         key={colKey}
-                                                        onClick={() => handleCellClick(rowIndex, colIndex)}  // 傳遞 rowIndex 和 colIndex
+                                                        onClick={() => {
+                                                            if (userRole === 'ADMIN' || userRole === 'SUPERVISOR') {
+                                                                handleCellClick(rowIndex, colIndex);
+                                                            }
+                                                        }}
                                                         className={currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : ''}
                                                     >
+
+
                                                         {editCell.rowIndex === rowIndex && editCell.colIndex === colIndex ? (
                                                             <TextField
                                                                 value={row[colKey]}
