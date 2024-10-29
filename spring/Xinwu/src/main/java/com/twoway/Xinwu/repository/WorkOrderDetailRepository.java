@@ -1,6 +1,6 @@
 package com.twoway.Xinwu.repository;
 
-import com.twoway.Xinwu.entity.WorkOrder;
+// import com.twoway.Xinwu.entity.WorkOrder;
 import com.twoway.Xinwu.entity.WorkOrderDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

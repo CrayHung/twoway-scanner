@@ -167,9 +167,9 @@ public class WorkOrderDetailSearchService {
         return workOrderDetailRepository.findAll((Specification<WorkOrderDetail>) (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (request.getWorkOrderNumbers() != null && !request.getWorkOrderNumbers().isEmpty()) {
+            if (request.getWorkOrderNumber() != null && !request.getWorkOrderNumber().isEmpty()) {
                 predicates.add(criteriaBuilder.or(
-                    request.getWorkOrderNumbers().stream()
+                    request.getWorkOrderNumber().stream()
                         .map(won -> criteriaBuilder.like(criteriaBuilder.lower(root.get("workOrder").get("workOrderNumber")), "%" + won.toLowerCase() + "%"))
                         .toArray(Predicate[]::new)
                 ));
@@ -265,7 +265,7 @@ public class WorkOrderDetailSearchService {
                 ));
             }
 
-            // 補上未有特殊字樣的項目
+            
 
             if (request.getNote() != null && !request.getNote().isEmpty()) {
                 predicates.add(criteriaBuilder.or(
