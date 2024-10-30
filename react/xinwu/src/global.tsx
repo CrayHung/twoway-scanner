@@ -43,10 +43,11 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [cam2LatestData, setCam2LatestData] = useState(null);
 
 
+  const [table1Id ,setTable1Id] = useState('');     //存放當點到某一筆工單時的第一層table的ID
   const [workNo, setWorkNo] = useState('');         //工單號碼
   const [detailId,setDetailId]=useState(0);         //存放目前指向該筆工單的哪一筆資料
-  const [quant, setQuant] = useState(0);               //工單數量
-  const [part, setPart] = useState('');           //料號名稱
+  const [quant, setQuant] = useState(0);            //工單數量
+  const [part, setPart] = useState('');             //料號名稱
   const [model, setModel] = useState('');           //模式A~E
 
   const [currentUser, setCurrentUser] = useState('admin');  // 當前使用者
@@ -187,7 +188,10 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
     detailId,
     setDetailId,
     currentUser,
-    setCurrentUser
+    setCurrentUser,
+
+    table1Id ,
+    setTable1Id
   };
 
 

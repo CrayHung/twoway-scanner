@@ -10,3 +10,9 @@
 - cmd在往上一層(和docker-compose.yml同層)執行以下指令   
     docker-compose up -d
     前往  http://localhost:3000/   看網頁變化
+
+
+    <!-- 前端初始頁面 -->
+    帳號admin
+    密碼1234
+    腳色 ADMIN

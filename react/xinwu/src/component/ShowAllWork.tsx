@@ -21,7 +21,7 @@ const modalStyle = {
 
 const ShowAllWork = () => {
     const { formatMessage } = useIntl();
-    const { userRole, currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, table3Data,
+    const { setTable1Id,userRole, currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, table3Data,
         setTable3Data, workNo, setWorkNo, part, setPart, quant, setQuant, model, setModel } = useGlobalContext();
 
     const today = new Date().toISOString().split('T')[0]; // 當前日期 (YYYY-MM-DD 格式)
@@ -37,19 +37,20 @@ const ShowAllWork = () => {
         setRowsPerPage(+event.target.value);
         setPage(0);
     };
-    useEffect(() => {
-        console.log('目前所有table3的內容是:', JSON.stringify(table3Data, null, 2));
+    // useEffect(() => {
+    //     console.log('目前所有table3的內容是:', JSON.stringify(table3Data, null, 2));
 
-    }, []);
+    // }, []);
 
-    useEffect(() => {
-        console.log('篩選後的table2的內容是:', JSON.stringify(table2Data, null, 2));
-    }, [table2Data]);
+    // useEffect(() => {
+    //     console.log('篩選後的table2的內容是:', JSON.stringify(table2Data, null, 2));
+    // }, [table2Data]);
 
 
     //點擊任一行工單資料, 記錄當下是按了哪一筆工單號碼,工單數量,料號 
     // 跳轉頁面顯示該筆工單的詳細內容(qr_PS,qr_HS...)
-    const handleRowClick = (workOrder: any, quantity: any, partnumber: any) => {
+    const handleRowClick = (id:any, workOrder: any, quantity: any, partnumber: any) => {
+        setTable1Id(id);
         setWorkNo(workOrder);
         setQuant(quantity);
         setPart(partnumber);
@@ -172,7 +173,7 @@ const ShowAllWork = () => {
             }
 
             const data = await response.json();
-            console.log("table3所有對應 : " + JSON.stringify(data));
+            // console.log("table3所有對應 : " + JSON.stringify(data));
             setTable3Data(data);
 
         } catch (error) {
@@ -189,6 +190,7 @@ const ShowAllWork = () => {
         setQuant();
         setPart();
         setModel();
+        setTable1Id();
     }, [])
 
 
@@ -201,6 +203,7 @@ const ShowAllWork = () => {
         setQuant();
         setPart();
         setModel();
+        setTable1Id();
     };
 
 
@@ -290,7 +293,7 @@ const ShowAllWork = () => {
                                 </TableHead>
                                 <TableBody>
                                     {table1Data.map((row: any, rowIndex: number) => (
-                                        <TableRow key={rowIndex} onClick={() => handleRowClick(row.workOrderNumber, row.quantity, row.partNumber)}>
+                                        <TableRow key={rowIndex} onClick={() => handleRowClick(row.id , row.workOrderNumber, row.quantity, row.partNumber)}>
                                             {Object.keys(row)
                                                 // .filter((colKey) => colKey !== 'id')
                                                 .map((colKey) => (

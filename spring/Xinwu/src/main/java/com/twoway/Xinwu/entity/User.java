@@ -81,5 +81,4 @@ public class User implements UserDetails {
         return true;
     }
 
-
 }
