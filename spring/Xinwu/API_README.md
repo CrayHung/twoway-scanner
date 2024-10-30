@@ -107,7 +107,7 @@ Content-Type: application/json
 
 JSON 可用名稱範例
 {
-  "workOrderNumbers": ["WO2023", "WO2024"],
+  "workOrderNumber": ["WO2023", "WO2024"],
   "snStart": ["SN1000"],
   "snEnd": ["SN9999"],
   "QR_RFTray": ["RF001", "RF002"],

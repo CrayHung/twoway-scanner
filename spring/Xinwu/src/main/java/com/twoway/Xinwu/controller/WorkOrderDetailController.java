@@ -42,8 +42,8 @@ public class WorkOrderDetailController {
   @Autowired
   private WorkOrderDetailSearchService searchService;
 
-  @Autowired
-  private WorkOrderDetailSearchService workOrderDetailSearchService;
+  // @Autowired
+  // private WorkOrderDetailSearchService workOrderDetailSearchService;
 
   @Autowired
   private WorkOrderDetailRepository workOrderDetailRepository;
@@ -268,7 +268,12 @@ public class WorkOrderDetailController {
   public ResponseEntity<List<WorkOrderDetail>> searchWorkOrderDetails(@RequestBody WorkOrderFieldSearchDTO request) {
     logger.info("正在使用SN搜尋的範圍，參數為：{}", request);
 
-    List<WorkOrderDetail> results = workOrderDetailSearchService.searchWorkOrderDetails(request);
+    List<WorkOrderDetail> results = searchService.searchWorkOrderDetails(request);
+
+    if (results.isEmpty()) {
+      logger.info("搜尋條件為空或無符合條件的結果");
+      return ResponseEntity.ok(new ArrayList<>());
+  }
 
     logger.info("搜尋完成。找到 {} 個結果。", results.size());
 
@@ -280,7 +285,18 @@ public class WorkOrderDetailController {
   public ResponseEntity<List<WorkOrderDetail>> fuzzySearchWorkOrderDetails(
       @RequestBody WorkOrderDetailFuzzySearchDTO searchCriteria) {
     try {
+      // 新增日誌記錄搜尋條件
+      logger.info("正在執行模糊搜尋，搜尋條件為：{}", searchCriteria);
+
       List<WorkOrderDetail> results = searchService.fuzzySearch(searchCriteria);
+
+      // 新增搜尋結果的日誌記錄
+      if (results.isEmpty()) {
+          logger.info("模糊搜尋無符合條件的結果");
+      } else {
+          logger.info("模糊搜尋完成，找到 {} 個結果", results.size());
+      }
+
       return ResponseEntity.ok(results);
     } catch (Exception e) {
       logger.error("Error occurred while performing fuzzy search on work order details", e);

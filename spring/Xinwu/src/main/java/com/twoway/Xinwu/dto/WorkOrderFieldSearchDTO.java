@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class WorkOrderFieldSearchDTO {
   
-  private List<String> workOrderNumbers;
+  private List<String> workOrderNumber;
     private List<String> snStart;
     private List<String> snEnd;
 
@@ -52,11 +52,11 @@ public class WorkOrderFieldSearchDTO {
     
 
 
-    public List<String> getWorkOrderNumbers() {
-      return workOrderNumbers;
+    public List<String> getWorkOrderNumber() {
+      return workOrderNumber;
     }
-    public void setWorkOrderNumbers(List<String> workOrderNumbers) {
-      this.workOrderNumbers = workOrderNumbers;
+    public void setWorkOrderNumber(List<String> workOrderNumbers) {
+      this.workOrderNumber = workOrderNumbers;
     }
 
     public List<String> getSnStart() {
