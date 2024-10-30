@@ -3,8 +3,10 @@ import { useState } from 'react';
 import { BrowserRouter as Router, Route, useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom'
 import { useIntl } from "react-intl";
+import { useGlobalContext } from './global';
 
 const ResetPassword: React.FC = () => {
+  const { globalUrl } = useGlobalContext();
   const { formatMessage } = useIntl();
 
     const navigate = useNavigate();
@@ -36,7 +38,7 @@ const ResetPassword: React.FC = () => {
           };
 
 
-        fetch("http://127.0.0.1:8080/reset/resetpassword",
+        fetch(`${globalUrl.url}/reset/resetpassword`,
             {
               method: 'POST',
               headers: headers,

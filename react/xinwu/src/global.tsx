@@ -10,10 +10,13 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const [globalUrl, setGlobalUrl] = useState({
     //url: 'http://192.168.195.195:8080',     //195
-    url: 'http://127.0.0.1:8080',          //loacl
+    // url: 'http://127.0.0.1:8080',          //loacl
+    url: 'http://192.168.29.91:8080',       //twoway sacnner
 
     //wsurl: 'ws://192.168.195.195:8080/ws',  //195
-    wsurl: 'ws://127.0.0.1:8080/ws',          //loacl
+    // wsurl: 'ws://127.0.0.1:8080/ws',          //loacl
+    wsurl: 'ws://192.168.29.91:8080/ws',       //twoway sacnner
+
   });
 
   //取得目前的使用者身分
