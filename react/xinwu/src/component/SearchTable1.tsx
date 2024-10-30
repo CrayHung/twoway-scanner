@@ -1,8 +1,3 @@
-/**
- * 
- * 首頁進入後進到此component , 完成搜尋表單填寫的話 , 將會找到幾筆指定的工單 , 點選某一筆工單即可跳轉到 SearchForm component
- * 
- */
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, IconButton, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
@@ -29,7 +24,7 @@ const modalStyle = {
 
 const SearchTable1 = () => {
     const { formatMessage } = useIntl();
-    const { currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, workNo, setWorkNo, part, setPart, quant, setQuant } = useGlobalContext();
+    const { table3Data, setTable3Data, currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, workNo, setWorkNo, part, setPart, quant, setQuant } = useGlobalContext();
 
     const [open, setOpen] = useState(true);
     const [page, setPage] = useState(0);
@@ -39,10 +34,15 @@ const SearchTable1 = () => {
     const [resultData, setResultData] = useState<any[]>([]);
     const navigate = useNavigate();
 
+    //整體要下載的原始檔案
+    const [dataForDownload, setDataForDownload] = useState<any>([]);
     //達運專用excel格式
     const [twowayExcelData, setTwowayExcelData] = useState([]);
     //客戶專用excel格式
     const [customerExcelData, setCustomerExcelData] = useState([]);
+
+    //SN選一種模式   用來切換模式 1.single 2.range
+    const [mode, setMode] = useState('');
 
     const today = new Date().toISOString().split('T')[0]; // 當前日期 (YYYY-MM-DD 格式)
 
@@ -51,17 +51,59 @@ const SearchTable1 = () => {
     const [tmpData, setTmpData] = useState<any[]>(table1Data);
 
     //搜尋表單,這樣可以對欄位的多組搜尋(workOrderNumbers , SNs , QR_Trays)
-    const [formData, setFormData] = useState({
+    // const [formData, setFormData] = useState({
+    //     workOrderNumber: [''],
+    //     productionDateStart: [''],
+    //     productionDateEnd: [''],
+    //     SN: [''],
+    //     QR_RFTray: [''],
+    //     QR_PS: [''],
+    //     QR_HS: [''],
+    //     snStart: [''],
+    //     snEnd: ['']
+    // });
+    interface FormData {
+        workOrderNumber: string[];
+        productionDateStart: string[];
+        productionDateEnd: string[];
+        QR_RFTray: string[];
+        QR_PS: string[];
+        QR_HS: string[];
+        QR_backup1: string[];
+        QR_backup2: string[];
+        QR_backup3: string[];
+        QR_backup4: string[];
+        note: string[];
+        create_date: string[];
+        create_user: string[];
+        partNumber: string[];
+        company: string[];
+
+
+        SN?: string[];
+        snStart?: string[];
+        snEnd?: string[];
+    }
+    const [formData, setFormData] = useState<FormData>({
         workOrderNumber: [''],
         productionDateStart: [''],
         productionDateEnd: [''],
-        SN: [''],
         QR_RFTray: [''],
         QR_PS: [''],
         QR_HS: [''],
-        snStart: [''],
-        snEnd: ['']
+        QR_backup1: [''],
+        QR_backup2: [''],
+        QR_backup3: [''],
+        QR_backup4: [''],
+        note: [''],
+        create_date: [''],
+        create_user: [''],
+        partNumber: [''],
+        company: [''],
+
+
     });
+
 
     const handleAddField = (field: keyof typeof formData) => {
         setFormData((prev) => ({
@@ -80,23 +122,23 @@ const SearchTable1 = () => {
     const handleModeChange = (e: any) => {
         const selectedMode = e.target.value;
         setMode(selectedMode);
+        setFormData((prevData) => {
+            const updatedData = { ...prevData };
 
-        // 如果切換到單一SN的搜尋模式，重置範圍的 snStart 和 snEnd
-        if (selectedMode === 'single') {
-            setFormData((prevData) => ({
-                ...prevData,
-                snStart: [''],
-                snEnd: ['']
-            }));
-        }
+            if (selectedMode === 'single') {
+                delete updatedData.snStart;
+                delete updatedData.snEnd;
+                updatedData.SN = updatedData.SN || ['']; // 確保 SN 欄位存在
+            }
 
-        // 如果切換到範圍的SN搜尋模式，  重置 SN 列表
-        if (selectedMode === 'range') {
-            setFormData((prevData) => ({
-                ...prevData,
-                SN: ['']
-            }));
-        }
+            if (selectedMode === 'range') {
+                delete updatedData.SN;
+                updatedData.snStart = updatedData.snStart || ['']; // 確保 snStart 和 snEnd 欄位存在
+                updatedData.snEnd = updatedData.snEnd || [''];
+            }
+
+            return updatedData;
+        });
     };
 
 
@@ -130,22 +172,20 @@ const SearchTable1 = () => {
             QR_PS: [''],
             QR_HS: [''],
             snStart: [''],
-            snEnd: ['']
+            snEnd: [''],
+
+
+            QR_backup1: [''],
+            QR_backup2: [''],
+            QR_backup3: [''],
+            QR_backup4: [''],
+            note: [''],
+            create_date: [''],
+            create_user: [''],
+            partNumber: [''],
+            company: ['']
         });
     };
-
-
-
-    useEffect(() => {
-        console.log("選到的工號是:" + workNo);
-        console.log("選到的工號數量是:" + quant);
-        console.log("選到的料號是:" + part);
-    }, [workNo, quant, part]);
-
-    useEffect(() => {
-        console.log('目前所有table1的內容是:', JSON.stringify(table1Data, null, 2));
-        console.log('目前所有table2的內容是:', JSON.stringify(table2Data, null, 2));
-    }, [table1Data, table2Data]);
 
 
     //為了要在下拉選單中可以渲染出已儲存的所有工單 , 一進頁面就先取得table1的所有工單 , 設定給tmpData
@@ -177,136 +217,343 @@ const SearchTable1 = () => {
 
 
 
-    //根據選到的工單號碼(workNumber),fetch該工單號碼的table2資料 , 並將資料設定給tabel2Data
+    //根據搜尋表單得到的內容 , 並將資料設定給resultData用以渲染table用
     const handleSearchTable2ByForm = async () => {
         handleClose();
         console.log('搜尋的Form資料為:', JSON.stringify(formData, null, 2));
 
-        // try {
-        //     const response = await fetch(`${globalUrl.url}/api/snfield-search-details `, {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json'
-        //         },
-        //         body: JSON.stringify({ formData }),
-        //     });
+        //單一SN[]搜尋
+        if (mode === 'single') {
+            console.log("使用api/snfuzzy-search-details這個API")
+            try {
+                const response = await fetch(`${globalUrl.url}/api/snfuzzy-search-details `, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ formData }),
+                });
 
-        //     if (!response.ok) {
-        //         throw new Error('Failed to get ');
-        //     }
-        //     const data: any[] = await response.json();
-
-        //     //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
-        //     //並且重新排序順序
-        //     const mappedData = data.map(item => ({
-        //         id: item.id,
-        //         workOrderNumber: item.parentWorkOrderNumber,
-        //         detailId: item.detailId,
-        //         SN: item.SN,
-        //         QR_RFTray: item.QR_RFTray,
-        //         QR_PS: item.QR_PS,
-        //         QR_HS: item.QR_HS,
-        //         QR_backup1: item.QR_backup1,
-        //         QR_backup2: item.QR_backup2,
-        //         QR_backup3: item.QR_backup3,
-        //         QR_backup4: item.QR_backup4,
-        //         note: item.note,
-        //         create_date: item.create_date,
-        //         create_user: item.create_user,
-        //         edit_date: item.edit_date,
-        //         edit_user: item.edit_user,
-        //         ...item,
-
-        //     }));
-
-        //     //用來將table2的不要欄位過濾掉(quantity,company,partNumber)
-        //     const filteredData = mappedData.map(({
-        //         parentPartNumber,
-        //         parentWorkOrderNumber,
-        //         parentCompany,
-        //         parentQuantity,
-        //         ...rest
-        //     }) => rest);
-
-        //     setResultData(filteredData);
-        //     console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
-
-        // } catch (error) {
-        //     console.error('Error fetching:', error);
-        // }
-    };
-
-
-
-    //達運專用下載excel , 將tabel2Data內的SN都提取出來並從1開始編號
-    const handleDownloadTwowayExcel = () => {
-        const extractedData = table2Data.map((row: any, index: any) => ({
-            id: index + 1,
-            SN: row.SN
-        }));
-        setTwowayExcelData(extractedData);
-
-        const rowsPerPage = 1000;
-        const rowsPerColumn = 35;
-
-        // 動態創建表頭根據資料數量
-        const createHeaders = (numColumns: number) => {
-            const headers = [];
-            for (let i = 1; i <= numColumns; i++) {
-                headers.push(`id`, `SN`);
-            }
-            return headers;
-        };
-
-        // 動態創建每頁的資料
-        const createPageData = (pageData: any) => {
-            const numColumns = Math.ceil(pageData.length / rowsPerColumn); // 確定需要的列數
-            const formattedData: any[] = [];
-
-            // 初始化每一行的資料
-            for (let i = 0; i < rowsPerColumn; i++) {
-                const rowData: any = {};
-                for (let j = 0; j < numColumns; j++) {
-                    rowData[`id`] = pageData[i + j * rowsPerColumn]?.id || "";
-                    rowData[`SN`] = pageData[i + j * rowsPerColumn]?.SN || "";
+                if (!response.ok) {
+                    throw new Error('Failed to get ');
                 }
-                formattedData.push(rowData);
+                const data: any[] = await response.json();
+                console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
+                setDataForDownload(data);
+
+                //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
+                //並且重新排序順序
+                const mappedData = data.map(item => ({
+                    id: item.id,
+                    workOrderNumber: item.parentWorkOrderNumber,
+                    detailId: item.detailId,
+                    SN: item.SN,
+                    QR_RFTray: item.QR_RFTray,
+                    QR_PS: item.QR_PS,
+                    QR_HS: item.QR_HS,
+                    QR_backup1: item.QR_backup1,
+                    QR_backup2: item.QR_backup2,
+                    QR_backup3: item.QR_backup3,
+                    QR_backup4: item.QR_backup4,
+                    note: item.note,
+                    create_date: item.create_date,
+                    create_user: item.create_user,
+                    edit_date: item.edit_date,
+                    edit_user: item.edit_user,
+                    ...item,
+
+                }));
+
+                //用來將不要欄位過濾掉
+                const filteredData = mappedData.map(({
+                    parentPartNumber,
+                    parentWorkOrderNumber,
+                    parentCompany,
+                    parentQuantity,
+                    ...rest
+                }) => rest);
+
+                setResultData(filteredData);
+                console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
+
+            } catch (error) {
+                console.error('Error fetching:', error);
             }
-            return formattedData;
-        };
+        }
+        //範圍snStart: [''],snEnd: ['']搜尋
+        else if (mode === 'range') {
+            console.log("使用api/snfield-search-details這個API")
+            try {
+                const response = await fetch(`${globalUrl.url}/api/snfield-search-details `, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ formData }),
+                });
 
-        const workbook = XLSX.utils.book_new();
+                if (!response.ok) {
+                    throw new Error('Failed to get ');
+                }
+                const data: any[] = await response.json();
+                console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
+                setDataForDownload(data);
 
-        // 分頁
-        for (let i = 0; i < extractedData.length; i += rowsPerPage) {
-            const pageData = extractedData.slice(i, i + rowsPerPage);
-            const formattedData = createPageData(pageData);
+                //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
+                //並且重新排序順序
+                const mappedData = data.map(item => ({
+                    id: item.id,
+                    workOrderNumber: item.parentWorkOrderNumber,
+                    detailId: item.detailId,
+                    SN: item.SN,
+                    QR_RFTray: item.QR_RFTray,
+                    QR_PS: item.QR_PS,
+                    QR_HS: item.QR_HS,
+                    QR_backup1: item.QR_backup1,
+                    QR_backup2: item.QR_backup2,
+                    QR_backup3: item.QR_backup3,
+                    QR_backup4: item.QR_backup4,
+                    note: item.note,
+                    create_date: item.create_date,
+                    create_user: item.create_user,
+                    edit_date: item.edit_date,
+                    edit_user: item.edit_user,
+                    ...item,
 
-            // 動態生成 header
-            const numColumns = Math.ceil(pageData.length / rowsPerColumn);
-            const headers = createHeaders(numColumns);
+                }));
 
-            const worksheet = XLSX.utils.json_to_sheet(formattedData, { header: headers });
+                //用來將不要欄位過濾掉
+                const filteredData = mappedData.map(({
+                    parentPartNumber,
+                    parentWorkOrderNumber,
+                    parentCompany,
+                    parentQuantity,
+                    ...rest
+                }) => rest);
 
-            // 設定列印設置
-            worksheet['!pageSetup'] = {
-                orientation: "portrait",
-                fitToWidth: 1,
-                fitToHeight: 1,
-                paperSize: 9
-            };
+                setResultData(filteredData);
+                console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
 
-            XLSX.utils.book_append_sheet(workbook, worksheet, `達運專用 ${i / rowsPerPage + 1}`);
+            } catch (error) {
+                console.error('Error fetching:', error);
+            }
+        } else {
+            try {
+                const response = await fetch(`${globalUrl.url}/api/snfield-search-details `, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ formData }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to get ');
+                }
+                const data: any[] = await response.json();
+                console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
+                setDataForDownload(data);
+
+                //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
+                //並且重新排序順序
+                const mappedData = data.map(item => ({
+                    id: item.id,
+                    workOrderNumber: item.parentWorkOrderNumber,
+                    detailId: item.detailId,
+                    SN: item.SN,
+                    QR_RFTray: item.QR_RFTray,
+                    QR_PS: item.QR_PS,
+                    QR_HS: item.QR_HS,
+                    QR_backup1: item.QR_backup1,
+                    QR_backup2: item.QR_backup2,
+                    QR_backup3: item.QR_backup3,
+                    QR_backup4: item.QR_backup4,
+                    note: item.note,
+                    create_date: item.create_date,
+                    create_user: item.create_user,
+                    edit_date: item.edit_date,
+                    edit_user: item.edit_user,
+                    ...item,
+
+                }));
+
+                // 用來將不要欄位過濾掉
+                const filteredData = mappedData.map(({
+                    parentPartNumber,
+                    parentWorkOrderNumber,
+                    parentCompany,
+                    parentQuantity,
+                    ...rest
+                }) => rest);
+
+                setResultData(filteredData);
+                console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
+
+
+
+            } catch (error) {
+                console.error('Error fetching:', error);
+            }
         }
 
-        XLSX.writeFile(workbook, 'twowayExcelData.xlsx');
     };
 
+
+
+
+    /******************************************************** */
+    //達運專用下載excel (xlsx中包含標題 項次,SN)
+    /********************************************************* */
+    // const handleDownloadTwowayExcel = () => {
+
+    //     //根據原始資料(dataForDownload)的partNumber做資料分組
+    //     const groupedData = dataForDownload.reduce((acc: any, item: any) => {
+    //         const { parentPartNumber } = item;
+    //         if (parentPartNumber) {  // 確保資料中有 parentPartNumber
+    //             if (!acc[parentPartNumber]) {
+    //                 acc[parentPartNumber] = [];
+    //             }
+    //             acc[parentPartNumber].push(item);
+    //         }
+    //         return acc;
+    //     }, {});
+    //     // console.log("groupedData:", JSON.stringify(groupedData, null, 2));
+
+    //     // Step 2: 根據每個parentPartNumber對應的numberPerPallet去產生資料
+    //     Object.keys(groupedData).forEach(parentPartNumber => {
+    //         const numberPerPallet = table3Data.find((entry: any) => entry.partNumber === parentPartNumber)?.numberPerPallet;
+    //         const worksheetData = groupedData[parentPartNumber].map((item: any, index: any) => ({
+    //             項次: index + 1,
+    //             SN: item.SN
+    //         }));
+
+    //         console.log("worksheetData:", JSON.stringify(worksheetData, null, 2));
+    //         console.log("此料號的棧板數量:" + numberPerPallet);
+
+    //         const workbook = XLSX.utils.book_new();
+
+    //         for (let i = 0; i < worksheetData.length; i += numberPerPallet) {
+    //             let sheetData = worksheetData.slice(i, i + numberPerPallet);
+    //             console.log("sheetData:" + sheetData);
+    //             console.log(`Sheet Data for ${parentPartNumber} (Sheet ${Math.floor(i / numberPerPallet) + 1}):`, sheetData);
+
+    //             let formattedSheetData: any[] = [];
+    //             let currentColumn = 0;
+
+
+    //             formattedSheetData[0] = {}; 
+    //             for (let j = 0; j < sheetData.length; j += 25) {
+    //                 const colItemHeader = String.fromCharCode(65 + currentColumn);
+    //                 const colSNHeader = String.fromCharCode(66 + currentColumn); 
+    //                 formattedSheetData[0][colItemHeader] = "項次";
+    //                 formattedSheetData[0][colSNHeader] = "SN";
+    //                 currentColumn += 2; // Move to the next set of columns for every 25 items
+    //             }
+    //             sheetData.forEach((data: any, index: any) => {
+    //                 const rowIndex = (index % 25) + 1; // Row index within each group
+    //                 const colIndex = Math.floor(index / 25) * 2; // Column index for groups of 25 (0, 2, 4, ...)
+    //                 const colItem = String.fromCharCode(65 + colIndex); // Column for 項次
+    //                 const colSN = String.fromCharCode(66 + colIndex);   // Column for SN
+
+    //                 if (!formattedSheetData[rowIndex]) formattedSheetData[rowIndex] = {}; // Ensure row exists
+    //                 formattedSheetData[rowIndex][colItem] = data.項次;
+    //                 formattedSheetData[rowIndex][colSN] = data.SN;
+    //             });
+
+
+    //             // 每25筆資料將資料從AB欄位換到CD欄位
+    //             sheetData.forEach((data: any, index: any) => {
+    //                 const rowIndex = (index % 25) + 1;
+    //                 const colIndex = Math.floor(index / 25) * 2; // Column index for groups of 25 (0, 2, 4, ...)
+    //                 const colItem = String.fromCharCode(65 + colIndex); // Column for 項次
+    //                 const colSN = String.fromCharCode(66 + colIndex);   // Column for SN
+
+    //                 if (!formattedSheetData[rowIndex]) formattedSheetData[rowIndex] = {}; // Ensure row exists
+    //                 formattedSheetData[rowIndex][colItem] = data.項次;
+    //                 formattedSheetData[rowIndex][colSN] = data.SN;
+    //             });
+
+    //             console.log(`Formatted Sheet Data for ${parentPartNumber} (Sheet ${Math.floor(i / numberPerPallet) + 1}):`, formattedSheetData);
+
+    //             if (formattedSheetData.length > 0) {
+    //                 const worksheet = XLSX.utils.json_to_sheet(formattedSheetData, { skipHeader: true });
+    //                 XLSX.utils.book_append_sheet(workbook, worksheet, `${parentPartNumber}_Sheet${Math.floor(i / numberPerPallet) + 1}`);
+    //             } else {
+    //                 console.log(`Sheet Data is empty for ${parentPartNumber} (Sheet ${Math.floor(i / numberPerPallet) + 1})`);
+    //             }
+    //         }
+
+    //         XLSX.writeFile(workbook, `${parentPartNumber}.xlsx`);
+    //     });
+    // }
+    /********************************************************* */
+
+    /******************************************************** */
+    //達運專用下載excel (xlsx中不包含標題 項次,SN)
+    /********************************************************* */
+    const handleDownloadTwowayExcel = () => {
+
+        //根據原始資料(dataForDownload)的partNumber做資料分組
+        const groupedData = dataForDownload.reduce((acc: any, item: any) => {
+            const { parentPartNumber } = item;
+            if (parentPartNumber) {  // 確保資料中有 parentPartNumber
+                if (!acc[parentPartNumber]) {
+                    acc[parentPartNumber] = [];
+                }
+                acc[parentPartNumber].push(item);
+            }
+            return acc;
+        }, {});
+        // console.log("groupedData:", JSON.stringify(groupedData, null, 2));
+
+        // Step 2: 根據每個parentPartNumber對應的number_per_pallet去產生資料
+        Object.keys(groupedData).forEach(parentPartNumber => {
+            const numberPerPallet = table3Data.find((entry: any) => entry.partNumber === parentPartNumber)?.numberPerPallet;
+            const worksheetData = groupedData[parentPartNumber].map((item: any, index: any) => ({
+                項次: index + 1,
+                SN: item.SN
+            }));
+
+            // console.log(`Worksheet Data for ${parentPartNumber}:`, worksheetData);
+
+            const workbook = XLSX.utils.book_new();
+
+            for (let i = 0; i < worksheetData.length; i += numberPerPallet) {
+                let sheetData = worksheetData.slice(i, i + numberPerPallet);
+
+                let formattedSheetData: any[] = [];
+                let currentColumn = 0;
+
+                // 每25筆資料將資料從AB欄位換到CD欄位
+                sheetData.forEach((data: any, index: any) => {
+                    const rowIndex = index % 25; 
+                    const colIndex = Math.floor(index / 25) * 2; // Column index for groups of 25 (0, 2, 4, ...)
+                    const colItem = String.fromCharCode(65 + colIndex); // Column for 項次
+                    const colSN = String.fromCharCode(66 + colIndex);   // Column for SN
+
+                    if (!formattedSheetData[rowIndex]) formattedSheetData[rowIndex] = {}; // Ensure row exists
+                    formattedSheetData[rowIndex][colItem] = data.項次;
+                    formattedSheetData[rowIndex][colSN] = data.SN;
+                });
+
+
+                if (formattedSheetData.length > 0) {
+                    const worksheet = XLSX.utils.json_to_sheet(formattedSheetData, { skipHeader: true });
+                    XLSX.utils.book_append_sheet(workbook, worksheet, `${parentPartNumber}_Sheet${Math.floor(i / numberPerPallet) + 1}`);
+                } else {
+                    console.log("sheet Data為空");
+                }
+            }
+
+            XLSX.writeFile(workbook, `${parentPartNumber}.xlsx`);
+        });
+    }
+    /********************************************************* */
 
     //客戶專用下載eexcel
     const handleDownloadCustomerExcel = () => {
 
-        const customerExcelData = table2Data.map((row: { QR_HS: any; QR_PS: any; QR_RFTray: any; create_date: any; }) => ({
+        const customerExcelData = dataForDownload.map((row: { QR_HS: any; QR_PS: any; QR_RFTray: any; create_date: any; }) => ({
             ASN_Number: "",
             component_QR_code_syntax: row.QR_RFTray,
             cable_operator_known_material_ID: "",
@@ -333,8 +580,33 @@ const SearchTable1 = () => {
         console.log(customerExcelData);
     }, [customerExcelData]);
 
-    //SN選一種模式   用來切換模式 1.single 2.range
-    const [mode, setMode] = useState('single');
+    //一進組件就先把table3Data拉出來
+    const fetchAllTable3 = async () => {
+        try {
+            const response = await fetch(`${globalUrl.url}/api/get-input-modes`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to get 所有對應表');
+            }
+
+            const data = await response.json();
+            console.log("table3所有對應 : " + JSON.stringify(data));
+            setTable3Data(data);
+
+        } catch (error) {
+            console.error('Error fetching token:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchAllTable3();
+    }, [])
+
 
     return (
         <div>
@@ -373,14 +645,15 @@ const SearchTable1 = () => {
 
                             {/* 序號欄位 */}
                             <FormControl component="fieldset">
-                                <FormLabel component="legend">Choose Mode</FormLabel>
+
                                 <RadioGroup row value={mode} onChange={handleModeChange}>
                                     <FormControlLabel value="single" control={<Radio />} label="Single SN" />
                                     <FormControlLabel value="range" control={<Radio />} label="SN Range" />
                                 </RadioGroup>
                             </FormControl>
 
-                            {mode === 'single' ? (
+                            {/* 看SN是single還是range mode , 會影響到要send的FormData */}
+                            {mode === 'single' && formData?.SN ? (
                                 <Grid item xs={12}>
                                     {formData.SN.map((SN, index) => (
                                         <Grid container spacing={1} key={index}>
@@ -400,7 +673,7 @@ const SearchTable1 = () => {
                                         </Grid>
                                     ))}
                                 </Grid>
-                            ) : (
+                            ) : mode === 'range' && formData?.snStart && formData?.snEnd ? (
                                 <Grid item xs={12}>
                                     {formData.snStart.map((start, index) => (
                                         <Grid container spacing={1} key={index}>
@@ -415,7 +688,7 @@ const SearchTable1 = () => {
                                             <Grid item xs={5}>
                                                 <TextField
                                                     label="SN End"
-                                                    value={formData.snEnd[index]}
+                                                    value={formData.snEnd?.[index] || ''}
                                                     onChange={(e) => handleSnRangeChange('snEnd', index, e.target.value)}
                                                     fullWidth
                                                 />
@@ -423,7 +696,10 @@ const SearchTable1 = () => {
                                         </Grid>
                                     ))}
                                 </Grid>
-                            )}
+                            ) : null}
+
+
+
 
                             {/* 序號QR_RFTray欄位 */}
                             <Grid item xs={12}>

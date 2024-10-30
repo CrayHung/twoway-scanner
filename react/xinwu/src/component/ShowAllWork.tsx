@@ -282,7 +282,7 @@ const ShowAllWork = () => {
 
                                         {['ADMIN', 'SUPERVISOR'].includes(userRole) && (
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>
-                                                {formatMessage({ id: 'delete-part' })}
+                                                {formatMessage({ id: 'delete-orkOrder' })}
                                             </TableCell>
                                         )}
 
@@ -304,7 +304,7 @@ const ShowAllWork = () => {
                                                         e.stopPropagation();    //避免handleRowClick和handleDeleteClick衝突
                                                         handleDeleteClick(row)
                                                     }}>
-                                                        {formatMessage({ id: 'delete-part' })}</button>
+                                                        {formatMessage({ id: 'delete-orkOrder' })}</button>
                                                 </TableCell>
                                             }
 

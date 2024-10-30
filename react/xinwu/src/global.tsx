@@ -54,11 +54,25 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [table3Data, setTable3Data] = useState([{
     "id":1,
     "partNumber":"QQ",
-    "inputMode":"A"
+    "inputMode":"A",
+    "number_per_pallet":10,
+    "summary":"",
+    "note":"",
+    "create_user":"",
+    "create_date":"",
+    "edit_user":"",
+    "edit_date":""
   },{
     "id":2,
     "partNumber":"AA",
-    "inputMode":"D"
+    "inputMode":"D",
+    "number_per_pallet":20,
+    "summary":"",
+    "note":"",
+    "create_user":"",
+    "create_date":"",
+    "edit_user":"",
+    "edit_date":""
   }]);
 
 
