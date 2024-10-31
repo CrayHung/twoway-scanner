@@ -16,12 +16,12 @@
 .menu {
   width: 150px; /* 左側 Menu 固定寬度 */
   background-color: #f4f4f4;
-  padding: 20px;
+  /* padding: 20px; */
 }
 
 .content {
   flex-grow: 1; /* 右側內容區域使用剩餘寬度 */
-  padding: 10px;
+  /* padding: 20px; */
 }
 
 table {
