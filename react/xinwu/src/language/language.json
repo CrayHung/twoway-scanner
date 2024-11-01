@@ -1,5 +1,7 @@
 {
         "zh-TW": {
+                "enterResetPassword": "輸入新密碼 ",
+                "reset-password":"重置密碼",
                 "account-page":"帳號管理",
                 "role":"身分",
 
@@ -58,6 +60,8 @@
                 "enddate": "結束日期"
         },
         "en-US": {
+                "enterResetPassword": "enter Reset Password ",
+                "resetPassword":"reset Password",
                 "account-page":"account-page",
                 "role":"role",
 

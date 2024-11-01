@@ -21,7 +21,7 @@ const modalStyle = {
 
 const ShowAllWork = () => {
     const { formatMessage } = useIntl();
-    const { setTable1Id,userRole, currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, table3Data,
+    const { company,setCompany,setTable1Id,userRole, currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, table3Data,
         setTable3Data, workNo, setWorkNo, part, setPart, quant, setQuant, model, setModel } = useGlobalContext();
 
     const today = new Date().toISOString().split('T')[0]; // 當前日期 (YYYY-MM-DD 格式)
@@ -49,7 +49,7 @@ const ShowAllWork = () => {
 
     //點擊任一行工單資料, 記錄當下是按了哪一筆工單號碼,工單數量,料號 
     // 跳轉頁面顯示該筆工單的詳細內容(qr_PS,qr_HS...)
-    const handleRowClick = (id:any, workOrder: any, quantity: any, partnumber: any) => {
+    const handleRowClick = (id:any, workOrder: any, quantity: any, partnumber: any ) => {
         setTable1Id(id);
         setWorkNo(workOrder);
         setQuant(quantity);

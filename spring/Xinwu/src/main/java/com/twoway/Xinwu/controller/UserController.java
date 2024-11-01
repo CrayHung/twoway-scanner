@@ -48,8 +48,10 @@ public class UserController {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "用戶未找到"));
 
+
         user.setUsername(request.getUsername());
         user.setRole(request.getRole());
+
 
         userRepository.save(user);
         return ResponseEntity.ok("用戶更新成功");
@@ -79,7 +81,14 @@ public class UserController {
 
         String encryptedPassword = passwordEncoder.encode(newPassword);
 
+        System.out.println("username : "+username);
+        System.out.println("newPassword : "+newPassword);
+        System.out.println("encryptedPassword : "+encryptedPassword);
+
+
         user.setPassword(encryptedPassword);
+        System.out.println("user : "+user);
+
         userRepository.save(user);
 
         return "密碼更新成功";

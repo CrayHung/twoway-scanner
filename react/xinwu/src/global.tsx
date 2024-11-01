@@ -10,8 +10,8 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const [globalUrl, setGlobalUrl] = useState({
     //url: 'http://192.168.195.195:8080',     //195
-    // url: 'http://127.0.0.1:8080',          //loacl
-    url: 'http://192.168.29.91:8080',       //twoway sacnner
+    url: 'http://127.0.0.1:8080',          //loacl
+    // url: 'http://192.168.29.91:8080',       //twoway sacnner
 
     //wsurl: 'ws://192.168.195.195:8080/ws',  //195
     // wsurl: 'ws://127.0.0.1:8080/ws',          //loacl
@@ -52,6 +52,8 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [quant, setQuant] = useState(0);            //工單數量
   const [part, setPart] = useState('');             //料號名稱
   const [model, setModel] = useState('');           //模式A~E
+
+  const [company,setCompany] = useState('');        //公司單位 (Twoway或ACI)
 
   const [currentUser, setCurrentUser] = useState('admin');  // 當前使用者
 
@@ -161,6 +163,8 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
 
 
   const contextValue = {
+    company,
+    setCompany,
     userRole,
     setUserRole,
     isLoggedIn,

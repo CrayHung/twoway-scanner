@@ -44,6 +44,7 @@ const AccountPage = () => {
 
             const data: any[] = await response.json();
             setData(data);
+            console.log("所有的user資料:", JSON.stringify(data, null, 2) );
 
         } catch (error) {
             console.error('Error fetching token:', error);
@@ -144,13 +145,105 @@ const AccountPage = () => {
         }
     };
 
+    
+    //重置密碼
+    const [openResetForm, setOpenResetForm] = useState(false);
+    const handleResetClose = () => setOpenResetForm(false);
+    const [editPassword, setEditPassword] = useState({
+        id: "",
+        username: "",
+        password: "",
+        role: "",
+    });
+    const handleReset = (rowData: any) => {
+        setEditPassword({
+            id: rowData.id,
+            username: rowData.username,
+            password: rowData.password,
+            role: rowData.role
+        });
+
+        setOpenResetForm(true);
+    }
+    const handlePasswordChange = (password: any) => {
+        setEditPassword({
+            ...editPassword,
+            password: password
+        });
+    };
+    const handlePasswordEmpty = () => {
+        handlePasswordChange('');
+    };
+
+
+    const saveResetChanges = async () => {
+
+        const requestBody = {
+            username: editPassword.username,
+            password: editPassword.password,
+            role: editPassword.role
+        };
+
+
+        console.log("editPassword" + editPassword);
+        console.log("更新的密碼:"+requestBody.password);
+        console.log("更新的使用者:", JSON.stringify(requestBody, null, 2));
+
+
+        const response = await fetch(`${globalUrl.url}/user/reset`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        // const result = await response.json();
+   
+        // console.log('更新成功:', result);
+        setOpenResetForm(false);
+        fetchAll();
+
+    }
 
 
 
     return (
         <div>
 
+            {/* 重置 */}
+            <Modal open={openResetForm} onClose={handleResetClose}>
+                <Box sx={modalStyle}>
+                    <Typography variant="h6" component="h2">
+                        {formatMessage({ id: 'reset-password' })}
+                    </Typography>
+                    <form>
+                        <Grid container spacing={2}>
 
+                            <Grid item xs={12}>
+                                <Grid container spacing={1} >
+                                    <Grid item xs={10}>
+                                        <TextField
+                                            value={editPassword.password}
+                                            onChange={(e) => handlePasswordChange(e.target.value)}
+                                            onClick={()=>handlePasswordEmpty()}
+                                            fullWidth
+                                            margin="normal"
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                            
+
+                            <Grid item xs={4}>
+                                <Button variant="contained" color="primary" fullWidth onClick={saveResetChanges}>
+                                    {formatMessage({ id: 'submit' })}
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </form>
+                </Box>
+            </Modal>
 
 
             {/* 編輯 */}
@@ -249,6 +342,9 @@ const AccountPage = () => {
                                 <TableRow key={index}>
                                     <TableCell>{user.username}</TableCell>
                                     <TableCell>{user.role}</TableCell>
+                                    <TableCell>
+                                        <button onClick={() => handleReset(user)}>{formatMessage({ id: 'reset-password' })}</button>
+                                    </TableCell>
                                     <TableCell>
                                         <button onClick={() => handleEdit(user)}>{formatMessage({ id: 'edit' })}</button>
                                     </TableCell>

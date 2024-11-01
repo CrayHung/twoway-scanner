@@ -660,8 +660,8 @@ const SearchTable1 = () => {
 
 
     return (
-        <div style={{ width: '100vw', position: 'relative', left: 0 }}>
-
+        // <div style={{ width: '100vw', position: 'relative', left: 0 }}>
+        <div className="content" style={{ flex: 1 }}>
             <Modal open={open} onClose={handleClose}>
                 <Box sx={modalStyle}>
                     <form>

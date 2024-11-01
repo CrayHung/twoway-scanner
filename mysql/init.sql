@@ -143,7 +143,7 @@ INSERT INTO parking_lot (id,amount, car_type) VALUES
 -- 或是在spring啟動時就先創建一個帳號(DataLoader)
 -- INSERT INTO users (username, password, role)
 -- VALUES
---   ('test', '$2a$10$sEo9Vh3mWscdSDjANOHLiulyQoncOzRbwAmZEIQmsw5HrrhXLj.LS', 'ADMIN');
+--   ('test', '$2a$10$sEo9Vh3mWscdSDjANOHLiulyQoncOzRbwAmZEIQmsw5HrrhXLj.LS' , 'ADMIN');
 -- SELECT COUNT(*) FROM users;
 
 -- INSERT INTO refresh_token (id,user_id, token, createdDate, expirationDate)

@@ -34,6 +34,7 @@ const LogInPage = () => {
           const data = await response.json();
           const token = data.token; 
           const userRole = data.role; 
+          const company = data.company;
           alert("登入腳色:"+ userRole);
 
   

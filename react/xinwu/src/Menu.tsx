@@ -13,7 +13,7 @@ const Menu = () => {
 
       {isLoggedIn ? (
         <>
-          {(userRole === 'ADMIN' || userRole === 'SUPERVISOR') && (
+          {(userRole === 'OPERATOR' || userRole === 'ADMIN' || userRole === 'SUPERVISOR') && (
             <Link to="/">{formatMessage({ id: 'Menu-All-WorkOrders' })}</Link>
           )}
 
