@@ -319,7 +319,7 @@ function AllowList() {
                 workOrderNumber: row.workOrderNumber,
                 // detailId: row.detailId,
                 SN: row.SN,
-                QR_RFTray: row.qr_RFTray,
+                QR_RFTray: row.QR_RFTray,
                 QR_PS: row.QR_PS,
                 QR_HS: row.QR_HS,
                 QR_backup1: row.QR_backup1,
