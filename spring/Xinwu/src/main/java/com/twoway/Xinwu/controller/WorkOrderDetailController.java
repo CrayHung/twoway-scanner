@@ -241,17 +241,40 @@ public class WorkOrderDetailController {
   }
 
   private void updateWorkOrderDetailFromDTO(WorkOrderDetail workOrderDetail, UpdateWorkOrderDetailDTO dto) {
-    workOrderDetail.setSn(dto.getSn());
-    workOrderDetail.setQrRfTray(dto.getQrRfTray());
-    workOrderDetail.setQrPs(dto.getQrPs());
-    workOrderDetail.setQrHs(dto.getQrHs());
-    workOrderDetail.setQrBackup1(dto.getQrBackup1());
-    workOrderDetail.setQrBackup2(dto.getQrBackup2());
-    workOrderDetail.setQrBackup3(dto.getQrBackup3());
-    workOrderDetail.setQrBackup4(dto.getQrBackup4());
-    workOrderDetail.setNote(dto.getNote());
-    workOrderDetail.setEdit_date(LocalDate.now());
-    workOrderDetail.setEdit_user(dto.getEdit_user());
+        // 只在值不為 null 且不為空字串時才更新
+        if (dto.getSn() != null && !dto.getSn().trim().isEmpty()) {
+          workOrderDetail.setSn(dto.getSn());
+      }
+      if (dto.getQrRfTray() != null && !dto.getQrRfTray().trim().isEmpty()) {
+          workOrderDetail.setQrRfTray(dto.getQrRfTray());
+      }
+      if (dto.getQrPs() != null && !dto.getQrPs().trim().isEmpty()) {
+          workOrderDetail.setQrPs(dto.getQrPs());
+      }
+      if (dto.getQrHs() != null && !dto.getQrHs().trim().isEmpty()) {
+          workOrderDetail.setQrHs(dto.getQrHs());
+      }
+      if (dto.getQrBackup1() != null && !dto.getQrBackup1().trim().isEmpty()) {
+          workOrderDetail.setQrBackup1(dto.getQrBackup1());
+      }
+      if (dto.getQrBackup2() != null && !dto.getQrBackup2().trim().isEmpty()) {
+          workOrderDetail.setQrBackup2(dto.getQrBackup2());
+      }
+      if (dto.getQrBackup3() != null && !dto.getQrBackup3().trim().isEmpty()) {
+          workOrderDetail.setQrBackup3(dto.getQrBackup3());
+      }
+      if (dto.getQrBackup4() != null && !dto.getQrBackup4().trim().isEmpty()) {
+          workOrderDetail.setQrBackup4(dto.getQrBackup4());
+      }
+      if (dto.getNote() != null && !dto.getNote().trim().isEmpty()) {
+          workOrderDetail.setNote(dto.getNote());
+      }
+      
+      // 這些欄位通常應該要更新，因為是系統紀錄
+      workOrderDetail.setEdit_date(LocalDate.now());
+      if (dto.getEdit_user() != null && !dto.getEdit_user().trim().isEmpty()) {
+          workOrderDetail.setEdit_user(dto.getEdit_user());
+      }
   }
 
   private void updateWorkOrder(WorkOrderDetail workOrderDetail, String editUser) {

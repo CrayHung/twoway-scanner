@@ -19,12 +19,16 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-
+        // 使用 findByUsername 檢查 admin 用戶是否存在
+        if (userRepository.findByUsername("admin").isEmpty()) {
             User adminUser = new User();
             adminUser.setUsername("admin"); //初始創建帳號admin
             adminUser.setPassword(passwordEncoder.encode("1234")); 
             adminUser.setRole(Role.ADMIN); 
             userRepository.save(adminUser);
-
+            System.out.println("Admin user created successfully");
+        } else {
+            System.out.println("Admin user already exists");
+        }
     }
 }
