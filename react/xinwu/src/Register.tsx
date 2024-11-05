@@ -10,6 +10,7 @@ const Register = () => {
   const [input1, setInput1] = useState<string>('');
   const [input2, setInput2] = useState<string>('');
   const [selectedRole, setSelectedRole] = useState('');
+  const [selectedCompany, setSelectedCompany] = useState('');
   const [error, setError] = useState<string>('');
   const { formatMessage } = useIntl();
 
@@ -28,6 +29,7 @@ const Register = () => {
         body: JSON.stringify({
           username: input1,
           password: input2,
+          company: selectedCompany
         }),
       });
 
@@ -64,6 +66,7 @@ const Register = () => {
         body: JSON.stringify({
           username: input1,
           password: input2,
+          company: selectedCompany
         }),
       });
 
@@ -100,6 +103,7 @@ const Register = () => {
         body: JSON.stringify({
           username: input1,
           password: input2,
+          company: selectedCompany
         }),
       });
 
@@ -136,6 +140,7 @@ const Register = () => {
         body: JSON.stringify({
           username: input1,
           password: input2,
+          company: selectedCompany
         }),
       });
 
@@ -197,6 +202,10 @@ const Register = () => {
     setSelectedRole(event.target.value);
   };
 
+  const handleCompanyChange = (event: any) => {
+    setSelectedCompany(event.target.value);
+  };
+
   return (
     <Container >
       <Box sx={{
@@ -241,6 +250,25 @@ const Register = () => {
           <MenuItem value="SUPERVISOR">SUPERVISOR</MenuItem>
           <MenuItem value="ADMIN">ADMIN</MenuItem>
         </TextField>
+
+        {/**********************公司欄位*********************/}
+        <TextField
+          select
+          label="Select Company"
+          value={selectedCompany}
+          onChange={handleCompanyChange}
+
+          margin="normal"
+          sx={{ width: '300px' }}
+
+        >
+          <MenuItem value=""> NO </MenuItem>
+          <MenuItem value="Twoway">Twoway</MenuItem>
+          <MenuItem value="ACI">ACI</MenuItem>
+        
+        </TextField>
+        {/*******************************************/}
+
         <Box
           sx={{
             display: 'flex',

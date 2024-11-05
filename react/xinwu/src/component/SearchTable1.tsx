@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation  } from 'react-router-dom';
 import { TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, IconButton, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import * as XLSX from 'xlsx';
 import { useGlobalContext } from '../global';
@@ -659,9 +659,15 @@ const SearchTable1 = () => {
     }, [])
 
 
+    const location = useLocation();
+    useEffect(() => {
+        setOpen(true); // 當 URL 改變時，重新打開 Modal
+      }, [location.search]); // location.search 變化時重新執行 useEffect
+
+
     return (
-        // <div style={{ width: '100vw', position: 'relative', left: 0 }}>
-        <div className="content" style={{ flex: 1 }}>
+        <div style={{ width: '100vw', position: 'relative', left: 0 }}>
+        {/* <div className="content" style={{ flex: 1 }}> */}
             <Modal open={open} onClose={handleClose}>
                 <Box sx={modalStyle}>
                     <form>

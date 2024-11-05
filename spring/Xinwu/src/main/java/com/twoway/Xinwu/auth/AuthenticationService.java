@@ -57,6 +57,7 @@ public class AuthenticationService {
         var user = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .company(request.getCompany())
                 .role(Role.SUPERVISOR)
                 .build();
 
@@ -98,6 +99,7 @@ public class AuthenticationService {
         var user = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .company(request.getCompany())
                 .role(Role.OPERATOR)
                 .build();
 
@@ -140,6 +142,7 @@ public class AuthenticationService {
         var user = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .company(request.getCompany())
                 .role(Role.USER)
                 .build();
 
@@ -181,6 +184,7 @@ public class AuthenticationService {
         var user = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .company(request.getCompany())
                 .role(Role.ADMIN)
                 .build();
 
@@ -211,6 +215,7 @@ public class AuthenticationService {
                 .token(jwtToken)
                 .refreshToken(refreshToken.getToken())
                 .role(user.getRole().name())
+                .company(user.getCompany())
                 .build();
     }
 

@@ -14,7 +14,7 @@ interface HeaderProps {
 
 const Header = () => {
 
-  const { userRole, isLoggedIn, setIsLoggedIn } = useGlobalContext();
+  const { userRole, isLoggedIn, setIsLoggedIn ,setToken} = useGlobalContext();
 
   const { formatMessage } = useIntl();
 

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { SelectChangeEvent, TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, formControlLabelClasses, Select, Typography } from '@mui/material';
+import { Button, Grid, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useGlobalContext } from '../global';
 import { useIntl } from "react-intl";
-import { setDefaultResultOrder } from 'dns';
+
 const modalStyle = {
     position: 'absolute' as 'absolute',
     top: '50%',
@@ -21,8 +21,8 @@ const modalStyle = {
 
 const ShowAllWork = () => {
     const { formatMessage } = useIntl();
-    const { company,setCompany,setTable1Id,userRole, currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, table3Data,
-        setTable3Data, workNo, setWorkNo, part, setPart, quant, setQuant, model, setModel } = useGlobalContext();
+    const { company, setTable1Id, userRole, globalUrl, table1Data, setTable1Data, setTable2Data, table3Data,
+        setTable3Data, setWorkNo, setPart, setQuant, setModel } = useGlobalContext();
 
     const today = new Date().toISOString().split('T')[0]; // 當前日期 (YYYY-MM-DD 格式)
     const navigate = useNavigate();
@@ -49,24 +49,24 @@ const ShowAllWork = () => {
 
     //點擊任一行工單資料, 記錄當下是按了哪一筆工單號碼,工單數量,料號 
     // 跳轉頁面顯示該筆工單的詳細內容(qr_PS,qr_HS...)
-    const handleRowClick = (id:any, workOrder: any, quantity: any, partnumber: any ) => {
-        setTable1Id(id);
-        setWorkNo(workOrder);
-        setQuant(quantity);
-        setPart(partnumber);
+    const handleRowClick = (id: any, workOrder: any, quantity: any, partnumber: any, companyUnit: any) => {
 
-        //紀錄該筆工單是哪種model
-        const selectedData = table3Data.find((data: any) => data.partNumber === partnumber);
-        if (selectedData) {
-            setModel(selectedData.inputMode);
+        if (companyUnit !== company) {
+
+        } else {
+            setTable1Id(id);
+            setWorkNo(workOrder);
+            setQuant(quantity);
+            setPart(partnumber);
+
+            //紀錄該筆工單是哪種model
+            const selectedData = table3Data.find((data: any) => data.partNumber === partnumber);
+            if (selectedData) {
+                setModel(selectedData.inputMode);
+            }
+            navigate('/searchForm');
         }
-
-
-        navigate('/searchForm');
     };
-
-
-
 
 
 
@@ -94,6 +94,8 @@ const ShowAllWork = () => {
 
             const updatedData = removeWorkOrderDetails(data);
             setTable1Data(updatedData);
+
+            // console.log("所有table1資料:"+ JSON.stringify(updatedData))
 
 
         } catch (error) {
@@ -192,7 +194,6 @@ const ShowAllWork = () => {
         setModel();
         setTable1Id();
     }, [])
-
 
     //fetch All
     const fetchAll = async () => {
@@ -293,7 +294,7 @@ const ShowAllWork = () => {
                                 </TableHead>
                                 <TableBody>
                                     {table1Data.map((row: any, rowIndex: number) => (
-                                        <TableRow key={rowIndex} onClick={() => handleRowClick(row.id , row.workOrderNumber, row.quantity, row.partNumber)}>
+                                        <TableRow key={rowIndex} onClick={() => handleRowClick(row.id, row.workOrderNumber, row.quantity, row.partNumber, row.company)}>
                                             {Object.keys(row)
                                                 // .filter((colKey) => colKey !== 'id')
                                                 .map((colKey) => (

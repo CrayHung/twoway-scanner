@@ -9,10 +9,11 @@ const LogInPage = () => {
     const [input2, setInput2] = useState<string>('');
     const [error, setError] = useState<string>('');
 
-    const {  userRole,setUserRole,jwtToken , setJwtToken ,isLoggedIn, setIsLoggedIn,globalUrl,currentUser, setCurrentUser } = useGlobalContext();
+    const {  setCompany, userRole,setUserRole,jwtToken , setJwtToken ,isLoggedIn, setIsLoggedIn,globalUrl,currentUser, setCurrentUser } = useGlobalContext();
     const { formatMessage } = useIntl();
 
     const fetchLogin = async () => {
+        console.log("globalUrl.url ="+globalUrl.url);
         try {
           const response = await fetch(`${globalUrl.url}/auth/authenticate`, {
             method: 'POST',
@@ -40,6 +41,7 @@ const LogInPage = () => {
   
           await setJwtToken(token);
           await setUserRole(userRole);
+          await setCompany(company);
           alert("登入成功")
           await setIsLoggedIn(true);
 

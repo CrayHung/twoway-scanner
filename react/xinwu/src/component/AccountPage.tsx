@@ -44,7 +44,7 @@ const AccountPage = () => {
 
             const data: any[] = await response.json();
             setData(data);
-            console.log("所有的user資料:", JSON.stringify(data, null, 2) );
+            console.log("所有的user資料:", JSON.stringify(data, null, 2));
 
         } catch (error) {
             console.error('Error fetching token:', error);
@@ -63,13 +63,15 @@ const AccountPage = () => {
         username: "",
         password: "",
         role: "",
+        company: ""
     });
     const handleEdit = (rowData: any) => {
         setEditUser({
             id: rowData.id,
             username: rowData.username,
             password: rowData.password,
-            role: rowData.role
+            role: rowData.role,
+            company: rowData.company
         });
 
         setOpenEditForm(true);
@@ -86,6 +88,12 @@ const AccountPage = () => {
             role: role
         });
     };
+    const handleEditCompanyChange = (company: any) => {
+        setEditUser({
+            ...editUser,
+            company: company
+        });
+    };
 
 
     const saveChanges = async () => {
@@ -93,7 +101,8 @@ const AccountPage = () => {
         const requestBody = {
             username: editUser.username,
             password: editUser.password,
-            role: editUser.role
+            role: editUser.role,
+            company: editUser.company
         };
 
         const response = await fetch(`${globalUrl.url}/user/update/${editUser.id}`, {
@@ -118,7 +127,7 @@ const AccountPage = () => {
         id: "",
         username: "",
         password: "",
-        role:""
+        role: ""
     });
     const handleDeleteClick = (row: any) => {
         setDeleteUser(row);
@@ -145,7 +154,7 @@ const AccountPage = () => {
         }
     };
 
-    
+
     //重置密碼
     const [openResetForm, setOpenResetForm] = useState(false);
     const handleResetClose = () => setOpenResetForm(false);
@@ -154,13 +163,15 @@ const AccountPage = () => {
         username: "",
         password: "",
         role: "",
+        company: ""
     });
     const handleReset = (rowData: any) => {
         setEditPassword({
             id: rowData.id,
             username: rowData.username,
             password: rowData.password,
-            role: rowData.role
+            role: rowData.role,
+            company: rowData.company
         });
 
         setOpenResetForm(true);
@@ -181,13 +192,9 @@ const AccountPage = () => {
         const requestBody = {
             username: editPassword.username,
             password: editPassword.password,
-            role: editPassword.role
+            role: editPassword.role,
+            company: editPassword.company
         };
-
-
-        console.log("editPassword" + editPassword);
-        console.log("更新的密碼:"+requestBody.password);
-        console.log("更新的使用者:", JSON.stringify(requestBody, null, 2));
 
 
         const response = await fetch(`${globalUrl.url}/user/reset`, {
@@ -199,7 +206,7 @@ const AccountPage = () => {
         });
 
         // const result = await response.json();
-   
+
         // console.log('更新成功:', result);
         setOpenResetForm(false);
         fetchAll();
@@ -226,14 +233,14 @@ const AccountPage = () => {
                                         <TextField
                                             value={editPassword.password}
                                             onChange={(e) => handlePasswordChange(e.target.value)}
-                                            onClick={()=>handlePasswordEmpty()}
+                                            onClick={() => handlePasswordEmpty()}
                                             fullWidth
                                             margin="normal"
                                         />
                                     </Grid>
                                 </Grid>
                             </Grid>
-                            
+
 
                             <Grid item xs={4}>
                                 <Button variant="contained" color="primary" fullWidth onClick={saveResetChanges}>
@@ -286,6 +293,22 @@ const AccountPage = () => {
                                 </TextField>
                             </Grid>
 
+                            <Grid item xs={10}>
+                                <TextField
+                                    select
+                                    label={formatMessage({ id: 'company' })}
+                                    value={editUser.company}
+                                    onChange={(e) => handleEditCompanyChange(e.target.value)}
+                                    fullWidth
+                                    margin="normal"
+                                >
+                                    <MenuItem value=""> NO </MenuItem>
+                                    <MenuItem value="Twoway">Twoway</MenuItem>
+                                    <MenuItem value="ACI"> ACI </MenuItem>
+   
+                                </TextField>
+                            </Grid>
+
 
                             <Grid item xs={4}>
                                 <Button variant="contained" color="primary" fullWidth onClick={saveChanges}>
@@ -333,6 +356,8 @@ const AccountPage = () => {
                             <TableRow>
                                 <TableCell>{formatMessage({ id: 'account' })}</TableCell>
                                 <TableCell>{formatMessage({ id: 'role' })}</TableCell>
+                                <TableCell>{formatMessage({ id: 'company' })}</TableCell>
+                                <TableCell>{formatMessage({ id: 'reset-password' })}</TableCell>
                                 <TableCell>{formatMessage({ id: 'edit' })}</TableCell>
                                 <TableCell>{formatMessage({ id: 'delete' })}</TableCell>
                             </TableRow>
@@ -342,6 +367,7 @@ const AccountPage = () => {
                                 <TableRow key={index}>
                                     <TableCell>{user.username}</TableCell>
                                     <TableCell>{user.role}</TableCell>
+                                    <TableCell>{user.company}</TableCell>
                                     <TableCell>
                                         <button onClick={() => handleReset(user)}>{formatMessage({ id: 'reset-password' })}</button>
                                     </TableCell>

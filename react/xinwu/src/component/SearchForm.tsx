@@ -489,7 +489,7 @@ const SearchForm = () => {
         /*這邊要取消註解一下*/
         // 只允許編輯QR_RFTray,QR_PS,QR_HS,QR_backup1,QR_backup2,QR_backup3,QR_backup4,note的欄位
         if (
-            colKey === 'id' || colKey === 'workOrderNumber' || colKey === 'detailId' || colKey === 'SN' ||
+            colKey === 'id' || colKey === 'workOrderNumber' || colKey === 'detailId' ||
             colKey === 'create_date' || colKey === 'create_user' || colKey === 'edit_date' || colKey === 'edit_user'
         ) {
             return;

@@ -6,12 +6,14 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
 
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
+  const serverUrl = window.location.origin;
 
   const [globalUrl, setGlobalUrl] = useState({
     //url: 'http://192.168.195.195:8080',     //195
-    // url: 'http://127.0.0.1:8080',          //loacl
-    url: 'http://192.168.29.91:8080',       //twoway sacnner NUC
+    url: 'http://127.0.0.1:8080',          //loacl
+
+    
+    // url: 'http://192.168.29.91:8080',       //twoway sacnner NUC
     // url: 'http://59.120.199.69:8080',       //twoway sacnner WINDOWS
 
     //wsurl: 'ws://192.168.195.195:8080/ws',  //195
@@ -59,109 +61,11 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   const [currentUser, setCurrentUser] = useState('admin');  // 當前使用者
 
-  const [table3Data, setTable3Data] = useState([{
-    "id":1,
-    "partNumber":"QQ",
-    "inputMode":"A",
-    "number_per_pallet":10,
-    "summary":"",
-    "note":"",
-    "create_user":"",
-    "create_date":"",
-    "edit_user":"",
-    "edit_date":""
-  },{
-    "id":2,
-    "partNumber":"AA",
-    "inputMode":"D",
-    "number_per_pallet":20,
-    "summary":"",
-    "note":"",
-    "create_user":"",
-    "create_date":"",
-    "edit_user":"",
-    "edit_date":""
-  }]);
+  const [table3Data, setTable3Data] = useState([]);
 
+  const [table1Data, setTable1Data] = useState([]);
 
-  const [table1Data, setTable1Data] = useState([{
-    "id":1,
-    "workOrderNumber": "01",
-    "quantity": 2,
-    "partNumber": "QQ",
-    "company": "",
-    "createUser": "admin",
-    "createDate": "2024-09-16",
-    "editUser": "admin",
-    "editDate": "2024-09-16"
-  }, {
-    "id":2,
-    "workOrderNumber": "02",
-    "quantity": 1,
-    "partNumber": "AA",
-    "company": "",
-    "createUser": "admin",
-    "createDate": "2024-09-16",
-    "editUser": "admin",
-    "editDate": "2024-09-16"
-  }]);
-
-  const [table2Data, setTable2Data] = useState([{
-      "id":1,
-      "workOrderNumber": "01",
-      "detailId": 1,
-      "sn": "QQ123",
-      "qr_RFTray": "DDDD",
-      "qr_PS": "QZ",
-      "qr_HS": "QQ",
-      "qr_backup1": "",
-      "qr_backup2": "",
-      "qr_backup3": "",
-      "qr_backup4": "",
-      "note": "",
-      "create_date": "2024-09-16",
-      "create_user": "admin",
-      "edit_date": "2024-09-16",
-      "edit_user": "admin"
-    }, {
-      "id":2,
-      "workOrderNumber": "01",
-      "detailId": 2,
-      "sn": "",
-      "qr_RFTray": "",
-      "qr_PS": "",
-      "qr_HS": "",
-      "qr_backup1": "",
-      "qr_backup2": "",
-      "qr_backup3": "",
-      "qr_backup4": "",
-      "note": "",
-      "create_date": "2024-09-16",
-      "create_user": "admin",
-      "edit_date": "2024-09-16",
-      "edit_user": "admin"
-    }
-    
-    , {
-      "id":3,
-      "workOrderNumber": "02",
-      "detailId": 1,
-      "sn": "",
-      "qr_RFTray": "",
-      "qr_PS": "",
-      "qr_HS": "",
-      "qr_backup1": "",
-      "qr_backup2": "",
-      "qr_backup3": "",
-      "qr_backup4": "",
-      "note": "",
-      "create_date": "2024-09-16",
-      "create_user": "admin",
-      "edit_date": "2024-09-16",
-      "edit_user": "admin"
-    }
-  
-  ]);
+  const [table2Data, setTable2Data] = useState([]);
 
 
   const contextValue = {

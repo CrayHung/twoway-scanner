@@ -8,7 +8,7 @@ const ForgetPassword = () => {
     const [input1, setInput1] = useState<string>('');
     const [input2, setInput2] = useState<string>('');
 
-    const { jwtToken,setJwtToken,isLoggedIn, setIsLoggedIn,globalUrl } = useGlobalContext();
+    const { globalUrl } = useGlobalContext();
     const navigate = useNavigate();
 
     const fetchData = async () => {

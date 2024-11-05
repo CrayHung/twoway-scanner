@@ -1,0 +1,23 @@
+FROM openjdk:17.0.1-jdk-slim
+ADD ./Xinwu/build/libs/Xinwu-0.0.1-SNAPSHOT.jar /app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+
+
+# 使用 Gradle 作為基礎映像
+FROM gradle:8.3-jdk11 AS build
+
+# 設定工作目錄
+WORKDIR /app
+
+# 複製 Gradle 的配置檔案和源碼
+COPY ./Xinwu/ ./
+
+# 執行建置指令
+RUN gradle build
+
+# 用 OpenJDK 作為運行環境
+FROM openjdk:17.0.1-jdk-slim
+COPY --from=build /app/build/libs/*.jar app.jar
+EXPOSE 8080
+CMD ["java", "-jar", "/app.jar"]

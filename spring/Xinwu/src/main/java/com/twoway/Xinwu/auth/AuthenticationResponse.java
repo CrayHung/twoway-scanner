@@ -21,4 +21,5 @@ public class AuthenticationResponse {
     private String error;
 
     private String role;
+    private String company;
 }

@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS users (
   username varchar(255) NOT NULL UNIQUE,
   password varchar(255) NOT NULL,
   role varchar(255) NOT NULL,
+  company varchar(255),
   PRIMARY KEY (id)
 );
 

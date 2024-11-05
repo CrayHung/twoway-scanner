@@ -34,6 +34,7 @@ public class User implements UserDetails {
     private Integer id;
     private String username;
     private String password;
+    private String company;
 
 
     @Enumerated(EnumType.STRING)
@@ -61,6 +62,15 @@ public class User implements UserDetails {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+   
+    public String getCompany(){
+        return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
     }
 
     @Override

@@ -51,6 +51,7 @@ public class UserController {
 
         user.setUsername(request.getUsername());
         user.setRole(request.getRole());
+        user.setCompany(request.getCompany());
 
 
         userRepository.save(user);
@@ -80,14 +81,7 @@ public class UserController {
         }
 
         String encryptedPassword = passwordEncoder.encode(newPassword);
-
-        System.out.println("username : "+username);
-        System.out.println("newPassword : "+newPassword);
-        System.out.println("encryptedPassword : "+encryptedPassword);
-
-
         user.setPassword(encryptedPassword);
-        System.out.println("user : "+user);
 
         userRepository.save(user);
 

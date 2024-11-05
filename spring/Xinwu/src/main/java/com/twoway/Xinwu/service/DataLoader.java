@@ -20,11 +20,14 @@ public class DataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
+        if (!userRepository.existsByUsername("admin")) {
+
             User adminUser = new User();
             adminUser.setUsername("admin"); //初始創建帳號admin
             adminUser.setPassword(passwordEncoder.encode("1234")); 
             adminUser.setRole(Role.ADMIN); 
+            adminUser.setCompany("Twoway"); 
             userRepository.save(adminUser);
-
+        }
     }
 }
