@@ -22,13 +22,17 @@ BODY 範例(JSON):
 }
 日期的部分會由當前資料庫時間自動判定，無需自行輸入
 
-#### Search API (GET)
+#### Search API (POST)
+修正為 post 方法
 URL 範例：
-搜尋 2023-1-1 ~ 2024-12-31 的所有 data
-http://localhost:8080/api/search-work-orders?productionDateStart=2023-01-01&productionDateEnd=2024-12-31
+http://localhost:8080/api/fuzzy-search-work-orders
 
-範例 2:
-(空白待補充)
+BODY:
+{
+  "workOrderNumber": ["001"],
+  "createDateStart": ["2023-01-01"],
+  "createDateEnd": ["2023-12-31"]
+}
 
 #### UPDATE/EDIT API (PUT)
 http://localhost:8080/api/update-work-orders/{id}
@@ -71,6 +75,9 @@ BODY 範例(JSON):
     "QR_RFTray": "RF001",
     "QR_PS": "PS001",
     "QR_HS": "HS001",
+    QR_RFTray_BEDID -> 目前暫定，尚未更新
+    QR_PS_BEDID
+    QR_HS_BEDID
     "QR_backup1": "BK001",
     "QR_backup2": "BK002",
     "QR_backup3": "BK003",
