@@ -19,6 +19,16 @@ public class WorkOrderDetailFuzzySearchDTO {
     @JsonProperty("QR_HS")
     private List<String> qrHs;
 
+    // 新增三個 BEDID 字段
+    @JsonProperty("QR_RFTray_BEDID")
+    private List<String> qrRfTrayBedid;
+
+    @JsonProperty("QR_PS_BEDID")
+    private List<String> qrPsBedid;
+
+    @JsonProperty("QR_HS_BEDID")
+    private List<String> qrHsBedid;
+
     @JsonProperty("QR_backup1")
     private List<String> qrBackup1;
 
@@ -195,5 +205,35 @@ public class WorkOrderDetailFuzzySearchDTO {
       this.productionDateEnd = productionDateEnd;
   }
 
+  // 新增 BEDID 欄位的 getter/setter
+  @JsonProperty("QR_RFTray_BEDID")
+  public List<String> getQrRfTrayBedid() {
+      return qrRfTrayBedid;
+  }
+
+  @JsonProperty("QR_RFTray_BEDID")
+  public void setQrRfTrayBedid(List<String> qrRfTrayBedid) {
+      this.qrRfTrayBedid = qrRfTrayBedid;
+  }
+
+  @JsonProperty("QR_PS_BEDID")
+  public List<String> getQrPsBedid() {
+      return qrPsBedid;
+  }
+
+  @JsonProperty("QR_PS_BEDID")
+  public void setQrPsBedid(List<String> qrPsBedid) {
+      this.qrPsBedid = qrPsBedid;
+  }
+
+  @JsonProperty("QR_HS_BEDID")
+  public List<String> getQrHsBedid() {
+      return qrHsBedid;
+  }
+
+  @JsonProperty("QR_HS_BEDID")
+  public void setQrHsBedid(List<String> qrHsBedid) {
+      this.qrHsBedid = qrHsBedid;
+  }
     
 }
