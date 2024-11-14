@@ -281,22 +281,64 @@ const EditWork = () => {
     };
 
     //
-    const [showTableData , setShowTableData]=useState(table1Data)
-    //篩選資料,由得到所有資料再篩選...可以再修改由API獲得最好
-    const handleFetchTable1Data = () => {
+    const [showTableData, setShowTableData] = useState(table1Data)
+    //篩選資料,由得到所有資料再篩選(但只能做正確的資料查詢 , 下面用table1的API模糊查詢取代)
+    // const handleFetchTable1Data = () => {
 
-        const filteredData = table1Data.filter((item: { workOrderNumber: string; createDate: string | number | Date; }) => {
-            const isWorkOrderMatch = item.workOrderNumber === searchWorkNumber;
-            const isDateInRange = new Date(item.createDate) >= new Date(productionDateStart) &&
-                new Date(item.createDate) <= new Date(productionDateEnd);
+    //     const filteredData = table1Data.filter((item: { workOrderNumber: string; createDate: string | number | Date; }) => {
+    //         const isWorkOrderMatch = item.workOrderNumber === searchWorkNumber;
+    //         const isDateInRange = new Date(item.createDate) >= new Date(productionDateStart) &&
+    //             new Date(item.createDate) <= new Date(productionDateEnd);
 
-            return isWorkOrderMatch || isDateInRange;
-        });
-        // setTable1Data(filteredData);
-        setShowTableData(filteredData);
+    //         return isWorkOrderMatch || isDateInRange;
+    //     });
+
+    //     setShowTableData(filteredData);
+    // }
+
+
+    const handleFetchTable1Data = async () => {
+
+        const requestBody = {
+            workOrderNumber: searchWorkNumber ? [searchWorkNumber] : [],
+            createDateStart: productionDateStart ? [productionDateStart] : [],
+            createDateEnd: productionDateEnd ? [productionDateEnd] : [],
+          };
+        
+        // console.log("requestBody : "+JSON.stringify(requestBody, null, 2));
+
+
+        try {
+            const response = await fetch(`${globalUrl.url}/api/fuzzy-search-work-orders`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    workOrderNumber: searchWorkNumber ? [searchWorkNumber] : [],
+                    createDateStart: productionDateStart ? [productionDateStart] : [],
+                    createDateEnd: productionDateEnd ? [productionDateEnd] : [],
+                }),
+
+              });
+
+
+            if (!response.ok) {
+                throw new Error('Failed to get 所有對應表');
+            }
+
+            const data = await response.json();
+            //過濾掉workOrderDetails的資料
+            const updatedData = removeWorkOrderDetails(data);
+
+            // console.log("updatedData : "+JSON.stringify(updatedData, null, 2));
+            setShowTableData(updatedData);
+
+        } catch (error) {
+            console.error('Error fetching token:', error);
+        }
+
     }
-
-    
 
     const handleEditClick = (id: any, workOrder: any, quantity: any, partnumber: any) => {
 
@@ -345,7 +387,7 @@ const EditWork = () => {
                         onChange={handleStartDateChange}
                     />
                 </>                    <>
-                    <label>{formatMessage({ id: 'enddate ' })}：</label>
+                    <label>{formatMessage({ id: 'enddate' })}：</label>
                     <input
                         type="date"
                         value={productionDateEnd}
@@ -359,52 +401,52 @@ const EditWork = () => {
                 <>
                     <Paper sx={{ width: '100%', overflow: 'hidden', height: '100%' }}>
                         <TableContainer component={Paper} style={{ maxHeight: '700px', overflowY: 'scroll' }}>
-                                <Table stickyHeader aria-label="sticky table">
-                                    <TableHead >
-                                        <TableRow style={{ border: '1px solid #ccc' }}>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'quantity' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'part' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'company' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
+                            <Table stickyHeader aria-label="sticky table">
+                                <TableHead >
+                                    <TableRow style={{ border: '1px solid #ccc' }}>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'quantity' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'part' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'company' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
 
-                                            {/* {['ADMIN', 'SUPERVISOR'].includes(userRole) && (
+                                        {/* {['ADMIN', 'SUPERVISOR'].includes(userRole) && (
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>
                                                 {formatMessage({ id: 'delete-orkOrder' })}
                                             </TableCell>
                                         )} */}
 
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {showTableData
-                                            .filter((row: any) => row.company === company)  // 過濾出 company 相同的資料
-                                            .map((row: any, rowIndex: number) => (
-                                                <TableRow key={rowIndex}>
-                                                    {/* <TableRow key={rowIndex} onClick={() => handleRowClick(row.id, row.workOrderNumber, row.quantity, row.partNumber, row.company)}> */}
-                                                    {['ADMIN', 'SUPERVISOR', 'OPERATOR'].includes(userRole) &&
-                                                        <TableCell>
-                                                            <button onClick={(e) => {
-                                                                handleEditClick(row.id, row.workOrderNumber, row.quantity, row.partNumber)
-                                                            }}>
-                                                                {formatMessage({ id: 'edit' })}</button>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {showTableData
+                                        .filter((row: any) => row.company === company)  // 過濾出 company 相同的資料
+                                        .map((row: any, rowIndex: number) => (
+                                            <TableRow key={rowIndex}>
+                                                {/* <TableRow key={rowIndex} onClick={() => handleRowClick(row.id, row.workOrderNumber, row.quantity, row.partNumber, row.company)}> */}
+                                                {['ADMIN', 'SUPERVISOR', 'OPERATOR'].includes(userRole) &&
+                                                    <TableCell>
+                                                        <button onClick={(e) => {
+                                                            handleEditClick(row.id, row.workOrderNumber, row.quantity, row.partNumber)
+                                                        }}>
+                                                            {formatMessage({ id: 'edit' })}</button>
+                                                    </TableCell>
+                                                }
+
+                                                {Object.keys(row)
+                                                    // .filter((colKey) => colKey !== 'id')
+                                                    .map((colKey) => (
+                                                        <TableCell key={colKey}>
+                                                            {row[colKey]}
                                                         </TableCell>
-                                                    }
+                                                    ))}
 
-                                                    {Object.keys(row)
-                                                        // .filter((colKey) => colKey !== 'id')
-                                                        .map((colKey) => (
-                                                            <TableCell key={colKey}>
-                                                                {row[colKey]}
-                                                            </TableCell>
-                                                        ))}
-
-                                                    {/* {['ADMIN', 'SUPERVISOR'].includes(userRole) &&
+                                                {/* {['ADMIN', 'SUPERVISOR'].includes(userRole) &&
                                                 <TableCell>
                                                     <button onClick={(e) => {
                                                         e.stopPropagation();    //避免handleRowClick和handleDeleteClick衝突
@@ -413,11 +455,11 @@ const EditWork = () => {
                                                         {formatMessage({ id: 'delete-orkOrder' })}</button>
                                                 </TableCell>
                                             } */}
-                                                </TableRow>
-                                            ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
+                                            </TableRow>
+                                        ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
                     </Paper>
                     {/* <TablePagination
                         rowsPerPageOptions={[5, 10, 25, 100]}
