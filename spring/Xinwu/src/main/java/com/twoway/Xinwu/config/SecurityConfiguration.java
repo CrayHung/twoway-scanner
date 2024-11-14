@@ -107,7 +107,7 @@ public class SecurityConfiguration {
                                 .requestMatchers("/parking/addparkinglots/**").hasAuthority("ADMIN")
                                 .requestMatchers("/parking/modifyparkinglots/**").hasAuthority( "ADMIN")
                                 .requestMatchers("/admin/**").hasAuthority("ADMIN")
-                                .requestMatchers("/upload/**").hasAuthority("ADMIN")
+                                .requestMatchers("/upload/**").permitAll()
                                 .requestMatchers("/user/**").permitAll() //測試用日後需刪除
                                 .requestMatchers("/api/**").permitAll() //測試用日後需刪除
                                 .anyRequest()

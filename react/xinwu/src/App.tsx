@@ -12,11 +12,11 @@ import Register from './Register';
 import ForgetPassword from './ForgetPassword';
 import ResetPassword from './ResetPassword';
 
-import AllowList from './component/AllowList';
+import AddNewWorker from './component/AddNewWorker';
 import SearchForm from './component/SearchForm';
 import SearchTable1 from './component/SearchTable1';
 
-import ShowAllWork from './component/ShowAllWork';
+import EditWork from './component/EditWork';
 import PartTable from './component/partTable';
 import AccountPage from './component/AccountPage';
 
@@ -26,11 +26,14 @@ import useNavigatorLanguage, { LocaleContext } from "./language/useNavigatorLang
 import useGetMessage from "./language/useGetMessage";
 
 
+import TwowayScannerImportOracleXlsx from './component/twowayScannerImportOracleXlsx';
+import HomePage from './HomePage';
+
 function App() {
   const [locale, setLocale] = useNavigatorLanguage();
   const messages = useGetMessage();
 
-  const {     userRole,isLoggedIn, setIsLoggedIn } = useGlobalContext();
+  const {    jwtToken, userRole,isLoggedIn, setIsLoggedIn } = useGlobalContext();
   return (
     <LocaleContext.Provider value={[locale, setLocale]}>
     <IntlProvider locale={locale} messages={messages && messages[locale]}>
@@ -42,18 +45,29 @@ function App() {
         <Header/>
 
         <div className="container" >
+
+          
         <div className="menu"> {/* 固定的左側 Menu */}
         <Menu />
         </div>
 
 
           <Routes>
+          {/* {jwtToken ? ( */}
           {isLoggedIn ? (
+
+
             <>
 
-            <Route path="/allowlist" Component={AllowList} /> 
-            <Route path="/allowlist/reload" element={<Navigate to="/allowlist" />} />
 
+            <Route path="/" Component={HomePage} /> 
+            <Route path="/reload" element={<Navigate to="/" />} />
+
+            <Route path="/addnewworker" Component={AddNewWorker} /> 
+            <Route path="/addnewworker/reload" element={<Navigate to="/addnewworker" />} />
+
+            <Route path="/editWorker" Component={EditWork} /> 
+            <Route path="/editWorker/reload" element={<Navigate to="/editWorker" />} />
 
             <Route path="/searchForm" Component={SearchForm} /> 
             <Route path="/searchForm/reload" element={<Navigate to="/searchForm" />} />
@@ -65,14 +79,17 @@ function App() {
             <Route path="/partTable/reload" element={<Navigate to="/partTable" />} />
 
             <Route path="/register" Component={Register} /> 
-            <Route path="/register" element={<Register />} />
+            <Route path="/register/reload" element={<Navigate to="/register" />} />
 
-            <Route path="/" Component={ShowAllWork} /> 
-            <Route path="/reload" element={<Navigate to="/" />} />
+
 
             <Route path="/accountPage" Component={AccountPage} /> 
             <Route path="/accountPage/reload" element={<Navigate to="/accountPage" />} />
 
+            <Route path="/importOracle" Component={TwowayScannerImportOracleXlsx} /> 
+            <Route path="/importOracle/reload" element={<Navigate to="/importOracle" />} />
+
+            
 
             </>
              ) : (

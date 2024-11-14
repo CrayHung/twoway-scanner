@@ -59,7 +59,8 @@ public class DataUploadService {
                 }
             }
 
-            allowListRepository.saveAll(allowList);
+                System.out.println("上傳的資料"+allowList);
+            // allowListRepository.saveAll(allowList);
         }
     }
 

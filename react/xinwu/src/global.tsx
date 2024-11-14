@@ -4,15 +4,26 @@ export const GlobalContext = createContext<any>(null);
 
 export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
+  //從localStorage中取得token
+  const [jwtToken, setJwtToken] = useState<string | null>(localStorage.getItem('jwtToken'));
+  //取得目前的使用者身分
+  const [userRole, setUserRole] = useState<string | null>(localStorage.getItem('userRole'));
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!jwtToken);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const serverUrl = window.location.origin;
+  //公司單位 (Twoway或ACI)
+  // const [company,setCompany] = useState('');  
+  const [company, setCompany] = useState<string | null>(localStorage.getItem('company')); 
+// 當前使用者
+  const [currentUser, setCurrentUser] = useState('');    
+  
+  
+  const ip = window.location.host.split(":")[0];
+  const serverUrl = `http://${ip}:8080`;
+  // const serverUrl = window.location.origin;
 
   const [globalUrl, setGlobalUrl] = useState({
     //url: 'http://192.168.195.195:8080',     //195
-    url: 'http://127.0.0.1:8080',          //loacl
-
-    
+    url: serverUrl,
     // url: 'http://192.168.29.91:8080',       //twoway sacnner NUC
     // url: 'http://59.120.199.69:8080',       //twoway sacnner WINDOWS
 
@@ -23,28 +34,77 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
 
   });
 
-  //取得目前的使用者身分
-  const [userRole ,setUserRole]=useState('');
-
-  //從localStorage中取得token
-  const [jwtToken, setJwtToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    const token = localStorage.getItem('jwtToken');
-    if (token) {
-      setJwtToken(token);
-    }
-  }, [jwtToken]);
-
-  //將token存到localStorage中
-  const setToken = (token: string | null) => {
-    if (token) {
+/******************************************************* */
+  // 更新 Token 和 Role 並存入 localStorage
+  const setToken = (token: string | null, role: string | null , company: string | null ) => {
+    if (token && role && company) {
       localStorage.setItem('jwtToken', token);
+      localStorage.setItem('userRole', role);
+      localStorage.setItem('company', company);
+
+
+      setJwtToken(token);
+      setUserRole(role);
+      setCompany(company);
+
+      setIsLoggedIn(true);
     } else {
       localStorage.removeItem('jwtToken');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('company');
+
+      setJwtToken(null);
+      setUserRole(null);
+      setCompany(null);
+
+      setIsLoggedIn(false);
     }
-    setJwtToken(token);
   };
+
+  // 登出函數
+  const logout = () => {
+    setToken(null, null,null);
+  };
+
+  // 應用程式載入時檢查 localStorage 中的 token
+  useEffect(() => {
+    const token = localStorage.getItem('jwtToken');
+    const role = localStorage.getItem('userRole');
+    const company = localStorage.getItem('company');
+
+    if (token && role ) {
+      setJwtToken(token);
+      setUserRole(role);
+      setCompany(company);
+
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+/***************************************************** */
+  // useEffect(() => {
+  //   const token = localStorage.getItem('jwtToken');
+  //   const role = localStorage.getItem('userRole');
+  //   if (token ) {
+  //     setJwtToken(token);
+  //     setIsLoggedIn(true);
+  //   }
+  // }, []);
+
+  // 將token存到localStorage中
+  // const setToken = (token: string | null) => {
+  //   if (token) {
+  //     localStorage.setItem('jwtToken', token);
+  //     setIsLoggedIn(true);
+  //   } else {
+  //     localStorage.removeItem('jwtToken');
+  //     setIsLoggedIn(false);
+  //   }
+  //   setJwtToken(token);
+  // };
+
+ 
+
 
   const [cam1LatestData, setCam1LatestData] = useState(null);
   const [cam2LatestData, setCam2LatestData] = useState(null);
@@ -57,10 +117,7 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [part, setPart] = useState('');             //料號名稱
   const [model, setModel] = useState('');           //模式A~E
 
-  const [company,setCompany] = useState('');        //公司單位 (Twoway或ACI)
-
-  const [currentUser, setCurrentUser] = useState('admin');  // 當前使用者
-
+ 
   const [table3Data, setTable3Data] = useState([]);
 
   const [table1Data, setTable1Data] = useState([]);
@@ -77,8 +134,12 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
     setIsLoggedIn,
     globalUrl,
     jwtToken,
-    //setJwtToken,
-    setJwtToken: setToken,
+    setJwtToken,
+    // setJwtToken: setToken,
+
+    setToken,
+    logout,
+
     cam1LatestData,
     setCam1LatestData,
     cam2LatestData,

@@ -9,7 +9,7 @@ const LogInPage = () => {
     const [input2, setInput2] = useState<string>('');
     const [error, setError] = useState<string>('');
 
-    const {  setCompany, userRole,setUserRole,jwtToken , setJwtToken ,isLoggedIn, setIsLoggedIn,globalUrl,currentUser, setCurrentUser } = useGlobalContext();
+    const {  setToken ,setCompany, userRole,setUserRole,jwtToken , setJwtToken ,isLoggedIn, setIsLoggedIn,globalUrl,currentUser, setCurrentUser } = useGlobalContext();
     const { formatMessage } = useIntl();
 
     const fetchLogin = async () => {
@@ -28,7 +28,7 @@ const LogInPage = () => {
   
           if (!response.ok) {
             throw new Error('Failed to login');
-            alert("登入失敗")
+            alert(formatMessage({ id: 'login-fail' }))
           }
           
           
@@ -36,14 +36,15 @@ const LogInPage = () => {
           const token = data.token; 
           const userRole = data.role; 
           const company = data.company;
-          alert("登入腳色:"+ userRole);
+          alert(`${formatMessage({ id: 'text8' })}  ${userRole}`);
 
+          setToken(token, userRole,company);
   
           await setJwtToken(token);
           await setUserRole(userRole);
           await setCompany(company);
-          alert("登入成功")
-          await setIsLoggedIn(true);
+          alert(formatMessage({ id: 'login-sucess' }))
+          // await setIsLoggedIn(true);
 
         } catch (error: any) {
           console.error('Error fetching token:', error);
@@ -95,6 +96,7 @@ const LogInPage = () => {
                     sx={{ width: '300px' }}
                 />
                 <TextField
+                    type="password" 
                     label={formatMessage({ id: 'password' })}
                     variant="outlined"
                     value={input2}
@@ -111,9 +113,9 @@ const LogInPage = () => {
                 > */}
  
                     <>
-                    <Link href="forgetpassword" variant="body2" >
+                    {/* <Link href="forgetpassword" variant="body2" >
                       {'forget password'}
-                    </Link>
+                    </Link> */}
                     <br />
                     <Button variant="contained" onClick={handleButtonClick} sx={{ marginRight: 1 }}>
                     {formatMessage({ id: 'submit' })}

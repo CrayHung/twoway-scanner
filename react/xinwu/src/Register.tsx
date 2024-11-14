@@ -44,11 +44,12 @@ const Register = () => {
         // setIsLoggedIn(false);
       } else {
         console.log(token);
-        setJwtToken(token);
+        // setJwtToken(token);
+        // setIsLoggedIn(true);
+        // setIsLoggedIn(false);
+        alert(formatMessage({ id: 'register-sucess' }));
 
-        setIsLoggedIn(true);
-        alert("註冊成功");
-        // navigate("/");
+        navigate("/accountPage");
       }
     } catch (error: any) {
       console.error('Error fetching token:', error);
@@ -81,11 +82,12 @@ const Register = () => {
         // setIsLoggedIn(false);
       } else {
         console.log(token);
-        setJwtToken(token);
+        // setJwtToken(token);
+        // setIsLoggedIn(true);
+        // setIsLoggedIn(false);
+        alert(formatMessage({ id: 'register-sucess' }));
 
-        setIsLoggedIn(true);
-        alert("註冊成功");
-        // navigate("/");
+        navigate("/accountPage");
       }
     } catch (error: any) {
       console.error('Error fetching token:', error);
@@ -118,11 +120,12 @@ const Register = () => {
         // setIsLoggedIn(false);
       } else {
         console.log(token);
-        setJwtToken(token);
+        // setJwtToken(token);
+        // setIsLoggedIn(true);
+        // setIsLoggedIn(false);
+        alert(formatMessage({ id: 'register-sucess' }));
 
-        setIsLoggedIn(true);
-        alert("註冊成功");
-        // navigate("/");
+        navigate("/accountPage");
       }
     } catch (error: any) {
       console.error('Error fetching token:', error);
@@ -155,11 +158,12 @@ const Register = () => {
         // setIsLoggedIn(false);
       } else {
         console.log(token);
-        setJwtToken(token);
+        // setJwtToken(token);
+        // setIsLoggedIn(true);
+        // setIsLoggedIn(false);
+        alert(formatMessage({ id: 'register-sucess' }));
 
-        setIsLoggedIn(true);
-        alert("註冊成功");
-        // navigate("/");
+        navigate("/accountPage");
       }
     } catch (error: any) {
       console.error('Error fetching token:', error);

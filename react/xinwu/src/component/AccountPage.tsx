@@ -214,6 +214,10 @@ const AccountPage = () => {
     }
 
 
+    const handleExitButtonClick = () => {
+        navigate('/');
+      };
+
 
     return (
         <div>
@@ -305,7 +309,7 @@ const AccountPage = () => {
                                     <MenuItem value=""> NO </MenuItem>
                                     <MenuItem value="Twoway">Twoway</MenuItem>
                                     <MenuItem value="ACI"> ACI </MenuItem>
-   
+
                                 </TextField>
                             </Grid>
 
@@ -345,47 +349,53 @@ const AccountPage = () => {
             {/* <div>
                 <button onClick={() => { navigate("/register") }}>{formatMessage({ id: 'register' })}</button>
             </div> */}
-
-            <Typography variant="h4" gutterBottom>
-                {formatMessage({ id: 'account-page' })}
-            </Typography>
-            {Data.length > 0 ? (
-                <TableContainer component={Paper}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>{formatMessage({ id: 'account' })}</TableCell>
-                                <TableCell>{formatMessage({ id: 'role' })}</TableCell>
-                                <TableCell>{formatMessage({ id: 'company' })}</TableCell>
-                                <TableCell>{formatMessage({ id: 'reset-password' })}</TableCell>
-                                <TableCell>{formatMessage({ id: 'edit' })}</TableCell>
-                                <TableCell>{formatMessage({ id: 'delete' })}</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {Data.map((user, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>{user.username}</TableCell>
-                                    <TableCell>{user.role}</TableCell>
-                                    <TableCell>{user.company}</TableCell>
-                                    <TableCell>
-                                        <button onClick={() => handleReset(user)}>{formatMessage({ id: 'reset-password' })}</button>
-                                    </TableCell>
-                                    <TableCell>
-                                        <button onClick={() => handleEdit(user)}>{formatMessage({ id: 'edit' })}</button>
-                                    </TableCell>
-
-                                    <TableCell>
-                                        <button onClick={() => handleDeleteClick(user)}>{formatMessage({ id: 'delete' })}</button>
-                                    </TableCell>
+            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                <Typography variant="h4" gutterBottom>
+                    {formatMessage({ id: 'account-page' })}
+                </Typography>
+                <Button variant="contained" sx={{ marginRight: 1 }} onClick={handleExitButtonClick}>
+                {formatMessage({ id: 'exit' })}
+                </Button>
+            </Box>
+            {
+                Data.length > 0 ? (
+                    <TableContainer component={Paper}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>{formatMessage({ id: 'account' })}</TableCell>
+                                    <TableCell>{formatMessage({ id: 'role' })}</TableCell>
+                                    <TableCell>{formatMessage({ id: 'company' })}</TableCell>
+                                    <TableCell>{formatMessage({ id: 'reset-password' })}</TableCell>
+                                    <TableCell>{formatMessage({ id: 'edit' })}</TableCell>
+                                    <TableCell>{formatMessage({ id: 'delete' })}</TableCell>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            ) : (
-                <Typography>No users found.</Typography>
-            )}
+                            </TableHead>
+                            <TableBody>
+                                {Data.map((user, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>{user.username}</TableCell>
+                                        <TableCell>{user.role}</TableCell>
+                                        <TableCell>{user.company}</TableCell>
+                                        <TableCell>
+                                            <button onClick={() => handleReset(user)}>{formatMessage({ id: 'reset-password' })}</button>
+                                        </TableCell>
+                                        <TableCell>
+                                            <button onClick={() => handleEdit(user)}>{formatMessage({ id: 'edit' })}</button>
+                                        </TableCell>
+
+                                        <TableCell>
+                                            <button onClick={() => handleDeleteClick(user)}>{formatMessage({ id: 'delete' })}</button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                ) : (
+                    <Typography>No users found.</Typography>
+                )
+            }
 
         </div >
     );

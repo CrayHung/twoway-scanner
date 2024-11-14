@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import "./Menu.css"
 import { useIntl } from "react-intl";
@@ -6,7 +6,7 @@ import { useGlobalContext } from './global';
 
 const Menu = () => {
   const { formatMessage } = useIntl();
-  const { userRole, isLoggedIn, globalUrl } = useGlobalContext();
+  const { company,jwtToken,userRole, isLoggedIn, globalUrl } = useGlobalContext();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -21,19 +21,26 @@ const Menu = () => {
   //     }
   // };
 
+  useEffect(() => {
+    // 每次 isLoggedIn 或 userRole 改變時觸發
+    console.log('User is logged in:', isLoggedIn);
+    console.log('User role:', userRole);
+    console.log('company:', company);
+  }, [isLoggedIn, userRole]);
+
   return (
     <div className="menu">
-
       {isLoggedIn ? (
         <>
-          {(userRole === 'OPERATOR' || userRole === 'ADMIN' || userRole === 'SUPERVISOR') && (
-            // <Link to="/"  >{formatMessage({ id: 'Menu-All-WorkOrders' })}</Link>
-            <Link to="/reload"  >{formatMessage({ id: 'Menu-All-WorkOrders' })}</Link>
-          )}
 
           {(userRole === 'ADMIN' || userRole === 'SUPERVISOR' || userRole === 'OPERATOR') && (
             // <Link to="/allowlist" >{formatMessage({ id: 'Menu-Add-WorkOrders' })}</Link>
-            <Link to="/allowlist/reload">{formatMessage({ id: 'Menu-Add-WorkOrders' })}</Link>
+            <Link to="/addnewworker/reload">{formatMessage({ id: 'Menu-Add-WorkOrders' })}</Link>
+          )}
+
+          {(userRole === 'OPERATOR' || userRole === 'ADMIN' || userRole === 'SUPERVISOR') && (
+            // <Link to="/"  >{formatMessage({ id: 'Menu-All-WorkOrders' })}</Link>
+            <Link to="/editWorker/reload"  >{formatMessage({ id: 'Menu-edit-WorkOrders' })}</Link>
           )}
 
           {(userRole === 'ADMIN' || userRole === 'SUPERVISOR' || userRole === 'OPERATOR' || userRole === 'USER') && (
@@ -41,14 +48,25 @@ const Menu = () => {
             <Link to="/searchTable1/reload">{formatMessage({ id: 'Menu-Search-WorkOrders' })}</Link>
           )}
 
+
           {(userRole === 'ADMIN' || userRole === 'SUPERVISOR') && (
             // <Link to="/partTable" >{formatMessage({ id: 'part-table' })}</Link>
-            <Link to="/partTable/reload" >{formatMessage({ id: 'part-table' })}</Link>
+            <Link to="/partTable/reload" >{formatMessage({ id: 'input-setting' })}</Link>
           )}
+
+
+
 
           {userRole === 'ADMIN' && (
             // <Link to="/accountPage" >{formatMessage({ id: 'account-page' })}</Link>
-            <Link to="/accountPage/reload" >{formatMessage({ id: 'account-page' })}</Link>
+            <>
+              <Link to="/accountPage/reload">{formatMessage({ id: 'account-page' })}</Link>
+
+              <Link to="/register/reload">{formatMessage({ id: 'create_account' })}</Link>
+
+              {/* <Link to="/importOracle">{formatMessage({ id: 'oracle import' })}</Link> */}
+              <Link to="/importOracle/reload">{formatMessage({ id: 'oracle import' })}</Link>
+            </>
           )}
         </>
       ) : (

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate,useLocation  } from 'react-router-dom';
-import { TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, IconButton, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, IconButton, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Typography } from '@mui/material';
 import * as XLSX from 'xlsx';
 import { useGlobalContext } from '../global';
 import { useIntl } from "react-intl";
@@ -42,7 +42,7 @@ const SearchTable1 = () => {
     const [customerExcelData, setCustomerExcelData] = useState([]);
 
     //SN選一種模式   用來切換模式 1.single 2.range
-    const [mode, setMode] = useState('');
+    const [mode, setMode] = useState('single');
 
     const today = new Date().toISOString().split('T')[0]; // 當前日期 (YYYY-MM-DD 格式)
 
@@ -104,7 +104,7 @@ const SearchTable1 = () => {
             company: [''],
 
             // 可選欄位預設為 null
-            SN: null,
+            SN: [''],
             snStart: null,
             snEnd: null,
         };
@@ -601,7 +601,7 @@ const SearchTable1 = () => {
     }
     /********************************************************* */
 
-    //客戶專用下載eexcel
+    //客戶專用下載excel
     const handleDownloadCustomerExcel = () => {
 
         const customerExcelData = dataForDownload.map((row: { QR_HS: any; QR_PS: any; QR_RFTray: any; create_date: any; }) => ({
@@ -623,9 +623,21 @@ const SearchTable1 = () => {
 
         const worksheet = XLSX.utils.json_to_sheet(customerExcelData);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "客戶專用");
+        XLSX.utils.book_append_sheet(workbook, worksheet, "客戶專用下載excel");
         XLSX.writeFile(workbook, "customerData.xlsx");
     };
+
+    /********************************************************* */
+    //下載所有欄位
+    const handleDownloadAllExcel = () => {
+
+        const worksheet = XLSX.utils.json_to_sheet(resultData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "所有欄位下載excel");
+        XLSX.writeFile(workbook, "AllData.xlsx");
+
+    }
+
 
     useEffect(() => {
         console.log(customerExcelData);
@@ -662,12 +674,24 @@ const SearchTable1 = () => {
     const location = useLocation();
     useEffect(() => {
         setOpen(true); // 當 URL 改變時，重新打開 Modal
-      }, [location.search]); // location.search 變化時重新執行 useEffect
+    }, [location.search]); // location.search 變化時重新執行 useEffect
 
+
+    const handleExitButtonClick = () => {
+        navigate('/');
+    };
 
     return (
         <div style={{ width: '100vw', position: 'relative', left: 0 }}>
-        {/* <div className="content" style={{ flex: 1 }}> */}
+            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                <Typography variant="h4" gutterBottom>
+                    {formatMessage({ id: 'Menu-Search-WorkOrders' })}
+                </Typography>
+                <Button variant="contained" sx={{ marginRight: 1 }} onClick={handleExitButtonClick}>
+                    {formatMessage({ id: 'exit' })}
+                </Button>
+            </Box>
+            {/* <div className="content" style={{ flex: 1 }}> */}
             <Modal open={open} onClose={handleClose}>
                 <Box sx={modalStyle}>
                     <form>
@@ -882,8 +906,12 @@ const SearchTable1 = () => {
                     <div>
                         <button onClick={handleDownloadCustomerExcel}>{formatMessage({ id: 'customexcel' })}</button>
                     </div>
-                    <Paper sx={{ width: '100%', overflow: 'hidden', height: '90%' }}>
-                        <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'scroll' }}>
+                    <div>
+                        <button onClick={handleDownloadAllExcel}>{formatMessage({ id: 'Allexcel' })}</button>
+                    </div>
+
+                    <Paper sx={{ width: '100%', overflow: 'hidden', height: '100%' }}>
+                        <TableContainer component={Paper} style={{ maxHeight: '700px', overflowY: 'scroll' }}>
                             <Table stickyHeader aria-label="sticky table">
                                 <TableHead >
                                     <TableRow style={{ border: '1px solid #ccc' }}>

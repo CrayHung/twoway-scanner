@@ -96,8 +96,8 @@ const PartTable = () => {
             numberPerPallet: numberPerPallet,
             summary: summary,
             note: note,
-            createUser:currentUser,
-            createDate:today,
+            createUser: currentUser,
+            createDate: today,
 
         };
 
@@ -198,8 +198,8 @@ const PartTable = () => {
                     numberPerPallet: editPart.numberPerPallet,
                     summary: editPart.summary,
                     note: editPart.note,
-                    editUser:currentUser,
-                    editDate:today,
+                    editUser: currentUser,
+                    editDate: today,
                 })
             });
 
@@ -253,6 +253,9 @@ const PartTable = () => {
 
 
 
+    const handleExitButtonClick = () => {
+        navigate('/');
+    };
 
 
 
@@ -402,7 +405,7 @@ const PartTable = () => {
                                         <TextField
                                             label={formatMessage({ id: 'number_per_pallet' })}
                                             value={editPart.numberPerPallet}
-                                            onChange={(e) => handleNumberPerPalletChange(Number(e.target.value))}
+                                            onChange={(e) => handleNumberPerPalletChange(e.target.value)}
                                             fullWidth
                                             type="number"
                                         />
@@ -470,9 +473,21 @@ const PartTable = () => {
 
 
 
-            <div>
+            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                <Button variant="contained" onClick={()=>{setOpenAddForm(true)}}>
+                {formatMessage({ id: 'add-part' })}
+                </Button>
+
+                <Button variant="contained" sx={{ marginRight: 1 }} onClick={handleExitButtonClick}>
+                    {formatMessage({ id: 'exit' })}
+                </Button>
+            </Box>
+
+
+            {/* <div>
                 <button onClick={() => { setOpenAddForm(true) }}>{formatMessage({ id: 'add-part' })}</button>
-            </div>
+                <button style={{ float: 'right' }} onClick={handleExitButtonClick}>{formatMessage({ id: 'exit' })}</button>
+            </div> */}
             <>
                 <Paper sx={{ width: '100vw%', overflow: 'hidden', height: '90%' }}>
                     <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'scroll' }}>
