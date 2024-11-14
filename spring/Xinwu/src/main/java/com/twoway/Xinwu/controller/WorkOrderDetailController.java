@@ -149,6 +149,9 @@ public class WorkOrderDetailController {
         workOrderDetail.setQrRfTray(request.getQR_RFTray());
         workOrderDetail.setQrPs(request.getQR_PS());
         workOrderDetail.setQrHs(request.getQR_HS());
+        workOrderDetail.setQrRfTrayBedid(request.getQR_RFTray_BEDID());
+        workOrderDetail.setQrPsBedid(request.getQR_PS_BEDID());
+        workOrderDetail.setQrHsBedid(request.getQR_HS_BEDID());
         workOrderDetail.setQrBackup1(request.getQR_backup1());
         workOrderDetail.setQrBackup2(request.getQR_backup2());
         workOrderDetail.setQrBackup3(request.getQR_backup3());
@@ -254,6 +257,18 @@ public class WorkOrderDetailController {
       if (dto.getQrHs() != null && !dto.getQrHs().trim().isEmpty()) {
           workOrderDetail.setQrHs(dto.getQrHs());
       }
+      
+      // 新增 BEDID 字段的更新邏輯
+      if (dto.getQrRfTrayBedid() != null && !dto.getQrRfTrayBedid().trim().isEmpty()) {
+        workOrderDetail.setQrRfTrayBedid(dto.getQrRfTrayBedid());
+      }
+      if (dto.getQrPsBedid() != null && !dto.getQrPsBedid().trim().isEmpty()) {
+        workOrderDetail.setQrPsBedid(dto.getQrPsBedid());
+      }
+      if (dto.getQrHsBedid() != null && !dto.getQrHsBedid().trim().isEmpty()) {
+        workOrderDetail.setQrHsBedid(dto.getQrHsBedid());
+      }
+      
       if (dto.getQrBackup1() != null && !dto.getQrBackup1().trim().isEmpty()) {
           workOrderDetail.setQrBackup1(dto.getQrBackup1());
       }
@@ -270,7 +285,7 @@ public class WorkOrderDetailController {
           workOrderDetail.setNote(dto.getNote());
       }
       
-      // 這些欄位通常應該要更新，因為是系統紀錄
+      // 由後端紀錄的欄位更新
       workOrderDetail.setEdit_date(LocalDate.now());
       if (dto.getEdit_user() != null && !dto.getEdit_user().trim().isEmpty()) {
           workOrderDetail.setEdit_user(dto.getEdit_user());
@@ -390,6 +405,16 @@ class WorkOrderDetailRequest {
   private String create_user;
   private String edit_user;
 
+  //新增 BEDID*3
+  @JsonProperty("QR_RFTray_BEDID")
+  private String QR_RFTray_BEDID;
+
+  @JsonProperty("QR_PS_BEDID")
+  private String QR_PS_BEDID;
+
+  @JsonProperty("QR_HS_BEDID")
+  private String QR_HS_BEDID;
+
   // 新增一個無參數構造函數
   public WorkOrderDetailRequest() {
   }
@@ -397,6 +422,7 @@ class WorkOrderDetailRequest {
   // 新增一個帶參數的構造函數
   public WorkOrderDetailRequest(String workOrderNumber, String SN,
       String QR_RFTray, String QR_PS, String QR_HS,
+      String QR_RFTray_BEDID, String QR_PS_BEDID, String QR_HS_BEDID,
       String QR_backup1, String QR_backup2, String QR_backup3,
       String QR_backup4, String note, String create_user, String edit_user) {
     this.workOrderNumber = workOrderNumber;
@@ -405,6 +431,9 @@ class WorkOrderDetailRequest {
     this.QR_RFTray = QR_RFTray;
     this.QR_PS = QR_PS;
     this.QR_HS = QR_HS;
+    this.QR_RFTray_BEDID = QR_RFTray_BEDID;  // BEDID
+    this.QR_PS_BEDID = QR_PS_BEDID;          
+    this.QR_HS_BEDID = QR_HS_BEDID;          
     this.QR_backup1 = QR_backup1;
     this.QR_backup2 = QR_backup2;
     this.QR_backup3 = QR_backup3;
@@ -513,4 +542,30 @@ class WorkOrderDetailRequest {
   public void setEdit_user(String edit_user) {
     this.edit_user = edit_user;
   }
+
+  // BEDID 
+
+  public String getQR_RFTray_BEDID() {
+    return QR_RFTray_BEDID;
+}
+
+public void setQR_RFTray_BEDID(String QR_RFTray_BEDID) {
+    this.QR_RFTray_BEDID = QR_RFTray_BEDID;
+}
+
+public String getQR_PS_BEDID() {
+    return QR_PS_BEDID;
+}
+
+public void setQR_PS_BEDID(String QR_PS_BEDID) {
+    this.QR_PS_BEDID = QR_PS_BEDID;
+}
+
+public String getQR_HS_BEDID() {
+    return QR_HS_BEDID;
+}
+
+public void setQR_HS_BEDID(String QR_HS_BEDID) {
+    this.QR_HS_BEDID = QR_HS_BEDID;
+}
 }

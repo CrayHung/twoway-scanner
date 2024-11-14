@@ -70,35 +70,38 @@ BODY 範例(JSON):
 
 [
   {
-    "workOrderNumber": "WO-001",
-    "SN": "SN001",
-    "QR_RFTray": "RF001",
-    "QR_PS": "PS001",
-    "QR_HS": "HS001",
-    QR_RFTray_BEDID -> 目前暫定，尚未更新
-    QR_PS_BEDID
-    QR_HS_BEDID
-    "QR_backup1": "BK001",
-    "QR_backup2": "BK002",
-    "QR_backup3": "BK003",
-    "QR_backup4": "BK004",
-    "note": "測試註記",
-    "create_user": "tester",
-    "edit_user": "tester"
+    "workOrderNumber": ["WO-001"],
+    "SN": ["SN001"],
+    "QR_RFTray": ["RF001"],
+    "QR_PS": ["PS001"],
+    "QR_HS": ["HS001"],
+    "QR_RFTray_BEDID": ["RFBED"],
+    "QR_PS_BEDID": ["PSBED"],
+    "QR_HS_BEDID": ["HSBED"]
+    "QR_backup1": ["BK001"],
+    "QR_backup2": ["BK002"],
+    "QR_backup3": ["BK003"],
+    "QR_backup4": ["BK004"],
+    "note": ["測試註記"],
+    "create_user": ["tester"],
+    "edit_user": ["tester"]
   },
   {
-    "workOrderNumber": "WO-002",
-    "SN": "SN002",
-    "QR_RFTray": "RF002",
-    "QR_PS": "PS002",
-    "QR_HS": "HS002",
-    "QR_backup1": "BK005",
-    "QR_backup2": "BK006",
-    "QR_backup3": "BK007",
-    "QR_backup4": "BK008",
-    "note": "另一個測試註記",
-    "create_user": "tester2",
-    "edit_user": "tester2"
+    "workOrderNumber": ["WO-001"],
+    "SN": ["SN001"],
+    "QR_RFTray": ["RF001"],
+    "QR_PS": ["PS001"],
+    "QR_HS": ["HS001"],
+    "QR_RFTray_BEDID": ["RFBED"],
+    "QR_PS_BEDID": ["PSBED"],
+    "QR_HS_BEDID": ["HSBED"]
+    "QR_backup1": ["BK001"],
+    "QR_backup2": ["BK002"],
+    "QR_backup3": ["BK003"],
+    "QR_backup4": ["BK004"],
+    "note": ["測試註記"],
+    "create_user": ["tester"],
+    "edit_user": ["tester"]
   }
 ]
 
@@ -120,6 +123,9 @@ JSON 可用名稱範例
   "QR_RFTray": ["RF001", "RF002"],
   "QR_PS": ["PS001", "PS002"],
   "QR_HS": ["HS001", "HS002"],
+  "QR_RFTray_BEDID": ["RFBED"],
+  "QR_PS_BEDID": ["PSBED"],
+  "QR_HS_BEDID": ["HSBED"],
   "QR_backup1": ["BK1001", "BK1002"],
   "QR_backup2": ["BK2001", "BK2002"],
   "QR_backup3": ["BK3001", "BK3002"],
@@ -146,6 +152,9 @@ JSON 可用名稱範例
   "QR_RFTray": ["RF001", "RF002"],
   "QR_PS": ["PS001", "PS002"],
   "QR_HS": ["HS001", "HS002"],
+  "QR_RFTray_BEDID": ["RFBED"],
+  "QR_PS_BEDID": ["PSBED"],
+  "QR_HS_BEDID": ["HSBED"]
   "QR_backup1": ["B1001", "B1002"],
   "QR_backup2": ["B2001", "B2002"],
   "QR_backup3": ["B3001", "B3002"],
@@ -167,30 +176,36 @@ BODY 範例(JSON):
 [
   {
     "id": 13,
-    "SN": "SN010-updated",
-    "QR_RFTray": "QRRF008-updated",
-    "QR_PS": "QRPS008-updated",
-    "QR_HS": "QRHS008-updated",
-    "QR_backup1": "QRBU029-updated",
-    "QR_backup2": "QRBU030-updated",
-    "QR_backup3": "QRBU031-updated",
-    "QR_backup4": "QRBU032-updated",
-    "note": "Note for WO-003 中文 - 已更新",
-    "edit_user": "user1-updated"
+    "SN": ["SN010-updated"],
+    "QR_RFTray": ["QRRF008-updated"],
+    "QR_PS": ["QRPS008-updated"],
+    "QR_HS": ["QRHS008-updated"],
+    "QR_RFTray_BEDID": ["RFBED-updated"],
+    "QR_PS_BEDID": ["PSBED-updated"],
+    "QR_HS_BEDID": ["HSBED-updated"],
+    "QR_backup1": ["QRBU029-updated"],
+    "QR_backup2": ["QRBU030-updated"],
+    "QR_backup3": ["QRBU031-updated"],
+    "QR_backup4": ["QRBU032-updated"],
+    "note": ["Note for WO-003 updated"],
+    "edit_user": ["user1-updated"]
   },
   {
     "id": 14,
-    "SN": "SN011-updated",
-    "QR_RFTray": "QRRF009-updated",
-    "QR_PS": "QRPS009-updated",
-    "QR_HS": "QRHS009-updated",
-    "QR_backup1": "QRBU033-updated",
-    "QR_backup2": "QRBU034-updated",
-    "QR_backup3": "QRBU035-updated",
-    "QR_backup4": "QRBU036-updated",
-    "note": "Note for WO-003 正確 - 已更新",
-    "edit_user": "user1-updated"
-  }
+    "SN": ["SN011-updated"],
+    "QR_RFTray": ["QRRF009-updated"],
+    "QR_PS": ["QRPS009-updated"],
+    "QR_HS": ["QRHS009-updated"],
+    "QR_RFTray_BEDID": ["RFBED-updated"],
+    "QR_PS_BEDID": ["PSBED-updated"],
+    "QR_HS_BEDID": ["HSBED-updated"],
+    "QR_backup1": ["QRBU033-updated"],
+    "QR_backup2": ["QRBU034-updated"],
+    "QR_backup3": ["QRBU035-updated"],
+    "QR_backup4": ["QRBU036-updated"],
+    "note": ["Note for WO-003 updated"],
+    "edit_user": ["user1-updated"]
+}
 ]
 
 注意：

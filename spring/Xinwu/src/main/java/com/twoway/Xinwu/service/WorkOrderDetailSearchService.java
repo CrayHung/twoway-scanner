@@ -202,6 +202,33 @@ public class WorkOrderDetailSearchService {
             ));
         }
 
+        // 新增 BEDID 字段的搜索條件
+        if (isValidList(criteria.getQrRfTrayBedid())) {
+            predicates.add(criteriaBuilder.or(
+                criteria.getQrRfTrayBedid().stream()
+                    .filter(qr -> qr != null && !qr.trim().isEmpty())
+                    .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrRfTrayBedid")), "%" + qr.toLowerCase() + "%"))
+                    .toArray(Predicate[]::new)
+            ));
+        }
+
+        if (isValidList(criteria.getQrPsBedid())) {
+            predicates.add(criteriaBuilder.or(
+                criteria.getQrPsBedid().stream()
+                    .filter(qr -> qr != null && !qr.trim().isEmpty())
+                    .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrPsBedid")), "%" + qr.toLowerCase() + "%"))
+                    .toArray(Predicate[]::new)
+            ));
+        }
+
+        if (isValidList(criteria.getQrHsBedid())) {
+            predicates.add(criteriaBuilder.or(
+                criteria.getQrHsBedid().stream()
+                    .filter(qr -> qr != null && !qr.trim().isEmpty())
+                    .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrHsBedid")), "%" + qr.toLowerCase() + "%"))
+                    .toArray(Predicate[]::new)
+            ));
+        }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
@@ -220,6 +247,9 @@ public class WorkOrderDetailSearchService {
                !isValidList(criteria.getQrRfTray()) &&
                !isValidList(criteria.getQrPs()) &&
                !isValidList(criteria.getQrHs()) &&
+               !isValidList(criteria.getQrRfTrayBedid()) && // 新增BEDID*3
+               !isValidList(criteria.getQrPsBedid()) &&     
+               !isValidList(criteria.getQrHsBedid()) &&     
                !isValidList(criteria.getQrBackup1()) &&
                !isValidList(criteria.getQrBackup2()) &&
                !isValidList(criteria.getQrBackup3()) &&
@@ -440,6 +470,34 @@ public class WorkOrderDetailSearchService {
             ));
         }
 
+         // 新增 BEDID 字段的搜索條件
+         if (isValidList(request.getQrRFTrayBedid())) {
+            predicates.add(criteriaBuilder.or(
+                request.getQrRFTrayBedid().stream()
+                    .filter(qr -> qr != null && !qr.trim().isEmpty())
+                    .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrRfTrayBedid")), "%" + qr.toLowerCase() + "%"))
+                    .toArray(Predicate[]::new)
+            ));
+        }
+
+        if (isValidList(request.getQrPSBedid())) {
+            predicates.add(criteriaBuilder.or(
+                request.getQrPSBedid().stream()
+                    .filter(qr -> qr != null && !qr.trim().isEmpty())
+                    .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrPsBedid")), "%" + qr.toLowerCase() + "%"))
+                    .toArray(Predicate[]::new)
+            ));
+        }
+
+        if (isValidList(request.getQrHSBedid())) {
+            predicates.add(criteriaBuilder.or(
+                request.getQrHSBedid().stream()
+                    .filter(qr -> qr != null && !qr.trim().isEmpty())
+                    .map(qr -> criteriaBuilder.like(criteriaBuilder.lower(root.get("qrHsBedid")), "%" + qr.toLowerCase() + "%"))
+                    .toArray(Predicate[]::new)
+            ));
+        }
+
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
@@ -460,6 +518,9 @@ public class WorkOrderDetailSearchService {
            !isValidList(request.getQrRFTray()) &&
            !isValidList(request.getQrPS()) &&
            !isValidList(request.getQrHS()) &&
+           !isValidList(request.getQrRFTrayBedid()) && // 新增 BEDID
+           !isValidList(request.getQrPSBedid()) &&     
+           !isValidList(request.getQrHSBedid()) &&     
            !isValidList(request.getQrBackup1()) &&
            !isValidList(request.getQrBackup2()) &&
            !isValidList(request.getQrBackup3()) &&

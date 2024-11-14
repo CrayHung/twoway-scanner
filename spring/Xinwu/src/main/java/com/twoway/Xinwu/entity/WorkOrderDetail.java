@@ -74,6 +74,17 @@ public class WorkOrderDetail {
     @JsonBackReference
     private WorkOrder workOrder;
 
+    //新增BEDID欄位
+
+    @Column(name = "qr_rf_tray_bedid")
+    private String qrRfTrayBedid;
+
+    @Column(name = "qr_ps_bedid")
+    private String qrPsBedid;
+
+    @Column(name = "qr_hs_bedid")
+    private String qrHsBedid;
+
     // Getters and setters for all fields
 
     public Long getId() {
@@ -250,5 +261,37 @@ public class WorkOrderDetail {
     public void updateWorkOrderNumber(String newWorkOrderNumber) {
         // This method will be called by WorkOrder when its work order number changes
         // You don't need to update the workOrder reference here, as it will be updated by the parent
+    }
+
+    //新增 BEDID getter / setter
+
+    @JsonProperty("QR_RFTray_BEDID")
+    public String getQrRfTrayBedid() {
+        return qrRfTrayBedid;
+    }
+
+    @JsonProperty("QR_RFTray_BEDID")
+    public void setQrRfTrayBedid(String qrRfTrayBedid) {
+        this.qrRfTrayBedid = qrRfTrayBedid;
+    }
+
+    @JsonProperty("QR_PS_BEDID")
+    public String getQrPsBedid() {
+        return qrPsBedid;
+    }
+
+    @JsonProperty("QR_PS_BEDID")
+    public void setQrPsBedid(String qrPsBedid) {
+        this.qrPsBedid = qrPsBedid;
+    }
+
+    @JsonProperty("QR_HS_BEDID")
+    public String getQrHsBedid() {
+        return qrHsBedid;
+    }
+
+    @JsonProperty("QR_HS_BEDID")
+    public void setQrHsBedid(String qrHsBedid) {
+        this.qrHsBedid = qrHsBedid;
     }
 }

@@ -22,6 +22,16 @@ public class WorkOrderFieldSearchDTO {
     @JsonProperty("QR_HS")
     private List<String> qrHS;
 
+    // 新增三個 BEDID 字段
+    @JsonProperty("QR_RFTray_BEDID")
+    private List<String> qrRFTrayBedid;
+
+    @JsonProperty("QR_PS_BEDID")
+    private List<String> qrPSBedid;
+
+    @JsonProperty("QR_HS_BEDID")
+    private List<String> qrHSBedid;
+
     @JsonProperty("QR_backup1")
     private List<String> qrBackup1;
 
@@ -214,5 +224,35 @@ public class WorkOrderFieldSearchDTO {
       public void setQuantity(List<String> quantity) {
           this.quantity = quantity;
       }
-  
+      
+      // 新增 BEDID 字段的 getter/setter
+    @JsonProperty("QR_RFTray_BEDID")
+    public List<String> getQrRFTrayBedid() {
+        return qrRFTrayBedid;
+    }
+
+    @JsonProperty("QR_RFTray_BEDID")
+    public void setQrRFTrayBedid(List<String> qrRFTrayBedid) {
+        this.qrRFTrayBedid = qrRFTrayBedid;
+    }
+
+    @JsonProperty("QR_PS_BEDID")
+    public List<String> getQrPSBedid() {
+        return qrPSBedid;
+    }
+
+    @JsonProperty("QR_PS_BEDID")
+    public void setQrPSBedid(List<String> qrPSBedid) {
+        this.qrPSBedid = qrPSBedid;
+    }
+
+    @JsonProperty("QR_HS_BEDID")
+    public List<String> getQrHSBedid() {
+        return qrHSBedid;
+    }
+
+    @JsonProperty("QR_HS_BEDID")
+    public void setQrHSBedid(List<String> qrHSBedid) {
+        this.qrHSBedid = qrHSBedid;
+    }
 }
