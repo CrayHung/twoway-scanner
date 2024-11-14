@@ -4,9 +4,14 @@ import org.springframework.web.bind.annotation.*;
 
 import com.twoway.Xinwu.entity.WorkOrder;
 import com.twoway.Xinwu.repository.WorkOrderRepository;
+import com.twoway.Xinwu.dto.WorkOrderSearchDTO;
+import com.twoway.Xinwu.service.WorkOrderSearchService;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
+// import org.springframework.format.annotation.DateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.time.LocalDate;
@@ -14,9 +19,17 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api")
 public class WorkOrderController {
+    
+// logger 宣告
+  private static final Logger logger = LoggerFactory.getLogger(WorkOrderController.class);
+
 
   @Autowired
   private WorkOrderRepository workOrderRepository;
+
+
+ @Autowired
+ private WorkOrderSearchService searchService;
 
   //POST API
   @PostMapping("/post-work-orders")
@@ -57,27 +70,24 @@ public class WorkOrderController {
   }
 
   //SEARCH API
-    @GetMapping("/search-work-orders")
-  public ResponseEntity<List<WorkOrder>> searchWorkOrders(
-      @RequestParam(required = false) String workOrderNumber,
-      @RequestParam(required = false) Integer quantity,
-      @RequestParam(required = false) String partNumber,
-      @RequestParam(required = false) String company,
-      @RequestParam(required = false) String createUser,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate productionDateStart,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate productionDateEnd
-  ) {
-      List<WorkOrder> workOrders = workOrderRepository.searchWorkOrders(
-          workOrderNumber,
-          quantity,
-          partNumber,
-          company,
-          createUser,
-          productionDateStart,
-          productionDateEnd
-      );
-      return ResponseEntity.ok(workOrders);
-  }
+  @PostMapping("/fuzzy-search-work-orders")
+    public ResponseEntity<List<WorkOrder>> fuzzySearchWorkOrders(@RequestBody WorkOrderSearchDTO searchCriteria) {
+        try {
+            logger.info("正在執行工單模糊搜尋，搜尋條件為：{}", searchCriteria);
+            List<WorkOrder> results = searchService.fuzzySearch(searchCriteria);
+
+            if (results.isEmpty()) {
+                logger.info("模糊搜尋無符合條件的結果");
+            } else {
+                logger.info("模糊搜尋完成，找到 {} 個結果", results.size());
+            }
+
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            logger.error("執行工單模糊搜尋時發生錯誤", e);
+            return ResponseEntity.status(500).body(null);
+        }
+    }
 
   //EDIT PUT API
   @PutMapping("/update-work-orders/{id}")

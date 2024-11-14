@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 // import java.util.stream.Collectors;
 import java.util.Map;
@@ -41,9 +42,6 @@ public class WorkOrderDetailController {
 
   @Autowired
   private WorkOrderDetailSearchService searchService;
-
-  // @Autowired
-  // private WorkOrderDetailSearchService workOrderDetailSearchService;
 
   @Autowired
   private WorkOrderDetailRepository workOrderDetailRepository;
@@ -70,11 +68,8 @@ public class WorkOrderDetailController {
 
     System.out.println("要新增的所有的工單號碼如下:" + workOrderNumbers);
 
-    // 檢查工單是否存在
-    // List<WorkOrderDetail> existingDetails = workOrderDetailRepository.findByParentWorkOrderNumbers(workOrderNumbers);
-    // Set<String> existingWorkOrderNumbers = existingDetails.stream()
-    //     .map(detail -> detail.getWorkOrder().getWorkOrderNumber())
-    //     .collect(Collectors.toSet());
+    //用於保存實際記錄detail_id數量
+    Map<String, Integer> currentDetailCounts = new HashMap<>();
 
     /****************************************** */
      // 用於保存已經存在的工單號
@@ -92,6 +87,10 @@ public class WorkOrderDetailController {
       // 如果工單號存在，將其加入 existingWorkOrderNumbers 集合
       existingWorkOrderNumbers.add(workOrderNumber);
       System.out.println("找到工單號並加入集合: " + workOrderNumber);
+
+      // ** 新增: 計算當前實際的記錄數量 **
+      Long currentCount = workOrderDetailRepository.countByWorkOrderNumber(workOrderNumber);
+      currentDetailCounts.put(workOrderNumber, currentCount.intValue());
     }
 
     /****************************************** */
@@ -116,10 +115,6 @@ public class WorkOrderDetailController {
           errors.add("工單編號不能為空: " + request.getSN());
           continue;
         }
-        // if (request.getSN() == null || request.getSN().isEmpty()) {
-        // errors.add("SN不能為空: " + request.getWorkOrderNumber());
-        // continue;
-        // }
 
         // 檢查對應的WorkOrder是否存在
         if (!existingWorkOrderNumbers.contains(request.getWorkOrderNumber())) {
@@ -133,10 +128,15 @@ public class WorkOrderDetailController {
         Integer currentDetailId = maxDetailIds.get(request.getWorkOrderNumber());
         int newDetailId = (currentDetailId == null) ? 1 : currentDetailId + 1;
 
-        if (newDetailId > workOrder.getQuantity()) {
-          errors.add("工單 " + request.getWorkOrderNumber() + " 的詳情數量已達到上限 " + workOrder.getQuantity());
-          continue;
+        // ** 修改: 使用實際記錄數檢查數量限制 **
+        Integer currentCount = currentDetailCounts.get(request.getWorkOrderNumber());
+        if (currentCount >= workOrder.getQuantity()) {
+            errors.add("工單 " + request.getWorkOrderNumber() + " 的實際記錄數量已達到上限 " + workOrder.getQuantity());
+            continue;
         }
+
+        // ** 更新記錄數量 **
+        currentDetailCounts.put(request.getWorkOrderNumber(), currentCount + 1);
 
         // 更新 maxDetailIds
         maxDetailIds.put(request.getWorkOrderNumber(), newDetailId);
@@ -328,6 +328,7 @@ public class WorkOrderDetailController {
   }
 
   // DEL API
+  @Transactional
   @DeleteMapping("/delete-work-order-details/{id}")
   public ResponseEntity<String> deleteWorkOrderDetail(@PathVariable Long id) {
     try {
@@ -335,10 +336,23 @@ public class WorkOrderDetailController {
       if (workOrderDetail == null) {
         return ResponseEntity.notFound().build();
       }
+       // ** 新增: 取得工單號供後續使用 **
+       String workOrderNumber = workOrderDetail.getParentWorkOrderNumber();
+        
+       workOrderDetailRepository.delete(workOrderDetail);
 
-      workOrderDetailRepository.delete(workOrderDetail);
+       // ** 新增: 重新編號邏輯 **
+       List<WorkOrderDetail> remainingDetails = workOrderDetailRepository
+           .findByWorkOrderNumberOrderByDetailId(workOrderNumber);
+       
+       int newDetailId = 1;
+       for (WorkOrderDetail detail : remainingDetails) {
+           detail.setDetailId(newDetailId++);
+           workOrderDetailRepository.save(detail);
+       }
 
-      return ResponseEntity.ok("工單詳細信息已成功刪除");
+       return ResponseEntity.ok("工單詳細信息已成功刪除並重新編號");
+
     } catch (Exception e) {
       logger.error("Error occurred while deleting work order detail", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("服務器內部錯誤");

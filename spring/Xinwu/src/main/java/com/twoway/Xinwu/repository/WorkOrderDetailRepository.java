@@ -27,6 +27,13 @@ public interface WorkOrderDetailRepository extends JpaRepository<WorkOrderDetail
     @Query("SELECT MAX(w.detailId) FROM WorkOrderDetail w WHERE w.workOrder.workOrderNumber = :workOrderNumber")
     Integer findMaxDetailIdByWorkOrderNumber(@Param("workOrderNumber") String workOrderNumber);
 
+    //刪除時計算實際 detail_id 數量
+    @Query("SELECT COUNT(w) FROM WorkOrderDetail w WHERE w.workOrder.workOrderNumber = :workOrderNumber")
+    Long countByWorkOrderNumber(@Param("workOrderNumber") String workOrderNumber);
+
+    @Query("SELECT w FROM WorkOrderDetail w WHERE w.workOrder.workOrderNumber = :workOrderNumber ORDER BY w.detailId")
+    List<WorkOrderDetail> findByWorkOrderNumberOrderByDetailId(@Param("workOrderNumber") String workOrderNumber);
+
     // 自動計算 detailid 有沒有超過 quantity
     @Query("SELECT w.workOrder.workOrderNumber, COUNT(w) FROM WorkOrderDetail w WHERE w.workOrder.workOrderNumber IN :workOrderNumbers GROUP BY w.workOrder.workOrderNumber")
     List<Object[]> countDetailsByWorkOrderNumbers(@Param("workOrderNumbers") List<String> workOrderNumbers);
