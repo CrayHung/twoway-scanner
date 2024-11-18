@@ -301,6 +301,86 @@ public class WorkOrderDetailController {
     }
   }
 
+  // 新增 輸入新 data 時同步檢查用的 put 方法
+
+   @PutMapping("/batch-create-work-order-details")
+   @Transactional
+   public ResponseEntity<String> batchCreateWorkOrderDetails(@RequestBody List<UpdateWorkOrderDetailDTO> requests) {
+       StringBuilder response = new StringBuilder();
+       List<String> errors = new ArrayList<>();
+   
+       // 第一階段：檢查所有數據是否重複
+       for (UpdateWorkOrderDetailDTO request : requests) {
+           try {
+               // 先檢查ID是否存在
+               WorkOrderDetail workOrderDetail = workOrderDetailRepository.findById(request.getId())
+                   .orElseThrow(() -> new RuntimeException("找不到ID為 " + request.getId() + " 的工單詳細信息"));
+   
+               // 檢查SN重複
+               if (request.getSn() != null && !request.getSn().trim().isEmpty()) {
+                   if (workOrderDetailRepository.existsBySn(request.getSn())) {
+                       errors.add(String.format("SN '%s' 已存在於資料庫中", request.getSn()));
+                       continue;
+                   }
+               }
+   
+               // 檢查BEDID重複（只在有值時檢查）
+               boolean hasAnyBedid = (request.getQrRfTrayBedid() != null && !request.getQrRfTrayBedid().trim().isEmpty()) ||
+                                   (request.getQrPsBedid() != null && !request.getQrPsBedid().trim().isEmpty()) ||
+                                   (request.getQrHsBedid() != null && !request.getQrHsBedid().trim().isEmpty());
+   
+               if (hasAnyBedid) {
+                   if (workOrderDetailRepository.existsByAnyBedid(
+                       request.getQrRfTrayBedid(),
+                       request.getQrPsBedid(),
+                       request.getQrHsBedid())) {
+                       errors.add(String.format("工單號 %s 的以下BEDID已存在：\n" +
+                           "RF_Tray_BEDID: %s\n" +
+                           "PS_BEDID: %s\n" +
+                           "HS_BEDID: %s",
+                           workOrderDetail.getParentWorkOrderNumber(),
+                           request.getQrRfTrayBedid(),
+                           request.getQrPsBedid(),
+                           request.getQrHsBedid()));
+                       continue;
+                   }
+               }
+           } catch (Exception e) {
+               errors.add("驗證過程發生錯誤: " + e.getMessage());
+           }
+       }
+   
+       // 如果有錯誤，返回所有錯誤信息
+       if (!errors.isEmpty()) {
+           response.append("更新失敗！請檢查以下問題：\n");
+           errors.forEach(error -> response.append("- ").append(error).append("\n"));
+           return ResponseEntity.badRequest().body(response.toString());
+       }
+   
+       // 第二階段：執行更新
+       try {
+           for (UpdateWorkOrderDetailDTO request : requests) {
+               WorkOrderDetail workOrderDetail = workOrderDetailRepository.findById(request.getId())
+                   .orElseThrow(() -> new RuntimeException("找不到ID為 " + request.getId() + " 的工單詳細信息"));
+               
+               updateWorkOrderDetailFromDTO(workOrderDetail, request);
+               workOrderDetailRepository.save(workOrderDetail);
+   
+               // 更新對應的 WorkOrder
+               updateWorkOrder(workOrderDetail, request.getEdit_user());
+   
+               response.append(String.format("成功更新工單號 %s 的詳細信息\n", 
+                   workOrderDetail.getParentWorkOrderNumber()));
+           }
+   
+           return ResponseEntity.ok(response.toString());
+   
+       } catch (Exception e) {
+           throw new RuntimeException("更新過程發生錯誤，請重新檢查後輸入: " + e.getMessage());
+       }
+   }
+
+
   // SN與日期範圍，其餘搜尋API
   @PostMapping("/snfield-search-details")
   public ResponseEntity<List<WorkOrderDetail>> searchWorkOrderDetails(@RequestBody WorkOrderFieldSearchDTO request) {

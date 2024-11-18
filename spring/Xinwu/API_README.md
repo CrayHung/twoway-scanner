@@ -215,6 +215,60 @@ BODY 範例(JSON):
 3. edit_date 會由系統自動設置為當前日期，無需手動提供。
 4. 不允許更改 create_user 和 create_date。
 
+#### 新增 data 時，檢查重複SN/BEDID 的 API (PUT)
+
+URL: http://localhost:8080/api/batch-create-work-order-details
+方法: PUT
+Headers:
+Content-Type: application/json
+
+功能說明：
+- 用於在輸入資料時即時檢查 SN 和 BEDID 是否重複
+- 如發現重複，會立即返回錯誤信息
+- 若無重複，則進行資料更新
+
+BODY 範例(JSON):
+[
+  {
+    "id": 1,
+    "SN": "SN001",
+    "QR_RFTray": "RF001",
+    "QR_PS": "PS001",
+    "QR_HS": "HS001",
+    "QR_RFTray_BEDID": "RFBED001",
+    "QR_PS_BEDID": "PSBED001",
+    "QR_HS_BEDID": "HSBED001",
+    "QR_backup1": "BK001",
+    "QR_backup2": "BK002",
+    "QR_backup3": "BK003",
+    "QR_backup4": "BK004",
+    "note": "測試註記",
+    "edit_user": "tester"
+  }
+]
+
+成功回應範例：
+{
+    "message": "成功更新工單號 WO-001 的詳細信息"
+}
+
+錯誤回應範例（SN重複）：
+{
+    "message": "更新失敗！請檢查以下問題：\n- SN 'SN001' 已存在於資料庫中"
+}
+
+錯誤回應範例（BEDID重複）：
+{
+    "message": "更新失敗！請檢查以下問題：\n- 工單號 WO-001 的BEDID重複：\nRF_Tray_BEDID: RFBED001"
+}
+
+注意事項：
+1. id 為必填欄位，用於識別要更新的記錄
+2. SN 和 BEDID 會進行重複檢查
+3. 若檢查到任何重複，整批資料都不會更新
+4. edit_date 會自動設為當前日期
+5. create_user 和 create_date 不允許修改
+
 #### DELETE API (DELETE)
 http://localhost:8080/api/delete-work-order-details/{id}
 
