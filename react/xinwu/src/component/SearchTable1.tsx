@@ -46,6 +46,8 @@ const SearchTable1 = () => {
 
     const today = new Date().toISOString().split('T')[0]; // 當前日期 (YYYY-MM-DD 格式)
 
+    //fetch尚未完成,先用loading提示
+    const [loading, setLoading] = useState(false);
 
     //為了要在下拉選單中可以渲染 , 一進頁面就先取得所有工單
     const [tmpData, setTmpData] = useState<any[]>(table1Data);
@@ -273,6 +275,8 @@ const SearchTable1 = () => {
         handleClose();
         console.log('搜尋的Form資料為:', JSON.stringify(sanitizedFormData, null, 2));
 
+        setLoading(true); // 開始Loading
+
         //單一SN[]搜尋
         if (mode === 'single') {
             console.log("使用api/snfuzzy-search-details這個API")
@@ -369,6 +373,9 @@ const SearchTable1 = () => {
                     create_user: item.create_user,
                     edit_date: item.edit_date,
                     edit_user: item.edit_user,
+                    QR_RFTray_BEDID: item.QR_RFTray_BEDID,
+                    QR_HS_BEDID: item.QR_HS_BEDID,
+                    QR_PS_BEDID: item.QR_PS_BEDID,
                     ...item,
 
                 }));
@@ -444,6 +451,8 @@ const SearchTable1 = () => {
 
             } catch (error) {
                 console.error('Error fetching:', error);
+            } finally {
+                setLoading(false); // 完成後結束Loading
             }
         }
 
@@ -682,11 +691,12 @@ const SearchTable1 = () => {
     };
 
     return (
-        <div style={{ width: '100vw', position: 'relative', left: 0 }}>
+        <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                 <Typography variant="h4" gutterBottom>
                     {formatMessage({ id: 'Menu-Search-WorkOrders' })}
                 </Typography>
+
                 <Button variant="contained" sx={{ marginRight: 1 }} onClick={handleExitButtonClick}>
                     {formatMessage({ id: 'exit' })}
                 </Button>
@@ -898,8 +908,9 @@ const SearchTable1 = () => {
                 </Box>
             </Modal>
 
-            {resultData.length != 0 &&
+            {resultData.length != 0 ? (
                 <>
+
                     <div>
                         <button onClick={handleDownloadTwowayExcel}>{formatMessage({ id: 'twowayexcel' })}</button>
                     </div>
@@ -910,11 +921,43 @@ const SearchTable1 = () => {
                         <button onClick={handleDownloadAllExcel}>{formatMessage({ id: 'Allexcel' })}</button>
                     </div>
 
-                    <Paper sx={{ width: '100%', overflow: 'hidden', height: '100%' }}>
-                        <TableContainer component={Paper} style={{ maxHeight: '700px', overflowY: 'scroll' }}>
-                            <Table stickyHeader aria-label="sticky table">
+                    <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
+                        <TableContainer component={Paper} style={{
+                            maxHeight: '70vh', // 設置最大高度，避免超出視窗
+                            overflowX: 'auto', // 確保左右滾動條出現
+                            overflowY: 'auto', // 確保上下滾動條出現
+                        }}
+                        >
+                            <Table stickyHeader aria-label="sticky table"
+                                style={{
+                                    minWidth: '800px', // 最小寬度，確保資料過多時滾動
+                                    tableLayout: 'auto',
+                                }}>
                                 <TableHead >
                                     <TableRow style={{ border: '1px solid #ccc' }}>
+
+                                        {/* <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup4' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'note' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray_BEDID' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS_BEDID' })}</TableCell>
+                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS_BEDID' })}</TableCell> */}
+
+
+
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
@@ -931,6 +974,9 @@ const SearchTable1 = () => {
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray_BEDID' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS_BEDID' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS_BEDID' })}</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -948,8 +994,10 @@ const SearchTable1 = () => {
                         </TableContainer>
                     </Paper>
                 </>
-            }
-        </div>
+            ) : (
+                <p>NO DATA</p>
+            )}
+        </div >
 
     );
 }

@@ -44,7 +44,7 @@ const AccountPage = () => {
 
             const data: any[] = await response.json();
             setData(data);
-            console.log("所有的user資料:", JSON.stringify(data, null, 2));
+            // console.log("所有的user資料:", JSON.stringify(data, null, 2));
 
         } catch (error) {
             console.error('Error fetching token:', error);
@@ -306,7 +306,6 @@ const AccountPage = () => {
                                     fullWidth
                                     margin="normal"
                                 >
-                                    <MenuItem value=""> NO </MenuItem>
                                     <MenuItem value="Twoway">Twoway</MenuItem>
                                     <MenuItem value="ACI"> ACI </MenuItem>
 

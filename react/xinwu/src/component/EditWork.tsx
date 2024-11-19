@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Grid, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, Typography, FormControl, FormControlLabel, MenuItem, Radio, RadioGroup, TextField } from '@mui/material';
+import { Button, Grid, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, Typography, FormControl, FormControlLabel, MenuItem, Radio, RadioGroup, TextField, TablePagination } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useGlobalContext } from '../global';
 import { useIntl } from "react-intl";
+
+import './hightlight.css';
+import './SearchForm.css';
+
 
 const modalStyle = {
     position: 'absolute' as 'absolute',
@@ -33,6 +37,11 @@ const EditWork = () => {
     const [searchWorkNumber, setSearchWorkNumber] = useState('');
     const [productionDateStart, setProductionDateStart] = useState('');
     const [productionDateEnd, setProductionDateEnd] = useState('');
+
+    const [showTableData, setShowTableData] = useState(table1Data);
+
+    //fetch尚未完成,先用loading提示
+    const [loading, setLoading] = useState(false);
 
 
     const handleChangePage = (event: any, newPage: number) => {
@@ -100,8 +109,9 @@ const EditWork = () => {
 
             const updatedData = removeWorkOrderDetails(data);
             setTable1Data(updatedData);
+            setShowTableData(updatedData);
 
-            // console.log("所有table1資料:"+ JSON.stringify(updatedData))
+            // console.log("setShowTableData:"+ JSON.stringify(updatedData))
 
 
         } catch (error) {
@@ -168,6 +178,7 @@ const EditWork = () => {
 
     //一進組件就先把table3Data拉出來
     const fetchAllTable3 = async () => {
+
         try {
             const response = await fetch(`${globalUrl.url}/api/get-input-modes`, {
                 method: 'GET',
@@ -194,11 +205,11 @@ const EditWork = () => {
         fetchAllTable1();
         fetchAllTable2();
         fetchAllTable3();
-        setWorkNo();
-        setQuant();
-        setPart();
-        setModel();
-        setTable1Id();
+        setWorkNo('');
+        setQuant('');
+        setPart('');
+        setModel('');
+        setTable1Id('');
 
         // setShowTableData([]);
     }, [])
@@ -207,17 +218,6 @@ const EditWork = () => {
     //     handleFetchTable1Data();
     // }, [searchWorkNumber,productionDateStart,productionDateEnd])
 
-    //fetch All
-    const fetchAll = async () => {
-        fetchAllTable1();
-        fetchAllTable2();
-        fetchAllTable3();
-        setWorkNo();
-        setQuant();
-        setPart();
-        setModel();
-        setTable1Id();
-    };
 
 
     //刪除工單
@@ -255,7 +255,7 @@ const EditWork = () => {
 
 
     const handleExitButtonClick = () => {
-        navigate('/');
+        navigate('/reload');
     };
 
     //避免start日期大於end
@@ -281,7 +281,7 @@ const EditWork = () => {
     };
 
     //
-    const [showTableData, setShowTableData] = useState(table1Data)
+
     //篩選資料,由得到所有資料再篩選(但只能做正確的資料查詢 , 下面用table1的API模糊查詢取代)
     // const handleFetchTable1Data = () => {
 
@@ -303,39 +303,65 @@ const EditWork = () => {
             workOrderNumber: searchWorkNumber ? [searchWorkNumber] : [],
             createDateStart: productionDateStart ? [productionDateStart] : [],
             createDateEnd: productionDateEnd ? [productionDateEnd] : [],
-          };
-        
-        // console.log("requestBody : "+JSON.stringify(requestBody, null, 2));
+        };
+
+        console.log("requestBody : " + JSON.stringify(requestBody, null, 2));
 
 
-        try {
-            const response = await fetch(`${globalUrl.url}/api/fuzzy-search-work-orders`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    workOrderNumber: searchWorkNumber ? [searchWorkNumber] : [],
-                    createDateStart: productionDateStart ? [productionDateStart] : [],
-                    createDateEnd: productionDateEnd ? [productionDateEnd] : [],
-                }),
-
-              });
+        // 判斷是否所有欄位都是空陣列
+        const isRequestBodyEmpty = Object.values(requestBody).every(
+            (value) => Array.isArray(value) && value.length === 0
+        );
 
 
-            if (!response.ok) {
-                throw new Error('Failed to get 所有對應表');
+
+        const callFuzzy = async (requestBody: { workOrderNumber: string[]; createDateStart: string[]; createDateEnd: string[]; }) => {
+            setLoading(true); // 開始Loading
+
+            try {
+                const response = await fetch(`${globalUrl.url}/api/fuzzy-search-work-orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody),
+                    // body: JSON.stringify({
+                    //     workOrderNumber: searchWorkNumber ? [searchWorkNumber] : [],
+                    //     createDateStart: productionDateStart ? [productionDateStart] : [],
+                    //     createDateEnd: productionDateEnd ? [productionDateEnd] : [],
+                    // }),
+
+                });
+
+
+                if (!response.ok) {
+                    throw new Error('Failed to get 所有對應表');
+                }
+
+                const data = await response.json();
+                //過濾掉workOrderDetails的資料
+                const updatedData = removeWorkOrderDetails(data);
+
+                // console.log("過濾掉workOrderDetails的資料 : "+JSON.stringify(updatedData, null, 2));
+                setShowTableData(updatedData);
+
+
+
+            } catch (error) {
+                console.error('Error fetching token:', error);
+            } finally {
+                setLoading(false); // 完成後結束Loading
+
             }
+        }
 
-            const data = await response.json();
-            //過濾掉workOrderDetails的資料
-            const updatedData = removeWorkOrderDetails(data);
-
-            // console.log("updatedData : "+JSON.stringify(updatedData, null, 2));
-            setShowTableData(updatedData);
-
-        } catch (error) {
-            console.error('Error fetching token:', error);
+        // 如果都是空陣列,則用GET取得所有table1Data
+        if (isRequestBodyEmpty) {
+            // 呼叫 Get all
+            fetchAllTable1();
+        } else {
+            // 如果任一欄不是空陣列,則用模糊搜尋
+            callFuzzy(requestBody);
         }
 
     }
@@ -353,13 +379,15 @@ const EditWork = () => {
         if (selectedData) {
             setModel(selectedData.inputMode);
         }
-        navigate('/searchForm');
+        navigate('/searchForm/reload');
 
     }
 
 
     return (
-        <div>
+
+        <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
+
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                 <Typography variant="h4" gutterBottom>
                     {formatMessage({ id: 'Menu-edit-WorkOrders' })}
@@ -369,6 +397,13 @@ const EditWork = () => {
                 </Button>
             </Box>
 
+            {/* for Loading*/}
+
+            {loading && (
+                <div className="loading-overlay">
+                    <div className="loading-spinner">Loading...</div>
+                </div>
+            )}
 
             <div>
                 <>
@@ -396,12 +431,21 @@ const EditWork = () => {
                 </>
                 <button onClick={handleFetchTable1Data}>{formatMessage({ id: 'submit-search' })}</button>
             </div>
-            {/* {table1Data && */}
-            {showTableData &&
+
+            {showTableData.length > 0 &&
                 <>
-                    <Paper sx={{ width: '100%', overflow: 'hidden', height: '100%' }}>
-                        <TableContainer component={Paper} style={{ maxHeight: '700px', overflowY: 'scroll' }}>
-                            <Table stickyHeader aria-label="sticky table">
+                    <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
+                        <TableContainer component={Paper} style={{
+                            maxHeight: '70vh', // 設置最大高度，避免超出視窗
+                            overflowX: 'auto', // 確保左右滾動條出現
+                            overflowY: 'auto', // 確保上下滾動條出現
+                        }}
+                        >
+                            <Table stickyHeader aria-label="sticky table"
+                                style={{
+                                    minWidth: '800px', // 最小寬度，確保資料過多時滾動
+                                    tableLayout: 'auto',
+                                }}>
                                 <TableHead >
                                     <TableRow style={{ border: '1px solid #ccc' }}>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit' })}</TableCell>
@@ -473,6 +517,7 @@ const EditWork = () => {
                 </>
             }
         </div >
+
     );
 }
 

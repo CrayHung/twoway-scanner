@@ -49,7 +49,7 @@ const Register = () => {
         // setIsLoggedIn(false);
         alert(formatMessage({ id: 'register-sucess' }));
 
-        navigate("/accountPage");
+        navigate("/accountPage/reload");
       }
     } catch (error: any) {
       console.error('Error fetching token:', error);
@@ -87,7 +87,7 @@ const Register = () => {
         // setIsLoggedIn(false);
         alert(formatMessage({ id: 'register-sucess' }));
 
-        navigate("/accountPage");
+        navigate("/accountPage/reload");
       }
     } catch (error: any) {
       console.error('Error fetching token:', error);
@@ -125,7 +125,7 @@ const Register = () => {
         // setIsLoggedIn(false);
         alert(formatMessage({ id: 'register-sucess' }));
 
-        navigate("/accountPage");
+        navigate("/accountPage/reload");
       }
     } catch (error: any) {
       console.error('Error fetching token:', error);
@@ -163,7 +163,7 @@ const Register = () => {
         // setIsLoggedIn(false);
         alert(formatMessage({ id: 'register-sucess' }));
 
-        navigate("/accountPage");
+        navigate("/accountPage/reload");
       }
     } catch (error: any) {
       console.error('Error fetching token:', error);
@@ -266,7 +266,6 @@ const Register = () => {
           sx={{ width: '300px' }}
 
         >
-          <MenuItem value=""> NO </MenuItem>
           <MenuItem value="Twoway">Twoway</MenuItem>
           <MenuItem value="ACI">ACI</MenuItem>
         

@@ -5,7 +5,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Button, Box, Typography } from '@mui/material';
-import '../App.css';
+// import '../App.css';
 import { useNavigate } from 'react-router-dom';
 
 import { useGlobalContext } from '../global';
@@ -46,7 +46,7 @@ function AddNewWorker() {
     //接收字串
     // const [editCell, setEditCell] = useState<{ rowIndex: number | null; colKey: string | null }>({ rowIndex: null, colKey: null }); //編輯當前的行和列
     const [savedData, setSavedData] = useState<any[]>([]); // 用來追蹤每行已儲存的資料
-    const [originalData, setOriginalData] = useState<any[]>([]); // 保留原始的data
+
 
     const navigate = useNavigate();
     const today = new Date().toISOString().split('T')[0]; // 當前日期 (YYYY-MM-DD 格式)
@@ -58,7 +58,7 @@ function AddNewWorker() {
         // console.log('目前所有table1的內容是:', JSON.stringify(table1Data, null, 2));
         // console.log('目前所有table2的內容是:', JSON.stringify(table2Data, null, 2));
         // console.log('目前所有table3的內容是:', JSON.stringify(table3Data, null, 2));
-        alert("QR CODE模式為 : .$DT+3碼.$DM:3碼NAN或12碼.$VN:3碼ACI.$SN:8~12碼.$MN:不超過25碼ACI的part Number.$HW:4碼.$ID:固定15碼.$" )
+        alert("QR CODE模式為 : .$DT+3碼.$DM:3碼NAN或12碼.$VN:3碼ACI.$SN:8~12碼.$MN:不超過25碼ACI的part Number.$HW:4碼.$ID:固定15碼.$")
     }, []);
 
     /**************************************************************************************************************** */
@@ -105,10 +105,9 @@ function AddNewWorker() {
         }
 
         // 根據工單數量和模式生成表格 (單機測試要另外增加id欄位...)
-        setData(Array.from({ length: rows }, (v, i) => ({
-
+        const newData = Array.from({ length: rows }, (v, i) => ({
             workOrderNumber: workNumber,
-            detailId: i + 1,
+            // detailId: i + 1,
             SN: '',
             QR_RFTray: '',
             QR_PS: '',
@@ -118,15 +117,158 @@ function AddNewWorker() {
             QR_backup3: '',
             QR_backup4: '',
             note: '',
-            create_date: today,
+            // create_date: today,
             create_user: currentUser,
-            edit_date: '',
-            edit_user: '',
+            // edit_date: '',
+            edit_user: currentUser,
             QR_RFTray_BEDID: '',
             QR_HS_BEDID: '',
             QR_PS_BEDID: ''
+        }));
 
-        })));
+        // setData(newData);
+
+
+
+        /**新增PUT即時更新 */
+
+        //取得所有的table2資料,再來比對workNumber,
+        //將所有table2Data中workOrderNumber欄位和workNumber相同的組成新的陣列顯示出來
+        const fetchAllTable2 = async () => {
+            try {
+                const response = await fetch(`${globalUrl.url}/api/get-work-order-details`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to get 所有工單');
+                }
+
+                const data: any[] = await response.json();
+
+
+                //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
+                //並且重新排序順序
+                const mappedData = data.map(item => ({
+                    id: item.id,
+                    workOrderNumber: item.parentWorkOrderNumber,
+                    detailId: item.detailId,
+                    SN: item.SN,
+                    QR_RFTray: item.QR_RFTray,
+                    QR_PS: item.QR_PS,
+                    QR_HS: item.QR_HS,
+                    QR_backup1: item.QR_backup1,
+                    QR_backup2: item.QR_backup2,
+                    QR_backup3: item.QR_backup3,
+                    QR_backup4: item.QR_backup4,
+                    note: item.note,
+                    create_date: item.create_date,
+                    create_user: item.create_user,
+                    edit_date: item.edit_date,
+                    edit_user: item.edit_user,
+                    QR_RFTray_BEDID: item.QR_RFTray_BEDID,
+                    QR_HS_BEDID: item.QR_HS_BEDID,
+                    QR_PS_BEDID: item.QR_PS_BEDID,
+                    ...item,
+
+                }));
+
+                //用來將table2的不要欄位過濾掉(quantity,company,partNumber)
+                const filteredData = mappedData.map(({
+                    parentPartNumber,
+                    parentWorkOrderNumber,
+                    parentCompany,
+                    parentQuantity,
+                    ...rest
+                }) => rest);
+
+
+                setTable2Data(filteredData);
+                return filteredData;
+
+            } catch (error) {
+                console.error('Error fetching token:', error);
+                return [];
+            }
+        };
+
+
+        //比對table2Data
+        const matchData2 = async () => {
+            const table2Data = await fetchAllTable2(); // 直接獲取最新資料
+            //比對
+            const matchData = table2Data.filter((item: { workOrderNumber: string; }) => item.workOrderNumber === workNumber);
+            //    console.log("比對後 相同的資料 :",JSON.stringify(matchData, null, 2) ) 
+            setData(matchData);
+        };
+
+
+        //新增table2
+        const fetchData2 = async () => {
+            try {
+                const response = await fetch(`${globalUrl.url}/api/post-work-order-details`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newData),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                // const res = await response.json();
+                // console.log("新增table2成功");
+
+            } catch (error: any) {
+                console.error('Error :', error);
+            }
+        };
+
+
+        //新增table1
+        const fetchData1 = async () => {
+            try {
+                const response = await fetch(`${globalUrl.url}/api/post-work-orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        workOrderNumber: workNumber,
+                        quantity: rows,
+                        partNumber: selectedPartNumber,
+                        company: company,
+                        createUser: currentUser,
+                        editUser: currentUser
+
+                    }),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                // const res = await response.json();
+
+                await fetchData2();
+                // console.log("新增table1成功");
+
+                //重新fetch table2Data並且比對workNumber找出目前要新增的陣列內容
+                await matchData2();
+
+                console.log('完成新增table1  table2', JSON.stringify(data, null, 2));
+                console.log('table1 ', JSON.stringify(table1Data, null, 2));
+                console.log('table2', JSON.stringify(table2Data, null, 2));
+
+            } catch (error: any) {
+                console.error('Error :', error);
+            }
+        };
+
+        fetchData1();
+        /**新增PUT即時更新 */
+
 
         setCurrentRow(0); // 重置行指針
         setCurrentColumn(1); // 重置列指針
@@ -441,6 +583,8 @@ function AddNewWorker() {
 
     /***************************************************************** */
     const [updatedRowData, setUpdatedRowData] = useState<any>([]);
+
+    //QR_後面的.$ID~.$的字串取出
     const extractID = (value: string) => {
         const match = value.match(/\.\$ID:(.*?)\.\$/);
         return match ? match[1] : null;
@@ -449,9 +593,11 @@ function AddNewWorker() {
     const handleBarcodeInput = (event: any) => {
         if (event.key === 'Enter' && !isComplete) {
             event.preventDefault();
-            const newValue = inputValue.trim();
 
+            const newValue = inputValue.trim();
             const rowIndex = currentRow !== null ? currentRow : 0;
+
+
             if (newValue && currentRow !== null && currentRow < rows) {
                 const updatedData = [...data];
                 let updatedRow = { ...updatedData[currentRow] };
@@ -462,15 +608,23 @@ function AddNewWorker() {
                 else if (currentColumn === 2) fieldToCompare = "QR_RFTray";
                 else if (currentColumn === 3) fieldToCompare = "QR_PS";
                 else if (currentColumn === 4) fieldToCompare = "QR_HS";
+
                 // 比對資料庫 (table2Data) 和已輸入資料 (updatedData)
                 let isDuplicateInDatabase = false;
                 let isDuplicateInUpdatedData = false;
 
                 if (fieldToCompare === "SN") {
-                    isDuplicateInDatabase = table2Data.some((item: { [x: string]: string; }) => item[fieldToCompare] === newValue);
-                    isDuplicateInUpdatedData = updatedRowData.some((item: { [x: string]: string; }, index: number) => index < currentRow && item[fieldToCompare] === newValue);
+                    // 若是空字串，視為不重複
+                    if (newValue.trim() === "") {
+                        isDuplicateInDatabase = false;
+                        isDuplicateInUpdatedData = false;
+                    } else {
+                        isDuplicateInDatabase = table2Data.some((item: { [x: string]: string; }) => item[fieldToCompare] === newValue);
+                        isDuplicateInUpdatedData = updatedRowData.some((item: { [x: string]: string; }, index: number) => index < currentRow && item[fieldToCompare] === newValue);
+                    }
 
-                    if (isDuplicateInDatabase || isDuplicateInUpdatedData) {
+
+                    if (newValue.trim() !== "" && isDuplicateInDatabase || isDuplicateInUpdatedData) {
                         alert(`${fieldToCompare} 已存在，請輸入不同的 ${fieldToCompare}`);
                         setInputValue(''); // 清空輸入框
                         return;
@@ -484,10 +638,49 @@ function AddNewWorker() {
                     setUpdatedRowData(updatedData);
                     setInputValue(''); // 清空輸入框
 
+
+                    /**新增PUT即時更新剛行的資料到table2 */
+                    const fetchUpdateRows = async () => {
+                        setLoading(true); // 開始Loading
+                        try {
+                            const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify([{
+                                    id: data[rowIndex].id,
+                                    [fieldToCompare]: newValue,
+                                    edit_user: currentUser
+                                }]),
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Failed to 更新');
+                            } else {
+                                console.log('完成table2更新現有資料');
+                            }
+                        } catch (error) {
+                            console.error('Error updating rows:', error);
+                        } finally {
+                            setLoading(false); // 完成後結束Loading
+                        }
+                    };
+                    fetchUpdateRows();
+
+
                     // 移動到下一個欄位或下一行
                     moveToNextColumnOrRow();
 
-                } else {
+                } else if (fieldToCompare === "QR_RFTray" || fieldToCompare === "QR_PS" || fieldToCompare === "QR_HS") {
+                    const newID = extractID(newValue);
+
+                    if (newID === null) {
+                        alert("字串格式不正確！請確保字串符合規定格式：.$ID:<內容>.$");
+                        setInputValue(''); // 清空輸入框
+                        return;
+                    }
+
                     isDuplicateInDatabase = table2Data.some((item: { [x: string]: string; }) => extractID(item[fieldToCompare]) === extractID(newValue));
                     isDuplicateInUpdatedData = updatedData.some((item, index) => index < currentRow && extractID(item[fieldToCompare]) === extractID(newValue));
 
@@ -496,6 +689,7 @@ function AddNewWorker() {
                         setInputValue(''); // 清空輸入框
                         return;
                     }
+
                     updatedRow[`${fieldToCompare}`] = newValue;
                     updatedRow[`${fieldToCompare}_BEDID`] = extractID(newValue);
                     updatedRow.edit_user = currentUser;
@@ -505,15 +699,89 @@ function AddNewWorker() {
                     setUpdatedRowData(updatedData);
                     setInputValue(''); // 清空輸入框
 
+
+
+                    /**新增PUT即時更新剛行的資料到table2 */
+                    const fetchUpdateRows = async () => {
+                        setLoading(true); // 開始Loading
+                        try {
+                            const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify([{
+                                    id: data[rowIndex].id,
+                                    [fieldToCompare]: newValue,
+                                    [`${fieldToCompare}_BEDID`]: extractID(newValue),
+                                    edit_user: currentUser
+                                }]),
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Failed to 更新');
+                            } else {
+                                console.log('完成table2更新現有資料');
+                            }
+                        } catch (error) {
+                            console.error('Error updating rows:', error);
+                        } finally {
+                            setLoading(false); // 完成後結束Loading
+                        }
+                    };
+                    fetchUpdateRows();
+
+
+
+                    // 移動到下一個欄位或下一行
+                    moveToNextColumnOrRow();
+                } else {
+
+
+                    updatedRow[fieldToCompare] = newValue;
+                    updatedRow.edit_user = currentUser;
+                    updatedRow.edit_date = today;
+                    updatedData[currentRow] = updatedRow;
+                    setData(updatedData); // 更新整體表格資料
+                    setUpdatedRowData(updatedData);
+                    setInputValue(''); // 清空輸入框
+
+
+
+                    /**新增PUT即時更新剛行的資料到table2 */
+                    const fetchUpdateRows = async () => {
+                        setLoading(true); // 開始Loading
+                        try {
+                            const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify([{
+                                    id: data[rowIndex].id,
+                                    [fieldToCompare]: newValue,
+                                    edit_user: currentUser
+                                }]),
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Failed to 更新');
+                            } else {
+                                console.log('完成table2更新現有資料');
+                            }
+                        } catch (error) {
+                            console.error('Error updating rows:', error);
+                        } finally {
+                            setLoading(false); // 完成後結束Loading
+                        }
+                    };
+                    fetchUpdateRows();
+
+
+
                     // 移動到下一個欄位或下一行
                     moveToNextColumnOrRow();
                 }
-
-
-
-
-
-
 
 
             }
@@ -547,7 +815,7 @@ function AddNewWorker() {
             //下一行的資料大於總資料行數,則不繼續新增
             if (currentRow !== null && currentRow + 1 >= rows) {
                 setIsComplete(true); // 完成輸入
-                setCurrentColumn(1); // 重置欄位到 SN
+                setCurrentColumn(null); // 重置欄位到 SN
                 setCurrentRow(null); // 重置行數
             } else {
                 setCurrentRow((prevRow) => (prevRow !== null ? prevRow + 1 : 0));
@@ -615,9 +883,75 @@ function AddNewWorker() {
             //略掉id worrOrderNumber兩欄位
             .filter((key) => key !== 'id' && key !== 'workOrderNumber')[colIndex];
 
+        const newValue = e.target.value;
+
+
+        /*新增防呆機制 */
+        const checkColumn = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS'];
+        let isDuplicateInDatabase = false;
+
+        // 若是空字串，視為不重複
+        if (newValue.trim() === "") {
+            isDuplicateInDatabase = false;
+            //指定的比對欄位
+        } else if (checkColumn.includes(colKey)) {
+            isDuplicateInDatabase = table2Data.some((item: { [x: string]: string; }) => item[colKey] === newValue);
+        } else {
+            isDuplicateInDatabase = false;
+        }
+
+        if (newValue.trim() !== "" && isDuplicateInDatabase) {
+            alert(`${colKey} 已存在，請輸入不同的 ${colKey}`);
+            setInputValue(''); // 清空輸入框
+            return;
+        }
+        /*新增防呆機制 */
+
+
+        /**新增PUT即時更新 */
+
+        //檢查原欄位值和新輸入的質是否相同,如不同則PUT到API
+        const originalValue = table2Data.find((item: any) => item.id === data[rowIndex].id)?.[colKey];
+        if (originalValue !== newValue) {
+            const fetchUpdateRows = async () => {
+                try {
+
+                    //如果修改的欄位是QR_,則將PUT內容新增_BEDID欄位
+                    const updateData = {
+                        id: data[rowIndex].id,
+                        [colKey]: newValue,
+                        edit_user: currentUser
+                    };
+
+                    if (checkColumn.includes(colKey)) {
+                        updateData[`${colKey}_BEDID`] = extractID(newValue);
+                    }
+
+
+                    const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify([updateData]),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to 更新');
+                    } else {
+                        console.log('完成table2更新現有資料');
+                    }
+                } catch (error) {
+                    console.error('Error updating rows:', error);
+                }
+            };
+            fetchUpdateRows();
+        }
+        /**新增PUT即時更新 */
+
         const updatedData = data.map((row: any, idx: any) =>
             //如果當前行和目標行相同,則將該欄位的值更新,其他行則維持原本的值
-            idx === rowIndex ? { ...row, [colKey]: e.target.value, edit_user: currentUser, edit_date: today } : row
+            idx === rowIndex ? { ...row, [colKey]: e.target.value, edit_user: currentUser, edit_date: today, [`${colKey}_BEDID`]: extractID(newValue) } : row
         );
 
         setData(updatedData);
@@ -636,151 +970,143 @@ function AddNewWorker() {
 
 
     // 儲存表格資料
-   
-    const handleSaveData = () => {
 
-        setLoading(true); // 開始Loading
+    // const handleSaveData = () => {
 
-        try {
+    //     setLoading(true); // 開始Loading
 
-
-            const newFormattedData = data.map((row: any, index: any) => {
-
-                // 如果原始資料不存在，設定為空物件，避免 undefined 錯誤
-                const originalRow = originalData[index] || {};
-
-                // 如果之前有儲存的資料，使用已儲存的資料，否則使用當前 row 資料
-                const savedRow = savedData[index] || {
-                    workOrderNumber: row.workOrderNumber,
-                    // detailId: row.detailId,
-                    SN: row.SN,
-                    QR_RFTray: row.QR_RFTray,
-                    QR_PS: row.QR_PS,
-                    QR_HS: row.QR_HS,
-                    QR_backup1: row.QR_backup1,
-                    QR_backup2: row.QR_backup2,
-                    QR_backup3: row.QR_backup3,
-                    QR_backup4: row.QR_backup4,
-                    note: row.note,
-                    // create_date: row.create_date,
-                    create_user: row.create_user,
-                    // edit_date: row.edit_date,
-                    edit_user: row.edit_user,
-                    QR_RFTray_BEDID: row.QR_RFTray_BEDID,
-                    QR_PS_BEDID: row.QR_PS_BEDID,
-                    QR_HS_BEDID: row.QR_HS_BEDID,
-                };
-
-                // 判斷該行是否有資料變動
-                const hasChanged =
-                    originalRow.workOrderNumber !== savedRow.workOrderNumber ||
-                    // originalRow.detailId !== savedRow.detailId ||
-                    originalRow.SN !== savedRow.SN ||
-                    originalRow.QR_RFTray !== savedRow.QR_RFTray ||
-                    originalRow.QR_PS !== savedRow.QR_PS ||
-                    originalRow.QR_HS !== savedRow.QR_HS ||
-                    originalRow.QR_backup1 !== savedRow.QR_backup1 ||
-                    originalRow.QR_backup2 !== savedRow.QR_backup2 ||
-                    originalRow.QR_backup3 !== savedRow.QR_backup3 ||
-                    originalRow.QR_backup4 !== savedRow.QR_backup4 ||
-                    originalRow.note !== savedRow.note ||
-                    originalRow.QR_RFTray_BEDID !== savedRow.QR_RFTray_BEDID ||
-                    originalRow.QR_PS_BEDID !== savedRow.QR_PS_BEDID ||
-                    originalRow.QR_HS_BEDID !== savedRow.QR_HS_BEDID;
-
-                // 如果資料有變動，更新資料，並更新日期和使用者
-                if (hasChanged) {
-                    const updatedRow = {
-                        ...savedRow,          // 保留其餘欄位的值
-                        edit_user: currentUser,  // 更新使用者
-                    };
-
-                    // 移除不需要的欄位 (detailId, create_date, edit_date)
-                    const { detailId, create_date, edit_date, ...filteredRow } = updatedRow;
-                    return filteredRow;
-                } else {
-                    // 如果沒有變動，返回原始資料，保持 date 和 user 不變
-                    return savedRow;
-                }
+    //     try {
 
 
-            });
+    //         const newFormattedData = data.map((row: any, index: any) => {
 
-            // 這邊用API將新增的資料存到DB中的 table1 table2
-            console.log("要新增table2的資料:" + JSON.stringify(newFormattedData));
-            //將新增的表格加入到table2資料庫
-            // const fetchData2 = async () => {
-            //     try {
-            //         const response = await fetch(`${globalUrl.url}/api/post-work-order-details`, {
-            //             method: 'POST',
-            //             headers: {
-            //                 'Content-Type': 'application/json',
-            //             },
-            //             body: JSON.stringify(newFormattedData),
-            //         });
-            //         if (!response.ok) {
-            //             throw new Error(`HTTP error! Status: ${response.status}`);
-            //         }
-            //         const res = await response.json();
-            //         console.log("新增table2成功" + res);
-            //     } catch (error: any) {
-            //         console.error('Error :', error);
+    //             // 如果原始資料不存在，設定為空物件，避免 undefined 錯誤
+    //             const originalRow = data[index] || {};
 
-            //     }
-            // };
+    //             // 如果之前有儲存的資料，使用已儲存的資料，否則使用當前 row 資料
+    //             const savedRow = savedData[index] || {
+    //                 workOrderNumber: row.workOrderNumber,
+    //                 // detailId: row.detailId,
+    //                 SN: row.SN,
+    //                 QR_RFTray: row.QR_RFTray,
+    //                 QR_PS: row.QR_PS,
+    //                 QR_HS: row.QR_HS,
+    //                 QR_backup1: row.QR_backup1,
+    //                 QR_backup2: row.QR_backup2,
+    //                 QR_backup3: row.QR_backup3,
+    //                 QR_backup4: row.QR_backup4,
+    //                 note: row.note,
+    //                 company: row.company,
+    //                 // create_date: row.create_date,
+    //                 create_user: row.create_user,
+    //                 // edit_date: row.edit_date,
+    //                 edit_user: row.edit_user,
+    //                 QR_RFTray_BEDID: row.QR_RFTray_BEDID,
+    //                 QR_PS_BEDID: row.QR_PS_BEDID,
+    //                 QR_HS_BEDID: row.QR_HS_BEDID,
+    //             };
 
-            //將資料加到table1Data
-            const newTestData1 = {
-                workOrderNumber: workNumber,
-                quantity: rows,
-                partNumber: selectedPartNumber,
-                company: company,
-                createUser: currentUser,
-                createDate: today,
-                editUser: currentUser,
-                editDate: today
-            };
-            // console.log("要新增table1的資料:" + JSON.stringify(newTestData1));
-            // 這邊用API將新增的資料存到DB中的 table1 table2
-            //將新增的表格加入到table1資料庫
-            // const fetchData1 = async () => {
-            //     try {
-            //         const response = await fetch(`${globalUrl.url}/api/post-work-orders`, {
-            //             method: 'POST',
-            //             headers: {
-            //                 'Content-Type': 'application/json',
-            //             },
-            //             body: JSON.stringify(newTestData1),
-            //         });
-            //         if (!response.ok) {
-            //             throw new Error(`HTTP error! Status: ${response.status}`);
-            //         }
-            //         // const res = await response.json();
-            //         console.log("新增table1成功" + response);
+    //             // 判斷該行是否有資料變動
+    //             const hasChanged =
+    //                 originalRow.workOrderNumber !== savedRow.workOrderNumber ||
+    //                 // originalRow.detailId !== savedRow.detailId ||
+    //                 originalRow.SN !== savedRow.SN ||
+    //                 originalRow.QR_RFTray !== savedRow.QR_RFTray ||
+    //                 originalRow.QR_PS !== savedRow.QR_PS ||
+    //                 originalRow.QR_HS !== savedRow.QR_HS ||
+    //                 originalRow.QR_backup1 !== savedRow.QR_backup1 ||
+    //                 originalRow.QR_backup2 !== savedRow.QR_backup2 ||
+    //                 originalRow.QR_backup3 !== savedRow.QR_backup3 ||
+    //                 originalRow.QR_backup4 !== savedRow.QR_backup4 ||
+    //                 originalRow.note !== savedRow.note ||
+    //                 originalRow.company !== savedRow.company ||
+    //                 originalRow.QR_RFTray_BEDID !== savedRow.QR_RFTray_BEDID ||
+    //                 originalRow.QR_PS_BEDID !== savedRow.QR_PS_BEDID ||
+    //                 originalRow.QR_HS_BEDID !== savedRow.QR_HS_BEDID;
 
-            //         await fetchData2();
+    //             // 如果資料有變動，更新資料，並更新日期和使用者
+    //             if (hasChanged) {
+    //                 const updatedRow = {
+    //                     ...savedRow,          // 保留其餘欄位的值
+    //                     edit_user: currentUser,  // 更新使用者
+    //                 };
 
-            //     } catch (error: any) {
-            //         console.error('Error :', error);
-
-            //     }
-            // };
-
+    //                 // 移除不需要的欄位 (detailId, create_date, edit_date)
+    //                 const { detailId, create_date, edit_date, ...filteredRow } = updatedRow;
+    //                 return filteredRow;
+    //             } else {
+    //                 // 如果沒有變動，返回原始資料，保持 date 和 user 不變
+    //                 return savedRow;
+    //             }
 
 
+    //         });
 
+    //         // 這邊用API將新增的資料存到DB中的 table1 table2
+    //         console.log("要新增table2的資料:" + JSON.stringify(newFormattedData));
+    //         //將新增的表格加入到table2資料庫
+    //         const fetchData2 = async () => {
+    //             try {
+    //                 const response = await fetch(`${globalUrl.url}/api/post-work-order-details`, {
+    //                     method: 'POST',
+    //                     headers: {
+    //                         'Content-Type': 'application/json',
+    //                     },
+    //                     body: JSON.stringify(newFormattedData),
+    //                 });
+    //                 if (!response.ok) {
+    //                     throw new Error(`HTTP error! Status: ${response.status}`);
+    //                 }
+    //                 const res = await response.json();
+    //                 console.log("新增table2成功" + res);
+    //             } catch (error: any) {
+    //                 console.error('Error :', error);
+    //             }
+    //         };
 
+    //         //將資料加到table1Data
+    //         const newTestData1 = {
+    //             workOrderNumber: workNumber,
+    //             quantity: rows,
+    //             partNumber: selectedPartNumber,
+    //             company: company,
+    //             createUser: currentUser,
+    //             createDate: today,
+    //             editUser: currentUser,
+    //             editDate: today
+    //         };
+    //         // console.log("要新增table1的資料:" + JSON.stringify(newTestData1));
+    //         // 這邊用API將新增的資料存到DB中的 table1 table2
+    //         //將新增的表格加入到table1資料庫
+    //         const fetchData1 = async () => {
+    //             try {
+    //                 const response = await fetch(`${globalUrl.url}/api/post-work-orders`, {
+    //                     method: 'POST',
+    //                     headers: {
+    //                         'Content-Type': 'application/json',
+    //                     },
+    //                     body: JSON.stringify(newTestData1),
+    //                 });
+    //                 if (!response.ok) {
+    //                     throw new Error(`HTTP error! Status: ${response.status}`);
+    //                 }
+    //                 // const res = await response.json();
 
+    //                 await fetchData2();
 
-            // fetchData1();
-        } catch (error) {
-            console.error("Error saving data:", error);
-        } finally {
-            setLoading(false); // 完成後結束Loading
-        }
+    //             } catch (error: any) {
+    //                 console.error('Error :', error);
+    //             }
+    //         };
 
-
-    };
+    //         fetchData1();
+    //     } catch (error) {
+    //         console.error("Error saving data:", error);
+    //     } finally {
+    //         setLoading(false); // 完成後結束Loading
+    //         alert(`${formatMessage({ id: 'updated' })}`)
+    //     }
+    // };
 
 
     /**
@@ -819,102 +1145,116 @@ function AddNewWorker() {
 
 
     const handleExitButtonClick = () => {
-        navigate('/');
+        navigate('/reload');
     };
 
 
     return (
-        <>
-            <div className="content" style={{ flex: 1 }}>
+
+        <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
 
 
-                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                    <Typography variant="h4" gutterBottom>
-                        {formatMessage({ id: 'newwork' })}
-                    </Typography>
-                    <Button variant="contained" sx={{ marginRight: 1 }} onClick={handleExitButtonClick}>
-                        {formatMessage({ id: 'exit' })}
-                    </Button>
-                </Box>
+            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                <Typography variant="h4" gutterBottom>
+                    {formatMessage({ id: 'newwork' })}
+                </Typography>
+                <Button variant="contained" sx={{ marginRight: 1 }} onClick={handleExitButtonClick}>
+                    {formatMessage({ id: 'exit' })}
+                </Button>
+            </Box>
 
-                {/* for Loading*/}
+            {/* for Loading*/}
 
-                {loading && (
-                    <div className="loading-overlay">
-                        <div className="loading-spinner">Loading...</div>
-                    </div>
-                )}
-
-                <div>
-                    <>
-                        <label>{formatMessage({ id: 'workOrderNumber' })}：</label>
-                        <input
-                            type="text"
-                            value={workNumber}
-                            onChange={(e) => setWorkNumber(e.target.value)}
-                        />
-                    </>
-                    <>
-                        <label>{formatMessage({ id: 'part' })}：</label>
-                        <select value={selectedPartNumber} onChange={(e) => setSelectedPartNumber(e.target.value)}>
-                            <option value="">{formatMessage({ id: 'part' })}</option>
-                            {table3Data.map((item: any) => (
-                                <option key={item.id} value={item.partNumber}>
-                                    {item.partNumber}
-                                </option>
-                            ))}
-                        </select>
-                    </>
-                    <>
-                        <label>{formatMessage({ id: 'quantity' })}：</label>
-                        <input type="number" value={rows} onChange={handleRowChange} />
-                    </>
-                    <button onClick={handleGenerateTable}>{formatMessage({ id: 'generate' })}</button>
+            {loading && (
+                <div className="loading-overlay">
+                    <div className="loading-spinner">Loading...</div>
                 </div>
+            )}
+
+            <div>
+                <>
+                    <label>{formatMessage({ id: 'workOrderNumber' })}：</label>
+                    <input
+                        type="text"
+                        value={workNumber}
+                        onChange={(e) => setWorkNumber(e.target.value)}
+                    />
+                </>
+                <>
+                    <label>{formatMessage({ id: 'part' })}：</label>
+                    <select value={selectedPartNumber} onChange={(e) => setSelectedPartNumber(e.target.value)}>
+                        <option value="">{formatMessage({ id: 'part' })}</option>
+                        {table3Data.map((item: any) => (
+                            <option key={item.id} value={item.partNumber}>
+                                {item.partNumber}
+                            </option>
+                        ))}
+                    </select>
+                </>
+                <>
+                    <label>{formatMessage({ id: 'quantity' })}：</label>
+                    <input type="number" value={rows} onChange={handleRowChange} />
+                </>
+                <button onClick={handleGenerateTable}>{formatMessage({ id: 'generate' })}</button>
+            </div>
 
 
 
-                {data.length > 0 &&
-                    <>
-                        {!isComplete &&
+            {data.length > 0 &&
+                <>
+                    {!isComplete &&
+                        <>
+                            {/* <button onClick={handleSaveData}>{formatMessage({ id: 'save' })}</button> */}
+
+                            <input
+                                type="text"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyDown={handleBarcodeInput}
+                                placeholder={formatMessage({ id: 'text' })}
+                                disabled={isComplete} // 當掃描完成後禁用輸入框
+                            />
+                        </>
+                    }
+
+                    {/* {isComplete &&
                             <>
+                                <p>{formatMessage({ id: 'text1' })}</p>
                                 <button onClick={handleSaveData}>{formatMessage({ id: 'save' })}</button>
-
-                                <input
-                                    type="text"
-                                    value={inputValue}
-                                    onChange={(e) => setInputValue(e.target.value)}
-                                    onKeyDown={handleBarcodeInput}
-                                    placeholder={formatMessage({ id: 'text' })}
-                                    disabled={isComplete} // 當掃描完成後禁用輸入框
-                                />
                             </>
-                        }
-                        {isComplete && <p>{formatMessage({ id: 'text1' })}</p>}
-                        <Paper sx={{ width: '100%', overflow: 'hidden', height: '90%' }}>
-                            <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'scroll' }}>
-
-                                <Table stickyHeader aria-label="sticky table">
-                                    <TableHead >
-                                        <TableRow style={{ border: '1px solid #ccc' }}>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup4' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'note' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    {/* 使用colKey */}
-                                    {/* <TableBody>
+                        } */}
+                    <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
+                        <TableContainer component={Paper} style={{
+                            maxHeight: '70vh', // 設置最大高度，避免超出視窗
+                            overflowX: 'auto', // 確保左右滾動條出現
+                            overflowY: 'auto', // 確保上下滾動條出現
+                        }}
+                        >
+                            <Table stickyHeader aria-label="sticky table"
+                                style={{
+                                    minWidth: '800px', // 最小寬度，確保資料過多時滾動
+                                    tableLayout: 'auto',
+                                }}>
+                                <TableHead >
+                                    <TableRow style={{ border: '1px solid #ccc' }}>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup4' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'note' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                {/* 使用colKey */}
+                                {/* <TableBody>
                                         {data.map((row: any, rowIndex: number) => (
                                             <TableRow key={rowIndex} >
                                                 {Object.keys(row)
@@ -941,45 +1281,62 @@ function AddNewWorker() {
                                         ))}
                                     </TableBody> */}
 
-                                    {/* 使用col index */}
-                                    <TableBody>
-                                        {data.map((row: any, rowIndex: number) => (
-                                            <TableRow key={rowIndex}>
-                                                {Object.keys(row)
-                                                    .filter((colKey) => colKey !== 'id' && colKey !== 'workOrderNumber')
-                                                    .map((colKey, colIndex) => (
-                                                        <TableCell
-                                                            key={colKey}
-                                                            onClick={() => handleCellClick(rowIndex, colIndex)}
-                                                            className={currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : ''}
-                                                        >
-                                                            {editCell.rowIndex === rowIndex && editCell.colIndex === colIndex ? (
-                                                                <TextField
-                                                                    value={row[colKey]}
-                                                                    onChange={(e) => handleCellChange(e, rowIndex, colIndex)}
-                                                                    onBlur={handleCellBlur}
-                                                                    autoFocus
-                                                                />
-                                                            ) : (
-                                                                row[colKey]
-                                                            )}
-                                                        </TableCell>
-                                                    ))}
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
+                                {/* 使用col index */}
+                                <TableBody>
+                                    {data.map((row: any, rowIndex: number) => (
+                                        <TableRow key={rowIndex}>
+                                            {Object.keys(row)
+                                                .filter((colKey) => colKey !== 'id' && colKey !== 'workOrderNumber' && colKey !== 'QR_RFTray_BEDID' && colKey !== 'QR_PS_BEDID' && colKey !== 'QR_HS_BEDID')
+                                                .map((colKey, colIndex) => (
+                                                    <TableCell
+                                                        key={colKey}
+                                                        // onClick={() => 
+                                                        //     handleCellClick(rowIndex, colIndex)
+                                                        // }
+
+                                                        onClick={() => {
+                                                            // 依據 inputMode 的條件 , 訂出不可編輯的欄位
+                                                            const restrictedFields: { [key in 'A' | 'B' | 'C' | 'D']: string[] } = {
+                                                                A: ['QR_PS', 'QR_RFTray'],
+                                                                B: ['QR_PS', 'QR_HS'],
+                                                                C: ['QR_RFTray', 'QR_HS'],
+                                                                D: ['QR_RFTray'],
+                                                            };
+                                                            // 檢查當前的欄位是否在 restrictedFields[inputMode] 中
+                                                            if (!inputMode || !restrictedFields[inputMode as 'A' | 'B' | 'C' | 'D']?.includes(colKey)) {
+                                                                // 如果不在不可編輯的欄位中，才允許編輯
+                                                                handleCellClick(rowIndex, colIndex);
+                                                            }
+                                                        }}
+                                                        className={currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : ''}
+                                                    >
+                                                        {editCell.rowIndex === rowIndex && editCell.colIndex === colIndex ? (
+                                                            <TextField
+                                                                value={row[colKey]}
+                                                                onChange={(e) => handleCellChange(e, rowIndex, colIndex)}
+                                                                onBlur={handleCellBlur}
+                                                                autoFocus
+                                                            />
+                                                        ) : (
+                                                            row[colKey]
+                                                        )}
+                                                    </TableCell>
+                                                ))}
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
 
 
 
-                                </Table>
-                            </TableContainer>
+                            </Table>
+                        </TableContainer>
 
 
-                        </Paper>
-                    </>
-                }
-            </div>
-        </>
+                    </Paper>
+                </>
+            }
+        </div>
+
     );
 }
 

@@ -34,7 +34,7 @@ const SearchForm = () => {
     const [currentRow, setCurrentRow] = useState<number | null>(null);
     // id是第0列 , 工單號碼是第1列，detailid是第2列 , 從第3列SN(序號)開始輸入其他資料
     //但要渲染的資料將id給屏蔽掉了 , 所以從第2列SN開始
-    const [currentColumn, setCurrentColumn] = useState<number | null>(2);
+    const [currentColumn, setCurrentColumn] = useState<number | null>(null);
 
 
     //接收number
@@ -52,7 +52,7 @@ const SearchForm = () => {
     const [updateWorkPart, setUpdateWorkPart] = useState(part);
 
     const [originalData, setOriginalData] = useState<any[]>([]);
-
+    const [updatedRowData, setUpdatedRowData] = useState<any>([]);
 
     /**************************************************************************************************************** */
     /**
@@ -152,8 +152,67 @@ const SearchForm = () => {
             })));
         }
 
+        setLoading(true); // 開始Loading
 
+        /**
+                更新tbale2Data邏輯為
+                步驟1.  將舊的table2資料更新....資料庫join的關係似乎連動改了?...所以這部份不用做
+                步驟2.  新增資料   (有修改updateWorkQuantity的話)
+         */
+
+
+        // 第一次table2 的 API請求 - 更新資料 ( 有用join的關係  免做)
+        // const fetchUpdateRows = async () => {
+        //     console.log("table2的第一個更新請求 : ", JSON.stringify(updatedRows, null, 2));
+        //     try {
+        //         const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
+        //             method: 'PUT',
+        //             headers: {
+        //                 'Content-Type': 'application/json',
+        //             },
+        //             body: JSON.stringify(updatedRows),
+        //         });
+
+        //         if (!response.ok) {
+        //             throw new Error('Failed to 更新已存在資料');
+        //         } else {
+        //             console.log('完成更新現有資料');
+        //         }
+        //     } catch (error) {
+        //         console.error('Error updating rows:', error);
+        //     }
+        // };
+
+
+        // 第二次table2的 API 請求 - 新增資料
+        const fetchAddRows = async () => {
+            console.log("additionalRows", JSON.stringify(additionalRows, null, 2))
+            setLoading(true); // 開始Loading
+            try {
+                const response = await fetch(`${globalUrl.url}/api/post-work-order-details`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(additionalRows),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to 新增資料');
+                } else {
+                    console.log('完成新增資料');
+                }
+            } catch (error) {
+                console.error('Error adding rows:', error);
+            } finally {
+                setLoading(false); // 完成後結束Loading
+            }
+        };
+
+
+        //更新table1資料
         const fetchUpdateTable1 = async () => {
+
             try {
                 const response = await fetch(`${globalUrl.url}/api/update-work-orders/${table1Id}`, {
                     method: 'PUT',
@@ -168,6 +227,7 @@ const SearchForm = () => {
                 } else {
                     console.log('完成更新現有資料');
                     if (additionalRows.length > 0) {
+                        //如果有增加行 , 則要新增行到table2
                         await fetchAddRows();
                     }
                     await fetchAll();
@@ -201,55 +261,14 @@ const SearchForm = () => {
         /******************************************* */
 
 
-        //更新tbale2Data邏輯為
-        // 步驟1.  將舊的table2資料更新....資料庫join的關係似乎連動改了?...所以這部份不用做
-        // 步驟2.  新增資料   (有修改updateWorkQuantity的話)
-
-        // const originalRows = table2Data.filter((row: { workOrderNumber: any; }) => row.workOrderNumber === workNo);
-        // 第一次API請求 - 更新資料 ( 有用join的關係  免做)
-        // const fetchUpdateRows = async () => {
-        //     console.log("table2的第一個更新請求 : ", JSON.stringify(updatedRows, null, 2));
-        //     try {
-        //         const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
-        //             method: 'PUT',
-        //             headers: {
-        //                 'Content-Type': 'application/json',
-        //             },
-        //             body: JSON.stringify(updatedRows),
-        //         });
-
-        //         if (!response.ok) {
-        //             throw new Error('Failed to 更新已存在資料');
-        //         } else {
-        //             console.log('完成更新現有資料');
-        //         }
-        //     } catch (error) {
-        //         console.error('Error updating rows:', error);
-        //     }
-        // };
-
-        // 第二次 API 請求 - 新增資料
-        const fetchAddRows = async () => {
-            console.log("additionalRows", JSON.stringify(additionalRows, null, 2))
-            try {
-                const response = await fetch(`${globalUrl.url}/api/post-work-order-details`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(additionalRows),
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to 新增資料');
-                } else {
-                    console.log('完成新增資料');
-                }
-            } catch (error) {
-                console.error('Error adding rows:', error);
-            }
+        //將table1Data裡面多餘的workOrderDetails資訊刪掉
+        const removeWorkOrderDetails = (data: any[]) => {
+            return data.map(({ workOrderDetails, ...rest }) => rest);
         };
+
+
         const fetchAllTable1 = async () => {
+
             try {
                 const response = await fetch(`${globalUrl.url}/api/get-work-orders`, {
                     method: 'GET',
@@ -273,9 +292,9 @@ const SearchForm = () => {
                 console.error('Error fetching token:', error);
             }
         };
-        const removeWorkOrderDetails = (data: any[]) => {
-            return data.map(({ workOrderDetails, ...rest }) => rest);
-        };
+
+
+
         const fetchAllTable2 = async () => {
             try {
                 const response = await fetch(`${globalUrl.url}/api/get-work-order-details`, {
@@ -334,6 +353,7 @@ const SearchForm = () => {
                 console.error('Error fetching token:', error);
             }
         };
+
         const fetchAllTable3 = async () => {
             try {
                 const response = await fetch(`${globalUrl.url}/api/get-input-modes`, {
@@ -360,15 +380,14 @@ const SearchForm = () => {
             fetchAllTable1();
             fetchAllTable2();
             fetchAllTable3();
-            setWorkNo();
-            setQuant();
-            setPart();
-            setModel();
-            setTable1Id();
+            setWorkNo('');
+            setQuant('');
+            setPart('');
+            setModel('');
+            setTable1Id('');
         }
 
 
-        //更新 table2Data (1.工單號碼更新 2.要增加幾行)
         // setTable2Data((prevTable2Data: any) => {
 
         //     //將所有相同的workOderNumber抓出來
@@ -454,6 +473,8 @@ const SearchForm = () => {
         //將編輯按鈕顯現出來 ,關閉原本的3個input框
         setUpdateData(false);
 
+        setLoading(false); // 完成後結束Loading
+
         navigate("/editWorker/reload");
     };
 
@@ -484,11 +505,12 @@ const SearchForm = () => {
         const colKey = Object.keys(originalData[rowIndex])
             .filter((key) => key !== 'id')[colIndex];
 
-        /*這邊要取消註解一下*/
+        /*這邊要取消註解*/
         // 只允許編輯QR_RFTray,QR_PS,QR_HS,QR_backup1,QR_backup2,QR_backup3,QR_backup4,note的欄位
         if (
             colKey === 'id' || colKey === 'workOrderNumber' || colKey === 'detailId' ||
             colKey === 'create_date' || colKey === 'create_user' || colKey === 'edit_date' || colKey === 'edit_user'
+            || colKey === 'QR_RFTray_BEDID' || colKey === 'QR_PS_BEDID' || colKey === 'QR_HS_BEDID'
         ) {
             return;
         }
@@ -506,14 +528,93 @@ const SearchForm = () => {
 
     // 處理編輯完成後，更新edit_user和edit_date
     const handleCellChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, rowIndex: number, colIndex: number) => {
+
+        //取得欄位名
         const colKey = Object.keys(originalData[rowIndex])
             .filter((key) => key !== 'id')[colIndex];
 
+        const newValue = e.target.value;
+
+        /*新增防呆機制 */
+        const checkColumn = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS'];
+        let isDuplicateInDatabase = false;
+
+        // 若是空字串，視為不重複
+        if (newValue.trim() === "") {
+            isDuplicateInDatabase = false;
+            //指定的比對欄位
+        } else if (checkColumn.includes(colKey)) {
+            isDuplicateInDatabase = table2Data.some((item: { [x: string]: string; }) => item[colKey] === newValue);
+        } else {
+            isDuplicateInDatabase = false;
+        }
+
+
+        if (newValue.trim() !== "" && isDuplicateInDatabase) {
+            alert(`${colKey} 已存在，請輸入不同的 ${colKey}`);
+            setInputValue(''); // 清空輸入框
+            return;
+        }
+
+        // const isDuplicateInDatabase = table2Data.some((item: any) => item[colKey] === newValue);
+        // if (isDuplicateInDatabase) {
+        //     alert(`${colKey} 已存在，請輸入不同的 ${colKey}`);
+        //     setInputValue(''); // 清空輸入框
+        //     return; // 阻止更新
+        // }
+        /*新增防呆機制 */
+
+
+        /**新增PUT即時更新 */
+
+        //檢查原欄位值和新輸入的質是否相同,如不同則PUT到API
+        const originalValue = table2Data.find((item: any) => item.id === originalData[rowIndex].id)?.[colKey];
+        if (originalValue !== newValue) {
+            const fetchUpdateRows = async () => {
+                try {
+
+                    //如果修改的欄位是QR_,則將PUT內容新增_BEDID欄位
+                    const updateData = {
+                        id: originalData[rowIndex].id,
+                        [colKey]: newValue,
+                        edit_user: currentUser
+                    };
+
+                    if (checkColumn.includes(colKey)) {
+                        updateData[`${colKey}_BEDID`] = extractID(newValue);
+                    }
+
+
+                    const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify([updateData]),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to 更新');
+                    } else {
+                        console.log('完成table2更新現有資料');
+                    }
+                } catch (error) {
+                    console.error('Error updating rows:', error);
+                }
+            };
+            fetchUpdateRows();
+        }
+        /**新增PUT即時更新 */
+
+        //複製原值並將該欄位值更新
         const updatedData = originalData.map((row: any, idx: any) =>
-            idx === rowIndex ? { ...row, [colKey]: e.target.value, edit_user: currentUser, edit_date: today } : row
+            idx === rowIndex ? { ...row, [colKey]: e.target.value, edit_user: currentUser, edit_date: today, [`${colKey}_BEDID`]: extractID(newValue) } : row
         );
 
-        // console.log("編輯後的資料", JSON.stringify(updatedData, null, 2))
+        // console.log("updatedData", JSON.stringify(updatedData, null, 2));
+
+
+
         setOriginalData(updatedData);
         setUpdateCell(true);
     };
@@ -529,7 +630,7 @@ const SearchForm = () => {
     };
 
 
-    const [updatedRowData, setUpdatedRowData] = useState<any>([]);
+
     // 處理Barcode input條碼輸入
     // const handleBarcodeInput = (event: any) => {
 
@@ -646,6 +747,7 @@ const SearchForm = () => {
     const handleBarcodeInput = (event: any) => {
         if (event.key === 'Enter' && !isComplete) {
             event.preventDefault();
+
             const newValue = inputValue.trim();
 
             const rowIndex = currentRow !== null ? currentRow : 0;
@@ -659,15 +761,22 @@ const SearchForm = () => {
                 else if (currentColumn === 3) fieldToCompare = "QR_RFTray";
                 else if (currentColumn === 4) fieldToCompare = "QR_PS";
                 else if (currentColumn === 5) fieldToCompare = "QR_HS";
+
                 // 比對資料庫 (table2Data) 和已輸入資料 (updatedData)
                 let isDuplicateInDatabase = false;
                 let isDuplicateInUpdatedData = false;
 
                 if (fieldToCompare === "SN") {
-                    isDuplicateInDatabase = table2Data.some((item: { [x: string]: string; }) => item[fieldToCompare] === newValue);
-                    isDuplicateInUpdatedData = updatedRowData.some((item: { [x: string]: string; }, index: number) => index < currentRow && item[fieldToCompare] === newValue);
+                    // 若是空字串，視為不重複
+                    if (newValue.trim() === "") {
+                        isDuplicateInDatabase = false;
+                        isDuplicateInUpdatedData = false;
+                    } else {
+                        isDuplicateInDatabase = table2Data.some((item: { [x: string]: string; }) => item[fieldToCompare] === newValue);
+                        isDuplicateInUpdatedData = updatedRowData.some((item: { [x: string]: string; }, index: number) => index < currentRow && item[fieldToCompare] === newValue);
+                    }
 
-                    if (isDuplicateInDatabase || isDuplicateInUpdatedData) {
+                    if (newValue.trim() !== "" && isDuplicateInDatabase || isDuplicateInUpdatedData) {
                         alert(`${fieldToCompare} 已存在，請輸入不同的 ${fieldToCompare}`);
                         setInputValue(''); // 清空輸入框
                         return;
@@ -681,10 +790,49 @@ const SearchForm = () => {
                     setUpdatedRowData(updatedData);
                     setInputValue(''); // 清空輸入框
 
+
+                    /**新增PUT即時更新剛行的資料到table2 */
+                    const fetchUpdateRows = async () => {
+                        setLoading(true); // 開始Loading
+                        try {
+                            const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify([{
+                                    id: originalData[rowIndex].id,
+                                    [fieldToCompare]: newValue,
+                                    edit_user: currentUser
+                                }]),
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Failed to 更新');
+                            } else {
+                                console.log('完成table2更新現有資料');
+                            }
+                        } catch (error) {
+                            console.error('Error updating rows:', error);
+                        } finally {
+                            setLoading(false); // 完成後結束Loading
+                        }
+                    };
+                    fetchUpdateRows();
+
+
                     // 移動到下一個欄位或下一行
                     moveToNextColumnOrRow();
 
-                } else {
+                } else if (fieldToCompare === "QR_RFTray" || fieldToCompare === "QR_PS" || fieldToCompare === "QR_HS") {
+                    const newID = extractID(newValue);
+
+                    if (newID === null) {
+                        alert("字串格式不正確！請確保字串符合規定格式：.$ID:<內容>.$");
+                        setInputValue(''); // 清空輸入框
+                        return;
+                    }
+
                     isDuplicateInDatabase = table2Data.some((item: { [x: string]: string; }) => extractID(item[fieldToCompare]) === extractID(newValue));
                     isDuplicateInUpdatedData = updatedData.some((item, index) => index < currentRow && extractID(item[fieldToCompare]) === extractID(newValue));
 
@@ -693,6 +841,7 @@ const SearchForm = () => {
                         setInputValue(''); // 清空輸入框
                         return;
                     }
+
                     updatedRow[`${fieldToCompare}`] = newValue;
                     updatedRow[`${fieldToCompare}_BEDID`] = extractID(newValue);
                     updatedRow.edit_user = currentUser;
@@ -701,6 +850,86 @@ const SearchForm = () => {
                     setOriginalData(updatedData); // 更新整體表格資料
                     setUpdatedRowData(updatedData);
                     setInputValue(''); // 清空輸入框
+
+
+
+                    /**新增PUT即時更新剛行的資料到table2 */
+                    const fetchUpdateRows = async () => {
+                        setLoading(true); // 開始Loading
+                        try {
+                            const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify([{
+                                    id: originalData[rowIndex].id,
+                                    [fieldToCompare]: newValue,
+                                    [`${fieldToCompare}_BEDID`]: extractID(newValue),
+                                    edit_user: currentUser
+                                }]),
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Failed to 更新');
+                            } else {
+                                console.log('完成table2更新現有資料');
+                            }
+                        } catch (error) {
+                            console.error('Error updating rows:', error);
+                        } finally {
+                            setLoading(false); // 完成後結束Loading
+                        }
+                    };
+                    fetchUpdateRows();
+
+
+
+                    // 移動到下一個欄位或下一行
+                    moveToNextColumnOrRow();
+                } else {
+
+
+                    updatedRow[`${fieldToCompare}`] = newValue;
+                    updatedRow.edit_user = currentUser;
+                    updatedRow.edit_date = today;
+                    updatedData[currentRow] = updatedRow;
+                    setOriginalData(updatedData); // 更新整體表格資料
+                    setUpdatedRowData(updatedData);
+                    setInputValue(''); // 清空輸入框
+
+
+
+                    /**新增PUT即時更新剛行的資料到table2 */
+                    const fetchUpdateRows = async () => {
+                        setLoading(true); // 開始Loading
+                        try {
+                            const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify([{
+                                    id: originalData[rowIndex].id,
+                                    [fieldToCompare]: newValue,
+                                    edit_user: currentUser
+                                }]),
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Failed to 更新');
+                            } else {
+                                console.log('完成table2更新現有資料');
+                            }
+                        } catch (error) {
+                            console.error('Error updating rows:', error);
+                        } finally {
+                            setLoading(false); // 完成後結束Loading
+                        }
+                    };
+                    fetchUpdateRows();
+
+
 
                     // 移動到下一個欄位或下一行
                     moveToNextColumnOrRow();
@@ -723,11 +952,12 @@ const SearchForm = () => {
 
         const maxColumn = columnsPerMode[inputMode];
 
+        //該筆資料的欄位已輸入完畢
         if (currentColumn === maxColumn) {
             //下一行的資料大於總資料行數,則不繼續新增
             if (currentRow !== null && currentRow + 1 >= rows) {
                 setIsComplete(true); // 完成輸入
-                setCurrentColumn(2); // 重置欄位到 SN
+                setCurrentColumn(null); // 重置欄位到 SN
                 setCurrentRow(null); // 重置行數
             } else {
                 setCurrentRow((prevRow) => (prevRow !== null ? prevRow + 1 : 0));
@@ -752,7 +982,7 @@ const SearchForm = () => {
             setIsComplete(true);
             setContinueInput(false);
             setCurrentRow(null);
-            setCurrentColumn(2);
+            setCurrentColumn(null);
         }
         //如果有尚未填寫的欄位 , 將目前的currentRow和currentColumn設定到尚未輸入的該單元格上
         else {
@@ -884,155 +1114,157 @@ const SearchForm = () => {
     //     setContinueInput(false);
 
     // };
-   
-    const handleSaveData = async () => {
 
-        setLoading(true); // 開始Loading
+    // const handleSaveData = async () => {
 
-        try {
+    //     setLoading(true); // 開始Loading
 
-
-
-            // 將相同 workOrderNumber 的行更新table1Data的 editUser 和 editDate
-
-            // const updatedTable1Data = table1Data.map((row: any) => {      
-            const updatedTable1Data = originalData.map((row: any) => {
-                if (row.workOrderNumber === workNo) {
-                    // 如果 workOrderNumber 匹配，更新 editUser 和 editDate
-                    return {
-                        ...row,
-                        editUser: currentUser,
-                        editDate: today,
-                    };
-                }
-                return row; // 如果不匹配，保持原數據不變
-            });
-            //測試用setTable1Data(updatedTable1Data);
-
-            // console.log("table1要更新的資料:" + JSON.stringify(updatedTable1Data));
-
-            // 這邊用API將table1Data資料回存到DB
-            // 將所有的table1Data資料UPDATE資料庫
-            const fetchUpdateTable1 = async (id: number, updatedData: any) => {
-                try {
-                    const response = await fetch(`${globalUrl.url}/api/update-work-orders/${id}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(updatedData),
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to update work order');
-                    } else {
-                        console.log(`完成更新table1資料`);
-                    }
-                } catch (error) {
-                    console.error('Error updating work order:', error);
-                }
-            };
-
-            // 只針對相同 workOrderNumber 的行發送 API 請求
-            for (const row of updatedTable1Data) {
-                // 只發送更新符合 workNo 的資料
-                if (row.workOrderNumber === workNo) {
-                    // 更新後端資料
-                    await fetchUpdateTable1(row.id, {
-                        workOrderNumber: row.workOrderNumber,
-                        editUser: row.editUser,
-                        editDate: row.editDate,
-                        quantity: row.quantity,
-                        partNumber: row.partNumber,
-                        company: company
-
-                    });
-                }
-            }
+    //     try {
 
 
 
+    //         // 將相同 workOrderNumber 的行更新table1Data的 editUser 和 editDate
 
-            const updatedTable2Data = [...table2Data];
-            const updatedRows: any[] = [];
+    //         // const updatedTable1Data = table1Data.map((row: any) => {      
+    //         const updatedTable1Data = originalData.map((row: any) => {
+    //             if (row.workOrderNumber === workNo) {
+    //                 // 如果 workOrderNumber 匹配，更新 editUser 和 editDate
+    //                 return {
+    //                     ...row,
+    //                     editUser: currentUser,
+    //                     editDate: today,
+    //                 };
+    //             }
+    //             return row; // 如果不匹配，保持原數據不變
+    //         });
+    //         //測試用setTable1Data(updatedTable1Data);
 
-            // 比對相同的 workOrderNumber 和 id，然後更新有修改的欄位
-            originalData.forEach((originalRow) => {
-                const matchingIndex = updatedTable2Data.findIndex(
-                    (tableRow) => tableRow.id === originalRow.id
-                );
+    //         // console.log("table1要更新的資料:" + JSON.stringify(updatedTable1Data));
 
-                if (matchingIndex !== -1) {
-                    const tableRow = updatedTable2Data[matchingIndex];
-                    const updatedRow = { ...tableRow }; // 複製一份現有資料行
-                    let hasChanges = false; // 檢查是否有修改
+    //         // 這邊用API將table1Data資料回存到DB
+    //         // 將所有的table1Data資料UPDATE資料庫
+    //         const fetchUpdateTable1 = async (id: number, updatedData: any) => {
+    //             try {
+    //                 const response = await fetch(`${globalUrl.url}/api/update-work-orders/${id}`, {
+    //                     method: 'PUT',
+    //                     headers: {
+    //                         'Content-Type': 'application/json',
+    //                     },
+    //                     body: JSON.stringify(updatedData),
+    //                 });
 
-                    // 檢查原始資料和現有資料是否有差異
-                    Object.keys(originalRow).forEach((key) => {
-                        if (tableRow[key] !== originalRow[key]) {
-                            updatedRow[key] = originalRow[key];
-                            hasChanges = true; // 標記有變更
-                        }
-                    });
+    //                 if (!response.ok) {
+    //                     throw new Error('Failed to update work order');
+    //                 } else {
+    //                     console.log(`完成更新table1資料`);
+    //                 }
+    //             } catch (error) {
+    //                 console.error('Error updating work order:', error);
+    //             }
+    //         };
 
-                    if (hasChanges) {
-                        updatedTable2Data[matchingIndex] = updatedRow;
-                        updatedRows.push({ ...tableRow, ...originalRow }); // 將原有資料和修改的資料行加入陣列
-                    }
-                } else {
-                    // 如果找不到相同 id，將 originalRow 新增到 updatedTable2Data
-                    updatedTable2Data.push(originalRow);
-                    updatedRows.push(originalRow); // 新資料也加入到待發送的陣列
-                }
-            });
+    //         // 只針對相同 workOrderNumber 的行發送 API 請求
+    //         for (const row of updatedTable1Data) {
+    //             // 只發送更新符合 workNo 的資料
+    //             if (row.workOrderNumber === workNo) {
+    //                 // 更新後端資料
+    //                 await fetchUpdateTable1(row.id, {
+    //                     workOrderNumber: row.workOrderNumber,
+    //                     edit_user: currentUser,
+    //                     // editUser: row.editUser,
+    //                     // editDate: row.editDate,
+    //                     quantity: row.quantity,
+    //                     partNumber: row.partNumber,
+    //                     company: company
 
-            // 更新 table2Data 狀態
-            //setTable2Data(updatedTable2Data);
-
-            console.log("table2要更新的資料:" + JSON.stringify(updatedRows));
-
-            // 將table2有變更的資料更新
-            if (updatedRows.length > 0) {
-                const fetchUpdateRows = async () => {
-                    try {
-                        const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(updatedRows),
-                        });
-
-                        if (!response.ok) {
-                            throw new Error('Failed to 更新已存在資料');
-                        } else {
-                            console.log('完成table2更新現有資料');
-                        }
-                    } catch (error) {
-                        console.error('Error updating rows:', error);
-                    }
-                };
-                fetchUpdateRows();
-            }
+    //                 });
+    //             }
+    //         }
 
 
 
-            //save資料後將所有欄位都清空
-            // setOriginalData([]);
-            setContinueInput(false);
 
-            setUpdateCell(false);
-        } catch (error) {
-            console.error("Error saving data:", error);
-        } finally {
-            setLoading(false); // 完成後結束Loading
-        }
+    //         const updatedTable2Data = [...table2Data];
+    //         const updatedRows: any[] = [];
 
-    };
+    //         // 比對相同的 workOrderNumber 和 id，然後更新有修改的欄位
+    //         originalData.forEach((originalRow) => {
+    //             const matchingIndex = updatedTable2Data.findIndex(
+    //                 (tableRow) => tableRow.id === originalRow.id
+    //             );
+
+    //             if (matchingIndex !== -1) {
+    //                 const tableRow = updatedTable2Data[matchingIndex];
+    //                 const updatedRow = { ...tableRow }; // 複製一份現有資料行
+    //                 let hasChanges = false; // 檢查是否有修改
+
+    //                 // 檢查原始資料和現有資料是否有差異
+    //                 Object.keys(originalRow).forEach((key) => {
+    //                     if (tableRow[key] !== originalRow[key]) {
+    //                         updatedRow[key] = originalRow[key];
+    //                         hasChanges = true; // 標記有變更
+    //                     }
+    //                 });
+
+    //                 if (hasChanges) {
+    //                     updatedTable2Data[matchingIndex] = updatedRow;
+    //                     updatedRows.push({ ...tableRow, ...originalRow }); // 將原有資料和修改的資料行加入陣列
+    //                 }
+    //             } else {
+    //                 // 如果找不到相同 id，將 originalRow 新增到 updatedTable2Data
+    //                 updatedTable2Data.push(originalRow);
+    //                 updatedRows.push(originalRow); // 新資料也加入到待發送的陣列
+    //             }
+    //         });
+
+    //         // 更新 table2Data 狀態
+    //         //setTable2Data(updatedTable2Data);
+
+    //         console.log("table2要更新的資料:" + JSON.stringify(updatedRows));
+
+    //         // 將table2有變更的資料"更新"
+    //         if (updatedRows.length > 0) {
+    //             const fetchUpdateRows = async () => {
+    //                 try {
+    //                     const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
+    //                         method: 'PUT',
+    //                         headers: {
+    //                             'Content-Type': 'application/json',
+    //                         },
+    //                         body: JSON.stringify(updatedRows),
+    //                     });
+
+    //                     if (!response.ok) {
+    //                         throw new Error('Failed to 更新已存在資料');
+    //                     } else {
+    //                         console.log('完成table2更新現有資料');
+    //                     }
+    //                 } catch (error) {
+    //                     console.error('Error updating rows:', error);
+    //                 }
+    //             };
+    //             fetchUpdateRows();
+    //         }
+
+
+
+    //         //save資料後將所有欄位都清空
+    //         // setOriginalData([]);
+    //         setContinueInput(false);
+
+    //         setUpdateCell(false);
+    //     } catch (error) {
+    //         console.error("Error saving data:", error);
+    //     } finally {
+    //         setLoading(false); // 完成後結束Loading
+    //     }
+
+    // };
 
 
     const handleDeleteClick = async (id: any, workOrder: any, quantity: any, partnumber: any) => {
         const fetchDeleteRows = async () => {
+            setLoading(true); // 開始Loading
             try {
                 const response = await fetch(`${globalUrl.url}/api/delete-work-order-details/${id}`, {
                     method: 'DELETE',
@@ -1048,16 +1280,18 @@ const SearchForm = () => {
                 }
             } catch (error) {
                 console.error('Error updating rows:', error);
+            } finally {
+                setLoading(false); // 完成後結束Loading
             }
         };
         fetchDeleteRows();
 
-        navigate('/editworker');
+        navigate('/editworker/reload');
     }
 
 
     const handleExitButtonClick = () => {
-        navigate('/');
+        navigate('/reload');
     };
 
     // 將選擇的工單號碼從table2Data中拉出來
@@ -1067,7 +1301,7 @@ const SearchForm = () => {
         // 設定過濾後的資料為 originalData
         setOriginalData(filteredData);
 
-        console.log("      setOriginalData(filteredData);", JSON.stringify(originalData, null, 2));
+        // console.log("      setOriginalData(filteredData);", JSON.stringify(originalData, null, 2));
         setRows(filteredData.length);
     };
 
@@ -1084,7 +1318,7 @@ const SearchForm = () => {
 
 
     return (
-        <div style={{ width: '100vw', position: 'relative', left: 0 }}>
+        <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
 
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                 <Typography variant="h4" gutterBottom>
@@ -1123,20 +1357,20 @@ const SearchForm = () => {
             {!updateData && !continueInput && userRole !== 'USER' && userRole !== 'OPERATOR' && !updateCell &&
                 <button onClick={handleUpdate}>{formatMessage({ id: 'edit-workOrderDetail' })}</button>
             }
-
+            {/* 
             {
                 updateCell &&
                 <>
                     <button onClick={handleSaveData} disabled={loading}>{formatMessage({ id: 'save' })}</button>
                 </>
-            }
+            } */}
             {/* <>
                 {!continueInput && 
                     <button onClick={handleContinueInput}>繼續輸入</button>
                 }
             </> */}
             {
-                !isComplete && continueInput &&
+                !isComplete && continueInput && userRole !== 'USER' &&
                 <>
                     <input
                         type="text"
@@ -1151,9 +1385,12 @@ const SearchForm = () => {
 
             {userRole !== 'USER' && !updateData && !updateCell && (
                 <>
-                    {continueInput ? (
+                    {/* {continueInput ? (
                         <button onClick={handleSaveData} disabled={loading}>{formatMessage({ id: 'save' })}</button>
                     ) : (
+                        <button onClick={handleContinueInput}>{formatMessage({ id: 'continueinput' })}</button>
+                    )} */}
+                    {!continueInput && (
                         <button onClick={handleContinueInput}>{formatMessage({ id: 'continueinput' })}</button>
                     )}
                 </>
@@ -1196,7 +1433,13 @@ const SearchForm = () => {
 
             </>
 
+            {/* for Loading*/}
 
+            {loading && (
+                <div className="loading-overlay">
+                    <div className="loading-spinner">Loading...</div>
+                </div>
+            )}
 
 
             {
@@ -1208,9 +1451,18 @@ const SearchForm = () => {
             {
                 originalData.length > 0 &&
                 <>
-                    <Paper sx={{ width: '100%', overflow: 'hidden', height: '90%' }}>
-                        <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'scroll' }}>
-                            <Table stickyHeader aria-label="sticky table">
+                    <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
+                        <TableContainer component={Paper} style={{
+                            maxHeight: '70vh', // 設置最大高度，避免超出視窗
+                            overflowX: 'auto', // 確保左右滾動條出現
+                            overflowY: 'auto', // 確保上下滾動條出現
+                        }}
+                        >
+                            <Table stickyHeader aria-label="sticky table"
+                                style={{
+                                    minWidth: '800px', // 最小寬度，確保資料過多時滾動
+                                    tableLayout: 'auto',
+                                }}>
                                 <TableHead >
                                     <TableRow style={{ border: '1px solid #ccc' }}>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'delete' })}</TableCell>
@@ -1229,6 +1481,9 @@ const SearchForm = () => {
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray_BEDID' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS_BEDID' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS_BEDID' })}</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 {/* 使用colKey */}
@@ -1319,7 +1574,7 @@ const SearchForm = () => {
                             </Table>
                         </TableContainer>
                     </Paper>
-                    <TablePagination
+                    {/* <TablePagination
                         rowsPerPageOptions={[5, 10, 25, 100]}
                         component="div"
                         count={originalData.length}
@@ -1327,7 +1582,7 @@ const SearchForm = () => {
                         page={page}
                         onPageChange={handleChangePage}
                         onRowsPerPageChange={handleChangeRowsPerPage}
-                    />
+                    /> */}
                 </>
             }
         </div >

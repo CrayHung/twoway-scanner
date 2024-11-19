@@ -24,6 +24,7 @@
                 "text6":"開始日期不能晚於結束日期",
                 "text7":"結束日期不能早於開始日期",
                 "text8": "登入腳色: ",
+                "updated":"更新完畢",
        
 
 
@@ -79,7 +80,10 @@
                 "generate": "生成表格",
                 "newworkordernumber": "新工單號碼",
                 "startdate": "起始日期",
-                "enddate": "結束日期"
+                "enddate": "結束日期",
+                "QR_RFTray_BEDID":"QR_RFTray_BEDID",
+                "QR_PS_BEDID":"QR_PS_BEDID",
+                "QR_HS_BEDID":"QR_HS_BEDID"
         },
         "en-US": {
                 "enterResetPassword": "enter Reset Password ",
@@ -106,7 +110,7 @@
                 "text6":"start date should early than end date",
                 "text7":"end date should late than start date",
                 "text8": "login Role :",
-
+                "updated":"update finish",
 
                 "twowayexcel": "SN download",
                 "customexcel": "Custom Excel download",
@@ -158,6 +162,9 @@
                 "generate": "generate",
                 "newworkordernumber": "new workOrderNumber",
                 "startdate": "start date from",
-                "enddate": "end date at"
+                "enddate": "end date at",
+                "QR_RFTray_BEDID":"QR_RFTray_BEDID",
+                "QR_PS_BEDID":"QR_PS_BEDID",
+                "QR_HS_BEDID":"QR_HS_BEDID"
         }
 }
