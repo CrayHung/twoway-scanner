@@ -68,7 +68,7 @@ public class WorkOrderDetail {
     @Column(name = "edit_user")
     private String edit_user;
 
-    // parent workorder
+    // 建立 work_order_number 為關聯第一層與第二層表單的項目
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "work_order_number", referencedColumnName = "work_order_number")
     @JsonBackReference
@@ -235,25 +235,25 @@ public class WorkOrderDetail {
      // Add a method to get parent WorkOrder properties
      
      @Transient
-    public String getParentWorkOrderNumber() {
+    public String getWorkOrderNumber() {
         return workOrder != null ? workOrder.getWorkOrderNumber() : null;
     }
 
     
     @Transient
-    public int getParentQuantity() {
+    public int getQuantity() {
         return workOrder != null ? workOrder.getQuantity() : 0;
     }
 
     
     @Transient
-    public String getParentPartNumber() {
+    public String getPartNumber() {
         return workOrder != null ? workOrder.getPartNumber() : null;
     }
     
     
     @Transient
-    public String getParentCompany() {
+    public String getCompany() {
         return workOrder != null ? workOrder.getCompany() : null;
     }
 

@@ -40,7 +40,7 @@ public interface WorkOrderDetailRepository extends JpaRepository<WorkOrderDetail
     
     // post 前先檢查是否workOrder已有該 workOrderNumber
     @Query("SELECT wd FROM WorkOrderDetail wd WHERE wd.workOrder.workOrderNumber IN :numbers")
-    List<WorkOrderDetail> findByParentWorkOrderNumbers(@Param("numbers") Set<String> workOrderNumbers);
+    List<WorkOrderDetail> findByWorkOrderNumbers(@Param("numbers") Set<String> workOrderNumbers);
 
     // 檢查SN是否存在
     @Query("SELECT COUNT(w) > 0 FROM WorkOrderDetail w WHERE w.sn = :sn")

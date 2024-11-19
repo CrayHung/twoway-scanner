@@ -293,7 +293,7 @@ public class WorkOrderDetailController {
   }
 
   private void updateWorkOrder(WorkOrderDetail workOrderDetail, String editUser) {
-    WorkOrder workOrder = workOrderRepository.findByWorkOrderNumber(workOrderDetail.getParentWorkOrderNumber());
+    WorkOrder workOrder = workOrderRepository.findByWorkOrderNumber(workOrderDetail.getWorkOrderNumber());
     if (workOrder != null) {
       workOrder.setEditDate(LocalDate.now());
       workOrder.setEditUser(editUser);
@@ -338,7 +338,7 @@ public class WorkOrderDetailController {
                            "RF_Tray_BEDID: %s\n" +
                            "PS_BEDID: %s\n" +
                            "HS_BEDID: %s",
-                           workOrderDetail.getParentWorkOrderNumber(),
+                           workOrderDetail.getWorkOrderNumber(),
                            request.getQrRfTrayBedid(),
                            request.getQrPsBedid(),
                            request.getQrHsBedid()));
@@ -370,7 +370,7 @@ public class WorkOrderDetailController {
                updateWorkOrder(workOrderDetail, request.getEdit_user());
    
                response.append(String.format("成功更新工單號 %s 的詳細信息\n", 
-                   workOrderDetail.getParentWorkOrderNumber()));
+                   workOrderDetail.getWorkOrderNumber()));
            }
    
            return ResponseEntity.ok(response.toString());
@@ -432,7 +432,7 @@ public class WorkOrderDetailController {
         return ResponseEntity.notFound().build();
       }
        // ** 新增: 取得工單號供後續使用 **
-       String workOrderNumber = workOrderDetail.getParentWorkOrderNumber();
+       String workOrderNumber = workOrderDetail.getWorkOrderNumber();
         
        workOrderDetailRepository.delete(workOrderDetail);
 
