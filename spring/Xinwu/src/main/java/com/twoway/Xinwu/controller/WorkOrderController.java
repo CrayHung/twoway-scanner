@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.twoway.Xinwu.entity.WorkOrder;
 import com.twoway.Xinwu.repository.WorkOrderRepository;
+import com.twoway.Xinwu.dto.WorkOrderDTO;
 import com.twoway.Xinwu.dto.WorkOrderSearchDTO;
 import com.twoway.Xinwu.service.WorkOrderSearchService;
 
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.time.LocalDate;
 
 @RestController
@@ -64,11 +66,19 @@ public class WorkOrderController {
   
   //GET API
   @GetMapping("/get-work-orders")
-  public ResponseEntity<List<WorkOrder>> getAllWorkOrders() {
-      List<WorkOrder> workOrders = workOrderRepository.findAll();
-      return ResponseEntity.ok(workOrders);
+  public ResponseEntity<List<WorkOrderDTO>> getAllWorkOrders() {
+    try {
+        List<WorkOrder> workOrders = workOrderRepository.findAll();
+        List<WorkOrderDTO> dtos = workOrders.stream()
+            .map(WorkOrderDTO::fromEntity)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(500).build();
+    }
   }
-
+  
   //SEARCH API
   @PostMapping("/fuzzy-search-work-orders")
     public ResponseEntity<List<WorkOrder>> fuzzySearchWorkOrders(@RequestBody WorkOrderSearchDTO searchCriteria) {
