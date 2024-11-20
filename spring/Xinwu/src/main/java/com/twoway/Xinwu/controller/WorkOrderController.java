@@ -81,10 +81,10 @@ public class WorkOrderController {
   
   //SEARCH API
   @PostMapping("/fuzzy-search-work-orders")
-    public ResponseEntity<List<WorkOrder>> fuzzySearchWorkOrders(@RequestBody WorkOrderSearchDTO searchCriteria) {
+    public ResponseEntity<List<WorkOrderDTO>> fuzzySearchWorkOrders(@RequestBody WorkOrderSearchDTO searchCriteria) {
         try {
             logger.info("正在執行工單模糊搜尋，搜尋條件為：{}", searchCriteria);
-            List<WorkOrder> results = searchService.fuzzySearch(searchCriteria);
+            List<WorkOrderDTO> results = searchService.fuzzySearch(searchCriteria);
 
             if (results.isEmpty()) {
                 logger.info("模糊搜尋無符合條件的結果");

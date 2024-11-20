@@ -1,5 +1,6 @@
 package com.twoway.Xinwu.service;
 
+import com.twoway.Xinwu.dto.WorkOrderDTO;
 import com.twoway.Xinwu.dto.WorkOrderSearchDTO;
 import com.twoway.Xinwu.entity.WorkOrder;
 import com.twoway.Xinwu.repository.WorkOrderRepository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.time.LocalDate;
 
 @Service
@@ -26,7 +28,7 @@ public class WorkOrderSearchService {
         return list != null && !list.isEmpty();
     }
 
-    public List<WorkOrder> fuzzySearch(WorkOrderSearchDTO criteria) {
+    public List<WorkOrderDTO> fuzzySearch(WorkOrderSearchDTO criteria) {
         if (isEmptySearchCriteria(criteria)) {
             System.out.println("未輸入任何有效搜尋條件，返回空列表");
             return new ArrayList<>();
@@ -116,12 +118,16 @@ public class WorkOrderSearchService {
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
-        List<WorkOrder> results = workOrderRepository.findAll(spec);
+         List<WorkOrder> results = workOrderRepository.findAll(spec);
         if (results.isEmpty()) {
             System.out.println("搜尋條件無符合項目");
         }
-        return results;
+        
+        return results.stream()
+                .map(WorkOrderDTO::fromEntity)
+                .collect(Collectors.toList());
     }
+    
 
     private boolean isEmptySearchCriteria(WorkOrderSearchDTO criteria) {
         return !isValidList(criteria.getWorkOrderNumber()) &&
