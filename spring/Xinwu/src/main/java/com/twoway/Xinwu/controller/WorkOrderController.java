@@ -131,7 +131,9 @@ public class WorkOrderController {
         
         WorkOrder updatedWorkOrder = workOrderRepository.save(existingWorkOrder);
         
-        return ResponseEntity.ok(updatedWorkOrder);
+        WorkOrderDTO responseDto = WorkOrderDTO.fromEntity(updatedWorkOrder);
+
+        return ResponseEntity.ok(responseDto);
     }
 
     //Delete API
