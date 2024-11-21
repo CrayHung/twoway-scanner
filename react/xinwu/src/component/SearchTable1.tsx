@@ -300,7 +300,7 @@ const SearchTable1 = () => {
                 //並且重新排序順序
                 const mappedData = data.map(item => ({
                     id: item.id,
-                    workOrderNumber: item.parentWorkOrderNumber,
+                    workOrderNumber: item.workOrderNumber,
                     detailId: item.detailId,
                     SN: item.SN,
                     QR_RFTray: item.QR_RFTray,
@@ -321,15 +321,15 @@ const SearchTable1 = () => {
 
                 //用來將不要欄位過濾掉
                 const filteredData = mappedData.map(({
-                    parentPartNumber,
-                    parentWorkOrderNumber,
-                    parentCompany,
-                    parentQuantity,
+                    partNumber,
+                    // workOrderNumber,
+                    company,
+                    quantity,
                     ...rest
                 }) => rest);
 
                 setResultData(filteredData);
-                console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
+                // console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
 
             } catch (error) {
                 console.error('Error fetching:', error);
@@ -351,14 +351,14 @@ const SearchTable1 = () => {
                     throw new Error('Failed to get ');
                 }
                 const data: any[] = await response.json();
-                console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
+                // console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
                 setDataForDownload(data);
 
                 //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
                 //並且重新排序順序
                 const mappedData = data.map(item => ({
                     id: item.id,
-                    workOrderNumber: item.parentWorkOrderNumber,
+                    workOrderNumber: item.workOrderNumber,
                     detailId: item.detailId,
                     SN: item.SN,
                     QR_RFTray: item.QR_RFTray,
@@ -373,19 +373,16 @@ const SearchTable1 = () => {
                     create_user: item.create_user,
                     edit_date: item.edit_date,
                     edit_user: item.edit_user,
-                    QR_RFTray_BEDID: item.QR_RFTray_BEDID,
-                    QR_HS_BEDID: item.QR_HS_BEDID,
-                    QR_PS_BEDID: item.QR_PS_BEDID,
                     ...item,
 
                 }));
 
                 //用來將不要欄位過濾掉
                 const filteredData = mappedData.map(({
-                    parentPartNumber,
-                    parentWorkOrderNumber,
-                    parentCompany,
-                    parentQuantity,
+                    partNumber,
+                    // workOrderNumber,
+                    company,
+                    quantity,
                     ...rest
                 }) => rest);
 
@@ -409,14 +406,14 @@ const SearchTable1 = () => {
                     throw new Error('Failed to get ');
                 }
                 const data: any[] = await response.json();
-                console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
+                // console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
                 setDataForDownload(data);
 
                 //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
                 //並且重新排序順序
                 const mappedData = data.map(item => ({
                     id: item.id,
-                    workOrderNumber: item.parentWorkOrderNumber,
+                    workOrderNumber: item.workOrderNumber,
                     detailId: item.detailId,
                     SN: item.SN,
                     QR_RFTray: item.QR_RFTray,
@@ -437,15 +434,15 @@ const SearchTable1 = () => {
 
                 // 用來將不要欄位過濾掉
                 const filteredData = mappedData.map(({
-                    parentPartNumber,
-                    parentWorkOrderNumber,
-                    parentCompany,
-                    parentQuantity,
+                    partNumber,
+                    // workOrderNumber,
+                    company,
+                    quantity,
                     ...rest
                 }) => rest);
 
                 setResultData(filteredData);
-                console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
+                // console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
 
 
 
@@ -555,26 +552,26 @@ const SearchTable1 = () => {
 
         //根據原始資料(dataForDownload)的partNumber做資料分組
         const groupedData = dataForDownload.reduce((acc: any, item: any) => {
-            const { parentPartNumber } = item;
-            if (parentPartNumber) {  // 確保資料中有 parentPartNumber
-                if (!acc[parentPartNumber]) {
-                    acc[parentPartNumber] = [];
+            const { partNumber } = item;
+            if (partNumber) {  // 確保資料中有 partNumber
+                if (!acc[partNumber]) {
+                    acc[partNumber] = [];
                 }
-                acc[parentPartNumber].push(item);
+                acc[partNumber].push(item);
             }
             return acc;
         }, {});
         // console.log("groupedData:", JSON.stringify(groupedData, null, 2));
 
-        // Step 2: 根據每個parentPartNumber對應的number_per_pallet去產生資料
-        Object.keys(groupedData).forEach(parentPartNumber => {
-            const numberPerPallet = table3Data.find((entry: any) => entry.partNumber === parentPartNumber)?.numberPerPallet;
-            const worksheetData = groupedData[parentPartNumber].map((item: any, index: any) => ({
+        // Step 2: 根據每個PartNumber對應的number_per_pallet去產生資料
+        Object.keys(groupedData).forEach(partNumber => {
+            const numberPerPallet = table3Data.find((entry: any) => entry.partNumber === partNumber)?.numberPerPallet;
+            const worksheetData = groupedData[partNumber].map((item: any, index: any) => ({
                 項次: index + 1,
                 SN: item.SN
             }));
 
-            // console.log(`Worksheet Data for ${parentPartNumber}:`, worksheetData);
+            // console.log(`Worksheet Data for ${partNumber}:`, worksheetData);
 
             const workbook = XLSX.utils.book_new();
 
@@ -599,13 +596,13 @@ const SearchTable1 = () => {
 
                 if (formattedSheetData.length > 0) {
                     const worksheet = XLSX.utils.json_to_sheet(formattedSheetData, { skipHeader: true });
-                    XLSX.utils.book_append_sheet(workbook, worksheet, `${parentPartNumber}_Sheet${Math.floor(i / numberPerPallet) + 1}`);
+                    XLSX.utils.book_append_sheet(workbook, worksheet, `${partNumber}_Sheet${Math.floor(i / numberPerPallet) + 1}`);
                 } else {
                     console.log("sheet Data為空");
                 }
             }
 
-            XLSX.writeFile(workbook, `${parentPartNumber}.xlsx`);
+            XLSX.writeFile(workbook, `${partNumber}.xlsx`);
         });
     }
     /********************************************************* */
@@ -648,9 +645,9 @@ const SearchTable1 = () => {
     }
 
 
-    useEffect(() => {
-        console.log(customerExcelData);
-    }, [customerExcelData]);
+    // useEffect(() => {
+    //     console.log(customerExcelData);
+    // }, [customerExcelData]);
 
     //一進組件就先把table3Data拉出來
     const fetchAllTable3 = async () => {
@@ -687,7 +684,7 @@ const SearchTable1 = () => {
 
 
     const handleExitButtonClick = () => {
-        navigate('/');
+        navigate('/reload');
     };
 
     return (

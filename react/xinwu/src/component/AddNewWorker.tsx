@@ -76,7 +76,54 @@ function AddNewWorker() {
     
      */
 
+      /**
+     * 
+     * 一進組件要做的
+     * 資料初始化
+     * 換頁
+     * 將table3的料號對應model儲存起來
+     */
 
+
+    //一進頁面先將資料初始化
+    useEffect(() => {
+        setWorkNo('');
+        setQuant(0);
+        setPart('');
+        setModel('');
+    }, [])
+
+    // 根據 selectedPartNumber 找到對應的 inputMode
+    useEffect(() => {
+        const foundItem = table3Data.find((item: { partNumber: string; }) => item.partNumber === selectedPartNumber);
+        if (foundItem) {
+            setInputMode(foundItem.inputMode);
+        }
+    }, [selectedPartNumber, table3Data]);
+
+    useEffect(() => {
+        const fetchAllTable1Data = async () => {
+            try {
+                const response = await fetch(`${globalUrl.url}/api/get-work-orders`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to get 所有工單');
+                }
+
+                const data: any[] = await response.json();
+                setTable1Data(data);
+
+            } catch (error) {
+                console.error('Error fetching token:', error);
+                return [];
+            }
+        }
+        fetchAllTable1Data();
+    }, [])
 
     //使用按鈕增新表格
     const handleGenerateTable = () => {
@@ -149,12 +196,12 @@ function AddNewWorker() {
 
                 const data: any[] = await response.json();
 
-
+                // console.log("table2Data : ", JSON.stringify(data, null, 2) )
                 //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
                 //並且重新排序順序
                 const mappedData = data.map(item => ({
                     id: item.id,
-                    workOrderNumber: item.parentWorkOrderNumber,
+                    workOrderNumber: item.workOrderNumber,
                     detailId: item.detailId,
                     SN: item.SN,
                     QR_RFTray: item.QR_RFTray,
@@ -172,16 +219,16 @@ function AddNewWorker() {
                     QR_RFTray_BEDID: item.QR_RFTray_BEDID,
                     QR_HS_BEDID: item.QR_HS_BEDID,
                     QR_PS_BEDID: item.QR_PS_BEDID,
-                    ...item,
+                    ...item
 
                 }));
 
-                //用來將table2的不要欄位過濾掉(quantity,company,partNumber)
+                // //用來將table2的不要欄位過濾掉(quantity,company,partNumber)
                 const filteredData = mappedData.map(({
-                    parentPartNumber,
-                    parentWorkOrderNumber,
-                    parentCompany,
-                    parentQuantity,
+                    partNumber,
+                    // workOrderNumber,
+                    company,
+                    quantity,
                     ...rest
                 }) => rest);
 
@@ -255,11 +302,11 @@ function AddNewWorker() {
                 // console.log("新增table1成功");
 
                 //重新fetch table2Data並且比對workNumber找出目前要新增的陣列內容
-                await matchData2();
+               matchData2();
 
-                console.log('完成新增table1  table2', JSON.stringify(data, null, 2));
-                console.log('table1 ', JSON.stringify(table1Data, null, 2));
-                console.log('table2', JSON.stringify(table2Data, null, 2));
+                // console.log('完成新增table1  table2', JSON.stringify(data, null, 2));
+                // console.log('table1 ', JSON.stringify(table1Data, null, 2));
+                // console.log('table2', JSON.stringify(table2Data, null, 2));
 
             } catch (error: any) {
                 console.error('Error :', error);
@@ -286,299 +333,6 @@ function AddNewWorker() {
             setRows(numRows);
         }
     };
-
-
-    /**************************************************************************************************************** */
-    /**
-     * 
-     *  處理輸入 , 編輯
-     * 
-     */
-    // const keyMap = [
-    //     "id" , "workOrderNumber", "detailId", "sn", "qr_RFTray", "qr_PS", "qr_HS", "qr_backup1", "qr_backup2", "qr_backup3", "qr_backup4", "note", "create_date", "create_user", "edit_date", "edit_user"
-    // ];
-
-    /* */
-
-    // const [updatedRowData, setUpdatedRowData] = useState<any>([]);
-    // 處理條碼輸入
-    // const handleBarcodeInput = (event: any) => {
-    //     if (event.key === 'Enter' && !isComplete) {
-    //         event.preventDefault();
-    //         const newValue = inputValue.trim();
-
-    //         const rowIndex = currentRow !== null ? currentRow : 0;
-    //         if (newValue && currentRow !== null && currentRow < rows) {//尚未達到工單數量
-
-    //             const updatedData = [...data];
-    //             let updatedRow = { ...updatedData[currentRow] };
-
-    //             /* 檢查新輸入的SN是否已存在資料庫或即將要新增的updatedRow中*/
-    //             // if (table2Data.some((row: { SN: string; }) => row.SN === newValue) ||
-    //             //     updatedRowData.some((row: { SN: string; }) => row.SN === newValue)
-    //             // ) {
-    //             //     alert("SN 已存在，請輸入不同的 SN");
-    //             //     setInputValue(''); // 清空輸入框
-    //             //     return;
-    //             // }
-
-
-
-
-
-    //             // 根據當前模式和欄位，填入不同的條碼數據
-    //             if (inputMode === 'A') {
-    //                 // A模式: 依次填入 sn 和 qr_HS
-    //                 if (currentColumn === 1) { // 填入SN欄位
-    //                     updatedRow.SN = newValue;
-    //                     setCurrentColumn(4); // 跳到QR_HS欄位
-    //                 } else if (currentColumn === 4) { // 填入QR_HS欄位
-    //                     updatedRow.QR_HS = newValue;
-    //                     moveToNextRowOrEnd(); // 完成該筆資料
-    //                 }
-    //             } else if (inputMode === 'B') {
-    //                 // B模式: 依次填入 sn 和 qr_RFTray
-    //                 if (currentColumn === 1) { // 填入SN欄位
-    //                     updatedRow.SN = newValue;
-    //                     setCurrentColumn(2); // 跳到QR_RFTray欄位
-    //                 } else if (currentColumn === 2) { // 填入QR_RFTray欄位
-    //                     updatedRow.QR_RFTray = newValue;
-    //                     moveToNextRowOrEnd(); // 完成該筆資料
-    //                 }
-    //             } else if (inputMode === 'C') {
-    //                 // C模式: 依次填入 sn 和 qr_PS
-    //                 if (currentColumn === 1) { // 填入SN欄位
-    //                     updatedRow.SN = newValue;
-    //                     setCurrentColumn(3); // 跳到QR_PS欄位
-    //                 } else if (currentColumn === 3) { // 填入QR_PS欄位
-    //                     updatedRow.QR_PS = newValue;
-    //                     moveToNextRowOrEnd(); // 完成該筆資料
-    //                 }
-    //             } else if (inputMode === 'D') {
-    //                 // D模式: 依次填入 sn, qr_PS, qr_HS
-    //                 if (currentColumn === 1) { // 填入SN欄位
-    //                     updatedRow.SN = newValue;
-    //                     setCurrentColumn(3); // 跳到QR_PS欄位
-    //                 } else if (currentColumn === 3) { // 填入QR_PS欄位
-    //                     updatedRow.QR_PS = newValue;
-    //                     setCurrentColumn(4); // 跳到QR_HS欄位
-    //                 } else if (currentColumn === 4) { // 填入QR_HS欄位
-    //                     updatedRow.QR_HS = newValue;
-    //                     moveToNextRowOrEnd(); // 完成該筆資料
-    //                 }
-    //             } else if (inputMode === 'E') {
-    //                 // E模式: 依次填入 sn, qr_RFTray, qr_PS, qr_HS
-    //                 if (currentColumn === 1) { // 填入SN欄位
-    //                     updatedRow.SN = newValue;
-    //                     setCurrentColumn(2); // 跳到QR_RFTray欄位
-    //                 } else if (currentColumn === 2) { // 填入QR_RFTray欄位
-    //                     updatedRow.QR_RFTray = newValue;
-    //                     setCurrentColumn(3); // 跳到QR_PS欄位
-    //                 } else if (currentColumn === 3) { // 填入QR_PS欄位
-    //                     updatedRow.QR_PS = newValue;
-    //                     setCurrentColumn(4); // 跳到QR_HS欄位
-    //                 } else if (currentColumn === 4) { // 填入QR_HS欄位
-    //                     updatedRow.QR_HS = newValue;
-    //                     moveToNextRowOrEnd(); // 完成該筆資料
-    //                 }
-    //             }
-
-    //             // 更新當前行的資料
-    //             updatedRow.edit_user = currentUser;
-    //             updatedRow.edit_date = today;
-    //             updatedData[currentRow] = updatedRow;
-    //             setData(updatedData); // 更新整體表格資料
-    //             setInputValue(''); // 清空輸入框
-
-    //             // 新增到 updatedRowData
-    //             setUpdatedRowData((prevUpdatedRow: any) => [...prevUpdatedRow, updatedRow]);
-    //         }
-    //     }
-    // };
-    // 處理是否需要跳到下一行或標記掃描完成
-    // const moveToNextRowOrEnd = () => {
-    //     setCurrentColumn(1); // 重置到 sn 欄位
-
-    //     if (currentRow !== null && currentRow + 1 >= rows) {
-    //         setIsComplete(true); // 已經完成所有行的掃描
-    //         setCurrentColumn(1);
-    //         setCurrentRow(null);
-    //     } else {
-    //         setCurrentRow((prevRow) => {
-    //             if (prevRow !== null && prevRow + 1 < rows) {
-    //                 return prevRow + 1;
-    //             }
-    //             return prevRow;
-    //         });
-    //     }
-
-    // };
-
-    /* */
-
-
-    /***************************************************************** */
-    // const [updatedRowData, setUpdatedRowData] = useState<any>([]);
-    // const handleBarcodeInput = (event:any) => {
-    //     if (event.key === 'Enter' && !isComplete) {
-    //         event.preventDefault();
-    //         const newValue = inputValue.trim();
-
-    //         const rowIndex = currentRow !== null ? currentRow : 0;
-    //         if (newValue && currentRow !== null && currentRow < rows) {
-    //             const updatedData = [...data];
-    //             let updatedRow = { ...updatedData[currentRow] };
-
-    //             // 僅在輸入 SN 欄位時進行重複檢查
-    //             if (currentColumn === 1) {
-    //                 const isSNDuplicate = 
-    //                     table2Data.some((row: { SN: string; }) => row.SN === newValue) || 
-    //                     updatedRowData.some((row: { SN: string; }) => row.SN === newValue);
-
-    //                 if (isSNDuplicate) {
-    //                     alert("SN 已存在，請輸入不同的 SN");
-    //                     setInputValue(''); // 清空輸入框
-    //                     return; // 如果重複，終止輸入
-    //                 }
-
-    //                 // 將輸入的 SN 值儲存到當前行的 `SN` 欄位
-    //                 updatedRow.SN = newValue;
-    //             } else {
-    //                 // 當前是非 SN 欄位，直接根據模式將值儲存到對應的欄位
-    //                 if (inputMode === 'A' && currentColumn === 4) {
-    //                     updatedRow.QR_HS = newValue;
-    //                 } else if (inputMode === 'B' && currentColumn === 2) {
-    //                     updatedRow.QR_RFTray = newValue;
-    //                 } else if (inputMode === 'C' && currentColumn === 3) {
-    //                     updatedRow.QR_PS = newValue;
-    //                 } else if (inputMode === 'D') {
-    //                     if (currentColumn === 3) {
-    //                         updatedRow.QR_PS = newValue;
-    //                     } else if (currentColumn === 4) {
-    //                         updatedRow.QR_HS = newValue;
-    //                     }
-    //                 } else if (inputMode === 'E') {
-    //                     if (currentColumn === 2) {
-    //                         updatedRow.QR_RFTray = newValue;
-    //                     } else if (currentColumn === 3) {
-    //                         updatedRow.QR_PS = newValue;
-    //                     } else if (currentColumn === 4) {
-    //                         updatedRow.QR_HS = newValue;
-    //                     }
-    //                 }
-    //             }
-
-    //             // 更新當前行的資料
-    //             updatedRow.edit_user = currentUser;
-    //             updatedRow.edit_date = today;
-    //             updatedData[currentRow] = updatedRow;
-    //             setData(updatedData); // 更新整體表格資料
-    //             setInputValue(''); // 清空輸入框
-    //             setUpdatedRowData(updatedData);
-
-    //             // 移動到下一個欄位或行
-    //             moveToNextColumnOrRow();
-    //         }
-    //     }
-    // };
-
-    // // 移動到下一個欄位或下一行的輔助函數
-    // const moveToNextColumnOrRow = () => {
-
-    //     const columnsPerMode: { [key in InputMode]: number } = {
-    //         'A': 4,
-    //         'B': 2,
-    //         'C': 3,
-    //         'D': 4,
-    //         'E': 4,
-    //     };
-
-    //     const maxColumn = columnsPerMode[inputMode];
-
-    //     // 如果當前欄位是最後一個欄位，移動到下一行的 SN 欄位
-    //     if (currentColumn === maxColumn) {
-    //         setCurrentRow((prevRow) => {
-    //             // 如果 prevRow 為 null，則設置為 0
-    //             return prevRow !== null ? prevRow + 1 : 0;
-    //         });
-    //         setCurrentColumn(1); // 重設為 SN 欄位
-    //     } else {
-    //         // 否則移動到下一個欄位
-    //         setCurrentColumn((prevColumn) => {
-    //             // 如果 prevRow 為 null，則設置為 0）
-    //             return prevColumn !== null ? prevColumn + 1 : 0;
-    //         });
-    //     }
-    // };
-
-    /***************************************************************** */
-    // const handleBarcodeInput = (event: any) => {
-    //     if (event.key === 'Enter' && !isComplete) {
-    //         event.preventDefault();
-    //         const newValue = inputValue.trim();
-
-    //         const rowIndex = currentRow !== null ? currentRow : 0;
-    //         if (newValue && currentRow !== null && currentRow < rows) {
-    //             const updatedData = [...data];
-    //             let updatedRow = { ...updatedData[currentRow] };
-
-    //             // 確定當前欄位的名稱
-    //             let fieldToCompare = "";
-    //             if (currentColumn === 1) fieldToCompare = "SN";
-    //             else if (currentColumn === 2) fieldToCompare = "QR_RFTray";
-    //             else if (currentColumn === 3) fieldToCompare = "QR_PS";
-    //             else if (currentColumn === 4) fieldToCompare = "QR_HS";
-
-    //             // 比對資料庫 (table2Data) 和已輸入資料 (updatedData)
-    //             const isDuplicateInDatabase = table2Data.some((item: { [x: string]: string; }) => item[fieldToCompare] === newValue);
-    //             const isDuplicateInUpdatedData = updatedData.some((item, index) => index < currentRow && item[fieldToCompare] === newValue);
-
-    //             if (isDuplicateInDatabase || isDuplicateInUpdatedData) {
-    //                 alert(`${fieldToCompare} 已存在，請輸入不同的 ${fieldToCompare}`);
-    //                 setInputValue(''); // 清空輸入框
-    //                 return;
-    //             }
-
-    //             // 更新當前欄位的數據
-    //             updatedRow[fieldToCompare] = newValue;
-    //             updatedRow.edit_user = currentUser;
-    //             updatedRow.edit_date = today;
-
-    //             updatedData[currentRow] = updatedRow;
-    //             setData(updatedData); // 更新整體表格資料
-    //             setInputValue(''); // 清空輸入框
-
-    //             // 移動到下一個欄位或下一行
-    //             moveToNextColumnOrRow();
-    //         }
-    //     }
-    // };
-
-    // // 移動到下一個欄位或下一行
-    // const moveToNextColumnOrRow = () => {
-
-    //     const columnsPerMode: { [key in InputMode]: number } = {
-    //         'A': 4,
-    //         'B': 2,
-    //         'C': 3,
-    //         'D': 4,
-    //         'E': 4,
-    //     };
-
-    //     const maxColumn = columnsPerMode[inputMode];
-
-    //     if (currentColumn === maxColumn) {
-    //         setCurrentRow((prevRow) => (prevRow !== null ? prevRow + 1 : 0));
-    //         setCurrentColumn(1); // 重設為 SN 欄位
-
-    //     } else {
-    //         // 移動到下一欄位
-    //         setCurrentColumn((prevColumn) => {
-    //             // 如果 prevRow 為 null，則設置為 0）
-    //             return prevColumn !== null ? prevColumn + 1 : 0;
-    //         });
-    //     }
-    // };
 
 
     /***************************************************************** */
@@ -1109,30 +863,7 @@ function AddNewWorker() {
     // };
 
 
-    /**
-     * 
-     * 一進組件要做的
-     * 資料初始化
-     * 換頁
-     * 將table3的料號對應model儲存起來
-     */
-
-    //一進頁面先將資料初始化
-    useEffect(() => {
-        setWorkNo('');
-        setQuant(0);
-        setPart('');
-        setModel('');
-    }, [])
-
-    // 根據 selectedPartNumber 找到對應的 inputMode
-    useEffect(() => {
-        const foundItem = table3Data.find((item: { partNumber: string; }) => item.partNumber === selectedPartNumber);
-        if (foundItem) {
-            setInputMode(foundItem.inputMode);
-        }
-    }, [selectedPartNumber, table3Data]);
-
+   
 
 
     // useEffect(() => {

@@ -281,10 +281,10 @@ const SearchForm = () => {
                     throw new Error('Failed to get 所有工單');
                 }
 
-                const data: any[] = await response.json();
+                const updatedData: any[] = await response.json();
 
 
-                const updatedData = removeWorkOrderDetails(data);
+                // const updatedData = removeWorkOrderDetails(data);
                 setTable1Data(updatedData);
 
 
@@ -315,7 +315,7 @@ const SearchForm = () => {
                 //並且重新排序順序
                 const mappedData = data.map(item => ({
                     id: item.id,
-                    workOrderNumber: item.parentWorkOrderNumber,
+                    workOrderNumber: item.workOrderNumber,
                     detailId: item.detailId,
                     SN: item.SN,
                     QR_RFTray: item.QR_RFTray,
@@ -339,10 +339,10 @@ const SearchForm = () => {
 
                 //用來將table2的不要欄位過濾掉(quantity,company,partNumber)
                 const filteredData = mappedData.map(({
-                    parentPartNumber,
-                    parentWorkOrderNumber,
-                    parentCompany,
-                    parentQuantity,
+                    partNumber,
+                    // workOrderNumber,
+                    company,
+                    quantity,
                     ...rest
                 }) => rest);
 
@@ -529,7 +529,7 @@ const SearchForm = () => {
     // 處理編輯完成後，更新edit_user和edit_date
     const handleCellChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, rowIndex: number, colIndex: number) => {
 
-        //取得欄位名
+        //取得欄位名 , 略調id欄位
         const colKey = Object.keys(originalData[rowIndex])
             .filter((key) => key !== 'id')[colIndex];
 
@@ -842,7 +842,7 @@ const SearchForm = () => {
                         return;
                     }
 
-                    updatedRow[`${fieldToCompare}`] = newValue;
+                    updatedRow[fieldToCompare] = newValue;
                     updatedRow[`${fieldToCompare}_BEDID`] = extractID(newValue);
                     updatedRow.edit_user = currentUser;
                     updatedRow.edit_date = today;
@@ -890,7 +890,7 @@ const SearchForm = () => {
                 } else {
 
 
-                    updatedRow[`${fieldToCompare}`] = newValue;
+                    updatedRow[fieldToCompare] = newValue;
                     updatedRow.edit_user = currentUser;
                     updatedRow.edit_date = today;
                     updatedData[currentRow] = updatedRow;

@@ -64,7 +64,7 @@ public class UserController {
         var user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "用戶未找到"));
 
-        userRepository.deleteUser(user);
+        userRepository.delete(user);
         return ResponseEntity.ok("用戶刪除成功");
     }
 

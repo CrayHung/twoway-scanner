@@ -104,10 +104,10 @@ const EditWork = () => {
                 throw new Error('Failed to get 所有工單');
             }
 
-            const data: any[] = await response.json();
+            const updatedData: any[] = await response.json();
 
 
-            const updatedData = removeWorkOrderDetails(data);
+            // const updatedData = removeWorkOrderDetails(data);
             setTable1Data(updatedData);
             setShowTableData(updatedData);
 
@@ -140,7 +140,7 @@ const EditWork = () => {
             //並且重新排序順序
             const mappedData = data.map(item => ({
                 id: item.id,
-                workOrderNumber: item.parentWorkOrderNumber,
+                workOrderNumber: item.workOrderNumber,
                 detailId: item.detailId,
                 SN: item.SN,
                 QR_RFTray: item.QR_RFTray,
@@ -155,16 +155,19 @@ const EditWork = () => {
                 create_user: item.create_user,
                 edit_date: item.edit_date,
                 edit_user: item.edit_user,
+                QR_RFTray_BEDID: item.QR_RFTray_BEDID,
+                QR_HS_BEDID: item.QR_HS_BEDID,
+                QR_PS_BEDID: item.QR_PS_BEDID,
                 ...item,
 
             }));
 
             //用來將table2的不要欄位過濾掉(quantity,company,partNumber)
             const filteredData = mappedData.map(({
-                parentPartNumber,
-                parentWorkOrderNumber,
-                parentCompany,
-                parentQuantity,
+                partNumber,
+                // workOrderNumber,
+                company,
+                quantity,
                 ...rest
             }) => rest);
 
@@ -305,7 +308,7 @@ const EditWork = () => {
             createDateEnd: productionDateEnd ? [productionDateEnd] : [],
         };
 
-        console.log("requestBody : " + JSON.stringify(requestBody, null, 2));
+        // console.log("requestBody : " + JSON.stringify(requestBody, null, 2));
 
 
         // 判斷是否所有欄位都是空陣列
@@ -340,10 +343,10 @@ const EditWork = () => {
 
                 const data = await response.json();
                 //過濾掉workOrderDetails的資料
-                const updatedData = removeWorkOrderDetails(data);
+                // const updatedData = removeWorkOrderDetails(data);
 
                 // console.log("過濾掉workOrderDetails的資料 : "+JSON.stringify(updatedData, null, 2));
-                setShowTableData(updatedData);
+                setShowTableData(data);
 
 
 
@@ -355,7 +358,7 @@ const EditWork = () => {
             }
         }
 
-        // 如果都是空陣列,則用GET取得所有table1Data
+        // 如果都是空陣列,則取得所有table1Data
         if (isRequestBodyEmpty) {
             // 呼叫 Get all
             fetchAllTable1();
