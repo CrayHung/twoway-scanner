@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.twoway.Xinwu.entity.RefreshTokenRepository;
 import com.twoway.Xinwu.entity.User;
 import com.twoway.Xinwu.entity.UserRepository;
+import com.twoway.Xinwu.service.UserService;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -27,6 +29,9 @@ import com.twoway.Xinwu.entity.UserRepository;
 public class UserController {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private  UserService userService;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -61,10 +66,11 @@ public class UserController {
     // 刪除
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        var user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "用戶未找到"));
+        // var user = userRepository.findById(id)
+        //         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "用戶未找到"));
+        // userRepository.delete(user);
 
-        userRepository.delete(user);
+        userService.deleteUser(id);
         return ResponseEntity.ok("用戶刪除成功");
     }
 

@@ -9,14 +9,21 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.twoway.Xinwu.entity.RefreshTokenRepository;
 import com.twoway.Xinwu.entity.User;
 import com.twoway.Xinwu.entity.UserRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserService implements UserDetailsService{
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private  RefreshTokenRepository refreshTokenRepository;
+
 
 
     
@@ -51,8 +58,16 @@ public class UserService implements UserDetailsService{
         return userRepository.findByUsername(username);
     }
 
-    public void deleteUser(Integer userId) {
-        userRepository.deleteById(userId);
+    // public void deleteUser(Integer userId) {
+    //     userRepository.deleteById(userId);
+    // }
+
+    @Transactional
+    public void deleteUser(Long id) {
+        refreshTokenRepository.deleteByUserId(id);
+        var user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("用户未找到"));
+        userRepository.delete(user);
     }
     
 }

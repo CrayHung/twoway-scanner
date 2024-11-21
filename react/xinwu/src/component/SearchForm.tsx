@@ -21,7 +21,7 @@ const SearchForm = () => {
     //fetch尚未完成,先用loading提示
     const [loading, setLoading] = useState(false);
     type InputMode = 'A' | 'B' | 'C' | 'D' | 'E';
-    const [inputMode, setInputMode] = useState<InputMode>('A');
+    const [inputMode, setInputMode] = useState<InputMode>(model);
 
     const [isComplete, setIsComplete] = useState(false); // 用來標記是否已經完成掃描
     const [continueInput, setContinueInput] = useState(false); // 用來標記是否繼續輸入
@@ -33,7 +33,7 @@ const SearchForm = () => {
     const [rows, setRows] = useState(0);  // 工單數量資料筆數
     const [currentRow, setCurrentRow] = useState<number | null>(null);
     // id是第0列 , 工單號碼是第1列，detailid是第2列 , 從第3列SN(序號)開始輸入其他資料
-    //但要渲染的資料將id給屏蔽掉了 , 所以從第2列SN開始
+    //但要渲染的資料將id給屏蔽掉了 , 所以從第2列SN開始...但因為不確定一開始在SN欄位還是QR_欄位,所以不給初始值
     const [currentColumn, setCurrentColumn] = useState<number | null>(null);
 
 
@@ -67,6 +67,7 @@ const SearchForm = () => {
         console.log("公單號碼的數量:" + quant);
         console.log("公單號碼的料號:" + part);
         console.log("公單號碼的料號對應模式:" + model);
+        
 
     }, [workNo, quant, part, model])
 
@@ -147,8 +148,8 @@ const SearchForm = () => {
                 create_user: currentUser,
                 edit_user: currentUser,
                 QR_RFTray_BEDID: '',
-                QR_HS_BEDID: '',
                 QR_PS_BEDID: '',
+                QR_HS_BEDID: '',
             })));
         }
 
@@ -569,11 +570,13 @@ const SearchForm = () => {
 
         //檢查原欄位值和新輸入的質是否相同,如不同則PUT到API
         const originalValue = table2Data.find((item: any) => item.id === originalData[rowIndex].id)?.[colKey];
+
+        console.log("這個欄位的值是 : "+newValue)
         if (originalValue !== newValue) {
             const fetchUpdateRows = async () => {
                 try {
 
-                    //如果修改的欄位是QR_,則將PUT內容新增_BEDID欄位
+                    //如果修改的欄位是QR_,則將PUT內容新增到table2的 _BEDID欄位
                     const updateData = {
                         id: originalData[rowIndex].id,
                         [colKey]: newValue,
@@ -745,6 +748,7 @@ const SearchForm = () => {
     };
 
     const handleBarcodeInput = (event: any) => {
+
         if (event.key === 'Enter' && !isComplete) {
             event.preventDefault();
 
@@ -940,37 +944,36 @@ const SearchForm = () => {
         }
     };
 
-    // 移動到下一個欄位或下一行
+    // 移動到下一個欄位或下一行(這版本移動到下一行或列時,不管該欄位有沒有資料 , 都會停在那格)
     const moveToNextColumnOrRow = () => {
-        const columnsPerMode: { [key in InputMode]: number } = {
-            'A': 5,
-            'B': 3,
-            'C': 4,
-            'D': 5,
-            'E': 5,
+        const columnOrderPerMode: { [key in InputMode]: number[] } = {
+            'A': [2, 5], // SN, QR_HS
+            'B': [2, 3], // SN, QR_RFTray
+            'C': [2, 4], // SN, QR_PS
+            'D': [2, 4, 5], // SN, QR_PS, QR_HS
+            'E': [2,  3, 4, 5], // SN, QR_RFTray, QR_PS, QR_HS
         };
 
-        const maxColumn = columnsPerMode[inputMode];
+        const columnOrder = columnOrderPerMode[inputMode]; // 取得當前模式的欄位順序
+        const currentColumnIndex = columnOrder.indexOf(currentColumn ?? 1); // 找出目前欄位的索引
 
-        //該筆資料的欄位已輸入完畢
-        if (currentColumn === maxColumn) {
-            //下一行的資料大於總資料行數,則不繼續新增
+        if (currentColumnIndex === columnOrder.length - 1) {
+            // 如果是最後一個欄位 , 檢查是否超出資料行數
             if (currentRow !== null && currentRow + 1 >= rows) {
                 setIsComplete(true); // 完成輸入
                 setCurrentColumn(null); // 重置欄位到 SN
                 setCurrentRow(null); // 重置行數
             } else {
-                setCurrentRow((prevRow) => (prevRow !== null ? prevRow + 1 : 0));
-                setCurrentColumn(2); // 重設為 SN 欄位
+                setCurrentRow((prevRow) => (prevRow !== null ? prevRow + 1 : 0)); // 移動到下一行
+                setCurrentColumn(columnOrder[0]); // 重設為第一個欄位 (SN)
             }
         } else {
-            // 移動到下一欄位
-            setCurrentColumn((prevColumn) => {
-                // 如果 prevRow 為 null，則設置為 0）
-                return prevColumn !== null ? prevColumn + 1 : 0;
-            });
+            // 移動到下一個欄位
+            setCurrentColumn(columnOrder[currentColumnIndex + 1]);
         }
     };
+
+
     /************************************************************** */
     //根據料號map所有originalData的資料,如果有尚未填寫的欄位,則從此行開始續繼編輯
     const handleContinueInput = () => {
@@ -1003,10 +1006,10 @@ const SearchForm = () => {
             // A 模式需要檢查 sn 和 qr_HS 欄位
             if (model === 'A') {
                 if (!row.SN) {
-                    return { rowIndex, column: 2 }; // 找到SN尚未填寫，返回對應的行和列
+                    return { rowIndex, column: 2 }; // 找到SN尚未填寫 返回對應的行和列
                 }
                 if (!row.QR_HS) {
-                    return { rowIndex, column: 5 }; // 找到QR_HS尚未填寫，返回對應的行和列
+                    return { rowIndex, column: 5 }; // 找到QR_HS尚未填寫 返回對應的行和列
                 }
             } else if (model === 'B') {
                 // B 模式檢查 sn 和 qr_RFTray
@@ -1304,10 +1307,35 @@ const SearchForm = () => {
         // console.log("      setOriginalData(filteredData);", JSON.stringify(originalData, null, 2));
         setRows(filteredData.length);
     };
+    const fetchAllTable1 = async () => {
 
+        try {
+            const response = await fetch(`${globalUrl.url}/api/get-work-orders`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to get 所有工單');
+            }
+
+            const updatedData: any[] = await response.json();
+
+
+            // const updatedData = removeWorkOrderDetails(data);
+            setTable1Data(updatedData);
+
+
+        } catch (error) {
+            console.error('Error fetching token:', error);
+        }
+    };
     //一進組件就先把要渲染的Table資料從table2Data拉出來設定給(originalData)暫存
     useEffect(() => {
         handlefilterWorkOrder();
+        fetchAllTable1();
     }, [])
 
     //資料有更新,就重新更新originalData
@@ -1482,8 +1510,9 @@ const SearchForm = () => {
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray_BEDID' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS_BEDID' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS_BEDID' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS_BEDID' })}</TableCell>
+
                                     </TableRow>
                                 </TableHead>
                                 {/* 使用colKey */}

@@ -4,6 +4,7 @@ import { TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableC
 import * as XLSX from 'xlsx';
 import { useGlobalContext } from '../global';
 import { useIntl } from "react-intl";
+import './SearchForm.css';
 
 
 const modalStyle = {
@@ -904,7 +905,11 @@ const SearchTable1 = () => {
                     </form>
                 </Box>
             </Modal>
-
+            {loading && (
+                <div className="loading-overlay">
+                    <div className="loading-spinner">Loading...</div>
+                </div>
+            )}
             {resultData.length != 0 ? (
                 <>
 
@@ -985,6 +990,9 @@ const SearchTable1 = () => {
                                                 </TableCell>
                                             ))}
                                         </TableRow>
+
+                                        
+
                                     ))}
                                 </TableBody>
                             </Table>

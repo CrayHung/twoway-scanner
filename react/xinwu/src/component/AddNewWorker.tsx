@@ -34,11 +34,12 @@ function AddNewWorker() {
 
     const [currentRow, setCurrentRow] = useState<number | null>(null);
 
-    // id是第0列 , 工單號碼是第1列，detailid是第2列 , 從第3列SN(序號)開始輸入其他資料
+    // id是第0列 , 工單號碼是第1列，detailid是第2列 , 第3列是SN(序號)
     // 因為要渲染的Table資料直接屏蔽掉id和 workOrderNumber欄位,所以初始從1開始
     const [currentColumn, setCurrentColumn] = useState<number | null>(1);
     const [inputValue, setInputValue] = useState('');
     const [isComplete, setIsComplete] = useState(false); // 用來標記是否已經完成掃描
+    const [hiddenInput, setHiddenInput] = useState(false); //當按下"生成表格"的按鈕後 , 將輸入框以及按鈕都隱藏起來
 
     //for 編輯
     //接收number
@@ -76,13 +77,13 @@ function AddNewWorker() {
     
      */
 
-      /**
-     * 
-     * 一進組件要做的
-     * 資料初始化
-     * 換頁
-     * 將table3的料號對應model儲存起來
-     */
+    /**
+   * 
+   * 一進組件要做的
+   * 資料初始化
+   * 換頁
+   * 將table3的料號對應model儲存起來
+   */
 
 
     //一進頁面先將資料初始化
@@ -123,6 +124,30 @@ function AddNewWorker() {
             }
         }
         fetchAllTable1Data();
+
+        const fetchAllTable3 = async () => {
+
+            try {
+                const response = await fetch(`${globalUrl.url}/api/get-input-modes`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+    
+                if (!response.ok) {
+                    throw new Error('Failed to get 所有對應表');
+                }
+    
+                const data = await response.json();
+                // console.log("table3所有對應 : " + JSON.stringify(data));
+                setTable3Data(data);
+    
+            } catch (error) {
+                console.error('Error fetching token:', error);
+            }
+        };fetchAllTable3();
+
     }, [])
 
     //使用按鈕增新表格
@@ -150,6 +175,10 @@ function AddNewWorker() {
             setWorkNumber(''); // 清空輸入框
             return;
         }
+
+        setHiddenInput(true);
+
+        setLoading(true);
 
         // 根據工單數量和模式生成表格 (單機測試要另外增加id欄位...)
         const newData = Array.from({ length: rows }, (v, i) => ({
@@ -180,7 +209,7 @@ function AddNewWorker() {
         /**新增PUT即時更新 */
 
         //取得所有的table2資料,再來比對workNumber,
-        //將所有table2Data中workOrderNumber欄位和workNumber相同的組成新的陣列顯示出來
+        //將所有table2Data中workOrderNumber欄位和workNumber相同的組成新的陣列顯示出來用來渲染table(setData)
         const fetchAllTable2 = async () => {
             try {
                 const response = await fetch(`${globalUrl.url}/api/get-work-order-details`, {
@@ -217,8 +246,8 @@ function AddNewWorker() {
                     edit_date: item.edit_date,
                     edit_user: item.edit_user,
                     QR_RFTray_BEDID: item.QR_RFTray_BEDID,
-                    QR_HS_BEDID: item.QR_HS_BEDID,
                     QR_PS_BEDID: item.QR_PS_BEDID,
+                    QR_HS_BEDID: item.QR_HS_BEDID,
                     ...item
 
                 }));
@@ -302,7 +331,7 @@ function AddNewWorker() {
                 // console.log("新增table1成功");
 
                 //重新fetch table2Data並且比對workNumber找出目前要新增的陣列內容
-               matchData2();
+                matchData2();
 
                 // console.log('完成新增table1  table2', JSON.stringify(data, null, 2));
                 // console.log('table1 ', JSON.stringify(table1Data, null, 2));
@@ -320,6 +349,7 @@ function AddNewWorker() {
         setCurrentRow(0); // 重置行指針
         setCurrentColumn(1); // 重置列指針
         setIsComplete(false); // 重置完成狀態
+        setLoading(false);
 
     };
 
@@ -542,49 +572,33 @@ function AddNewWorker() {
         }
     };
 
-    // 移動到下一個欄位或下一行
+    // 移動到下一個欄位或下一行(這版本移動到下一行或列時,不管該欄位有沒有資料 , 都會停在那格)
     const moveToNextColumnOrRow = () => {
-        const columnsPerMode: { [key in InputMode]: number } = {
-            'A': 4,
-            'B': 2,
-            'C': 3,
-            'D': 4,
-            'E': 4,
+        const columnOrderPerMode: { [key in InputMode]: number[] } = {
+            'A': [1, 4], // SN, QR_HS
+            'B': [1, 2], // SN, QR_RFTray
+            'C': [1, 3], // SN, QR_PS
+            'D': [1, 3, 4], // SN, QR_PS, QR_HS
+            'E': [1, 2, 3, 4], // SN, QR_RFTray, QR_PS, QR_HS
         };
 
-        const maxColumn = columnsPerMode[inputMode];
+        const columnOrder = columnOrderPerMode[inputMode]; // 取得當前模式的欄位順序
+        const currentColumnIndex = columnOrder.indexOf(currentColumn ?? 1); // 找出目前欄位的索引
 
-        // if (currentColumn === maxColumn) {
-        //     setCurrentRow((prevRow) => (prevRow !== null ? prevRow + 1 : 0));
-        //     setCurrentColumn(1); // 重設為 SN 欄位
-        // } else {
-        //     // 移動到下一欄位
-        //     setCurrentColumn((prevColumn) => {
-        //         return prevColumn !== null ? prevColumn + 1 : 0;
-        //     });
-        // }
-
-        //該筆資料的欄位已輸入完畢
-        if (currentColumn === maxColumn) {
-            //下一行的資料大於總資料行數,則不繼續新增
+        if (currentColumnIndex === columnOrder.length - 1) {
+            // 如果是最後一個欄位 , 檢查是否超出資料行數 , 如果沒超過則移動到下一行
             if (currentRow !== null && currentRow + 1 >= rows) {
                 setIsComplete(true); // 完成輸入
                 setCurrentColumn(null); // 重置欄位到 SN
                 setCurrentRow(null); // 重置行數
             } else {
-                setCurrentRow((prevRow) => (prevRow !== null ? prevRow + 1 : 0));
-                setCurrentColumn(1); // 重設為 SN 欄位
+                setCurrentRow((prevRow) => (prevRow !== null ? prevRow + 1 : 0)); // 移動到下一行
+                setCurrentColumn(columnOrder[0]); // 重設為第一個欄位 (SN)
             }
+        } else {
+            // 移動到下一個欄位
+            setCurrentColumn(columnOrder[currentColumnIndex + 1]);
         }
-        // 移動到下一欄位
-        else {
-            setCurrentColumn((prevColumn) => {
-                return prevColumn !== null ? prevColumn + 1 : 0;
-            });
-        }
-
-
-
     };
 
 
@@ -613,7 +627,7 @@ function AddNewWorker() {
 
         // 只允許編輯QR_RFTray ,QR_PS,QR_HS ,QR_backup1,QR_backup2,QR_backup3,QR_backup4note的欄位
         if (
-            colKey === 'id' || colKey === 'workOrderNumber' || colKey === 'detailId' || colKey === 'SN' ||
+            colKey === 'id' || colKey === 'workOrderNumber' || colKey === 'detailId' ||
             colKey === 'create_date' || colKey === 'create_user' || colKey === 'edit_date' || colKey === 'edit_user'
         ) {
             return;
@@ -669,7 +683,7 @@ function AddNewWorker() {
         if (originalValue !== newValue) {
             const fetchUpdateRows = async () => {
                 try {
-
+                    setLoading(true);
                     //如果修改的欄位是QR_,則將PUT內容新增_BEDID欄位
                     const updateData = {
                         id: data[rowIndex].id,
@@ -697,6 +711,8 @@ function AddNewWorker() {
                     }
                 } catch (error) {
                     console.error('Error updating rows:', error);
+                } finally {
+                    setLoading(false); // 完成後結束Loading
                 }
             };
             fetchUpdateRows();
@@ -863,7 +879,7 @@ function AddNewWorker() {
     // };
 
 
-   
+
 
 
     // useEffect(() => {
@@ -883,7 +899,7 @@ function AddNewWorker() {
     return (
 
         <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
-
+            
 
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                 <Typography variant="h4" gutterBottom>
@@ -902,33 +918,34 @@ function AddNewWorker() {
                 </div>
             )}
 
-            <div>
-                <>
-                    <label>{formatMessage({ id: 'workOrderNumber' })}：</label>
-                    <input
-                        type="text"
-                        value={workNumber}
-                        onChange={(e) => setWorkNumber(e.target.value)}
-                    />
-                </>
-                <>
-                    <label>{formatMessage({ id: 'part' })}：</label>
-                    <select value={selectedPartNumber} onChange={(e) => setSelectedPartNumber(e.target.value)}>
-                        <option value="">{formatMessage({ id: 'part' })}</option>
-                        {table3Data.map((item: any) => (
-                            <option key={item.id} value={item.partNumber}>
-                                {item.partNumber}
-                            </option>
-                        ))}
-                    </select>
-                </>
-                <>
-                    <label>{formatMessage({ id: 'quantity' })}：</label>
-                    <input type="number" value={rows} onChange={handleRowChange} />
-                </>
-                <button onClick={handleGenerateTable}>{formatMessage({ id: 'generate' })}</button>
-            </div>
-
+        {!hiddenInput &&
+                <div>
+                    <>
+                        <label>{formatMessage({ id: 'workOrderNumber' })}：</label>
+                        <input
+                            type="text"
+                            value={workNumber}
+                            onChange={(e) => setWorkNumber(e.target.value)}
+                        />
+                    </>
+                    <>
+                        <label>{formatMessage({ id: 'part' })}：</label>
+                        <select value={selectedPartNumber} onChange={(e) => setSelectedPartNumber(e.target.value)}>
+                            <option value="">{formatMessage({ id: 'part' })}</option>
+                            {table3Data.map((item: any) => (
+                                <option key={item.id} value={item.partNumber}>
+                                    {item.partNumber}
+                                </option>
+                            ))}
+                        </select>
+                    </>
+                    <>
+                        <label>{formatMessage({ id: 'quantity' })}：</label>
+                        <input type="number" value={rows} onChange={handleRowChange} />
+                    </>
+                    <button onClick={handleGenerateTable}>{formatMessage({ id: 'generate' })}</button>
+                </div>
+            }
 
 
             {data.length > 0 &&
