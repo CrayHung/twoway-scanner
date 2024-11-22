@@ -81,7 +81,7 @@ const PartTable = () => {
     const [selectedPartNumber, setSelectedPartNumber] = useState('');
     const [selectedInputModel, setselectedInputModel] = useState('');
 
-    const [numberPerPallet, setNumberPerPallet] = useState(1);
+    const [numberPerPallet, setNumberPerPallet] = useState('');
     const [summary, setSummary] = useState('');
     const [note, setNote] = useState('');
 
@@ -93,7 +93,7 @@ const PartTable = () => {
         const newData = {
             partNumber: selectedPartNumber,
             inputMode: selectedInputModel,
-            numberPerPallet: numberPerPallet,
+            numberPerPallet: Number(numberPerPallet),
             summary: summary,
             note: note,
             createUser: currentUser,
@@ -195,7 +195,7 @@ const PartTable = () => {
                     partNumber: editPart.partNumber,
                     inputMode: editPart.inputMode,
 
-                    numberPerPallet: editPart.numberPerPallet,
+                    numberPerPallet: Number(editPart.numberPerPallet),
                     summary: editPart.summary,
                     note: editPart.note,
                     editUser: currentUser,
@@ -260,7 +260,7 @@ const PartTable = () => {
 
 
     return (
-        <div style={{ width: '100vw', position: 'relative', left: 0 }}>
+        <div style={{ overflow: "hidden" }}>
             <Modal open={openAddForm} onClose={handleAddClose}>
                 <Box sx={modalStyle}>
                     <Typography variant="h6" component="h2">
@@ -308,7 +308,7 @@ const PartTable = () => {
                                         <TextField
                                             label={formatMessage({ id: 'number_per_pallet' })}
                                             value={numberPerPallet}
-                                            onChange={(e) => setNumberPerPallet(Number(e.target.value))}
+                                            onChange={(e) => setNumberPerPallet(e.target.value)}
                                             fullWidth
                                             type="number"
                                         />
@@ -489,8 +489,8 @@ const PartTable = () => {
                 <button style={{ float: 'right' }} onClick={handleExitButtonClick}>{formatMessage({ id: 'exit' })}</button>
             </div> */}
             <>
-                <Paper sx={{ width: '100vw%', overflow: 'hidden', height: '90%' }}>
-                    <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'scroll' }}>
+                <Paper>
+                    <TableContainer component={Paper} style={{ height: 'calc(100vh - 110px)', overflow: 'auto' }}>
                         <Table stickyHeader aria-label="sticky table">
                             <TableHead >
                                 <TableRow style={{ border: '1px solid #ccc' }}>
