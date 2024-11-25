@@ -9,10 +9,15 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Collection;
 
 @Repository
 public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long>, JpaSpecificationExecutor<WorkOrder>{
   WorkOrder findByWorkOrderNumber(String workOrderNumber);
+
+  //  優化批次查詢工單用 
+  List<WorkOrder> findAllByWorkOrderNumberIn(Collection<String> workOrderNumbers);
+
 
   @Query("SELECT w FROM WorkOrder w WHERE " +
          "(:workOrderNumber IS NULL OR w.workOrderNumber = :workOrderNumber) AND " +
