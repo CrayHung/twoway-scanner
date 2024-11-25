@@ -78,6 +78,11 @@ const SearchForm = () => {
         setOriginalData([]);
     }, [])
 
+    // useEffect(() => {
+    //     console.log("目前資料:",JSON.stringify(originalData, null, 2) );
+    // }, [originalData])
+
+
 
     // useEffect(() => {
     //     //      console.log('目前所有table1的內容是:', JSON.stringify(table1Data, null, 2));
@@ -190,7 +195,7 @@ const SearchForm = () => {
         // 第二次table2的 API 請求 - 新增資料
         const fetchAddRows = async () => {
             console.log("additionalRows", JSON.stringify(additionalRows, null, 2))
-            setLoading(true); // 開始Loading
+
             try {
                 const response = await fetch(`${globalUrl.url}/api/post-work-order-details`, {
                     method: 'POST',
@@ -207,9 +212,7 @@ const SearchForm = () => {
                 }
             } catch (error) {
                 console.error('Error adding rows:', error);
-            } finally {
-                setLoading(false); // 完成後結束Loading
-            }
+            } 
         };
 
 
@@ -383,11 +386,11 @@ const SearchForm = () => {
             fetchAllTable1();
             fetchAllTable2();
             fetchAllTable3();
-            setWorkNo('');
-            setQuant('');
-            setPart('');
-            setModel('');
-            setTable1Id('');
+            // setWorkNo('');
+            // setQuant('');
+            // setPart('');
+            // setModel('');
+            // setTable1Id('');
         }
 
 
@@ -1380,10 +1383,13 @@ const SearchForm = () => {
     // };
 
 
-    const handleDeleteClick = async (id: any, workOrder: any, quantity: any, partnumber: any) => {
+    const handleDeleteClick = async (id: any, workOrder: any) => {
+
+        console.log("handleDeleteClick接收到的資料:"+id+" , "+workOrder);
 
         //const confirmMessage = {formatMessage({ id: 'text9' })};
         const isConfirmed = window.confirm(formatMessage({ id: 'text9' }));
+
 
         if (isConfirmed) {
 
@@ -1404,13 +1410,49 @@ const SearchForm = () => {
                     }
                 } catch (error) {
                     console.error('Error updating rows:', error);
-                } finally {
-                    setLoading(false); // 完成後結束Loading
-                }
+                } 
             };
 
             await fetchDeleteRows();
             await fetchAllTable2();
+
+
+            //刪除後 更新table1內容
+            const fetchUpdateTable1 = async () => {
+
+                const updatedTable1Data = {
+                    workOrderNumber: workOrder,
+                    quantity: (quant-1),
+                    partNumber: part,
+                    editUser: currentUser,
+                    company: company
+                };
+
+                console.log("要更新的資料:",JSON.stringify(updatedTable1Data, null, 2))
+                try {
+                    const response = await fetch(`${globalUrl.url}/api/update-work-orders/${table1Id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(updatedTable1Data),
+                    })
+
+                    // if (!response.ok) {
+                    //     throw new Error('Failed to 更新已存在資料');
+                    // } 
+
+                } catch (error) {
+                    console.error('Error updating rows:', error);
+                }
+            }
+
+            await fetchUpdateTable1();
+
+
+
+            setLoading(false); // 完成後結束Loading
+ 
             // navigate('/editworker/reload');
         }
     }
@@ -1723,7 +1765,7 @@ const SearchForm = () => {
                                             {['ADMIN', 'SUPERVISOR', 'OPERATOR'].includes(userRole) &&
                                                 <TableCell>
                                                     <button onClick={(e) => {
-                                                        handleDeleteClick(row.id, row.workOrderNumber, row.quantity, row.partNumber)
+                                                        handleDeleteClick(row.id, row.workOrderNumber)
                                                     }}>
                                                         {formatMessage({ id: 'delete' })}</button>
                                                 </TableCell>
@@ -1787,56 +1829,56 @@ const SearchForm = () => {
 
 
 
-                                                                    // onChange={(e) => {
-                                                                    //     setTempValue(e.target.value);
-                                                                    //     const updatedValue = e.target.value;
-                                                                    //     row[colKey] = updatedValue; 
-                                                                    // }}
+                                                                // onChange={(e) => {
+                                                                //     setTempValue(e.target.value);
+                                                                //     const updatedValue = e.target.value;
+                                                                //     row[colKey] = updatedValue; 
+                                                                // }}
 
-                                                                    // onBlur={(e)=>{
-                                                                    //     handleBlurOrEnter(tempValue , rowIndex , colIndex);
-                                                                    // }}
+                                                                // onBlur={(e)=>{
+                                                                //     handleBlurOrEnter(tempValue , rowIndex , colIndex);
+                                                                // }}
 
-                                                                    /*按下enter才做判斷*/
-                                                                    // onKeyDown={(e) => {
-                                                                    //     if (e.key === 'Enter') {
-                                                                    //         e.preventDefault(); 
-                                                                    //         handleBlurOrEnter(tempValue , rowIndex , colIndex); 
-                                                                    //     }
-                                                                    // }}
-
-
+                                                                /*按下enter才做判斷*/
+                                                                // onKeyDown={(e) => {
+                                                                //     if (e.key === 'Enter') {
+                                                                //         e.preventDefault(); 
+                                                                //         handleBlurOrEnter(tempValue , rowIndex , colIndex); 
+                                                                //     }
+                                                                // }}
 
 
-                                                                    // onBlur={(e) => {
-                                                                    //     const target = e.target as HTMLInputElement;
-                                                                    //     const fakeEvent = {
-                                                                    //         target: {
-                                                                    //             value: target.value,
-                                                                    //         },
-                                                                    //     } as React.ChangeEvent<HTMLInputElement>;
-                                                                
-                                                                    //     handleCellChange(fakeEvent, rowIndex, colIndex); 
-                                                                    // }}
-                                                                    // onChange={(e) => {
-                                                                    //     const updatedValue = e.target.value;
-                                                                        
-                                                                    //     row[colKey] = updatedValue;
-                                                                    // }}
 
-                                                                    // onKeyDown={(e) => {
-                                                                    //     if (e.key === 'Enter') {
-                                                                    //         e.preventDefault();
-                                                                    //         const target = e.target as HTMLInputElement;
-                                                                    //         const fakeEvent = {
-                                                                    //             target: {
-                                                                    //                 value: target.value,
-                                                                    //             },
-                                                                    //         } as React.ChangeEvent<HTMLInputElement>;
-                                                                
-                                                                    //         handleCellChange(fakeEvent, rowIndex, colIndex);
-                                                                    //     }
-                                                                    // }}
+
+                                                                // onBlur={(e) => {
+                                                                //     const target = e.target as HTMLInputElement;
+                                                                //     const fakeEvent = {
+                                                                //         target: {
+                                                                //             value: target.value,
+                                                                //         },
+                                                                //     } as React.ChangeEvent<HTMLInputElement>;
+
+                                                                //     handleCellChange(fakeEvent, rowIndex, colIndex); 
+                                                                // }}
+                                                                // onChange={(e) => {
+                                                                //     const updatedValue = e.target.value;
+
+                                                                //     row[colKey] = updatedValue;
+                                                                // }}
+
+                                                                // onKeyDown={(e) => {
+                                                                //     if (e.key === 'Enter') {
+                                                                //         e.preventDefault();
+                                                                //         const target = e.target as HTMLInputElement;
+                                                                //         const fakeEvent = {
+                                                                //             target: {
+                                                                //                 value: target.value,
+                                                                //             },
+                                                                //         } as React.ChangeEvent<HTMLInputElement>;
+
+                                                                //         handleCellChange(fakeEvent, rowIndex, colIndex);
+                                                                //     }
+                                                                // }}
 
 
                                                                 />
