@@ -57,11 +57,14 @@ public class WorkOrderDetailController {
   public ResponseEntity<String> processWorkOrderDetail(@RequestBody List<WorkOrderDetailRequest> requests) {
 
     System.out.println("前端丟過來的請求:" + requests);
-
     StringBuilder response = new StringBuilder();
     List<String> errors = new ArrayList<>();
 
-    // 獲取所有請求的工單號
+try {
+    // 新增：效能監控開始
+    long startTime = System.currentTimeMillis();
+
+    // 收集所有需要的工單號
     Set<String> workOrderNumbers = requests.stream()
         .map(WorkOrderDetailRequest::getWorkOrderNumber)
         .collect(Collectors.toSet());
@@ -69,31 +72,44 @@ public class WorkOrderDetailController {
     System.out.println("要新增的所有的工單號碼如下:" + workOrderNumbers);
 
     //用於保存實際記錄detail_id數量
+    // Map<String, Integer> currentDetailCounts = new HashMap<>();
+
+    // /****************************************** */
+    //  // 用於保存已經存在的工單號
+    //  Set<String> existingWorkOrderNumbers = new HashSet<>();
+    // // 查詢每個工單號是否存在於 WorkOrder 表中
+    // for (String workOrderNumber : workOrderNumbers) {
+    //   WorkOrder workOrder = workOrderRepository.findByWorkOrderNumber(workOrderNumber);
+
+    //   if (workOrder == null) {
+    //     // 如果工單號不存在，記錄錯誤並跳過
+    //     errors.add("找不到對應的工單: " + workOrderNumber);
+    //     continue;
+    //   }
+
+    //   // 如果工單號存在，將其加入 existingWorkOrderNumbers 集合
+    //   existingWorkOrderNumbers.add(workOrderNumber);
+    //   System.out.println("找到工單號並加入集合: " + workOrderNumber);
+
+    //   // ** 新增: 計算當前實際的記錄數量 **
+    //   Long currentCount = workOrderDetailRepository.countByWorkOrderNumber(workOrderNumber);
+    //   currentDetailCounts.put(workOrderNumber, currentCount.intValue());
+    // }
+
+    // /****************************************** */
+
+    // 1122 新增：批次查詢所有工單 **
+    Map<String, WorkOrder> workOrderCache = workOrderRepository.findAllByWorkOrderNumberIn(workOrderNumbers)
+    .stream()
+    .collect(Collectors.toMap(WorkOrder::getWorkOrderNumber, w -> w));
+
+    // ** 新增：批次查詢所有工單的當前記錄數 **
     Map<String, Integer> currentDetailCounts = new HashMap<>();
+    workOrderNumbers.forEach(workOrderNumber -> {
+        Long count = workOrderDetailRepository.countByWorkOrderNumber(workOrderNumber);
+        currentDetailCounts.put(workOrderNumber, count.intValue());
+    });
 
-    /****************************************** */
-     // 用於保存已經存在的工單號
-     Set<String> existingWorkOrderNumbers = new HashSet<>();
-    // 查詢每個工單號是否存在於 WorkOrder 表中
-    for (String workOrderNumber : workOrderNumbers) {
-      WorkOrder workOrder = workOrderRepository.findByWorkOrderNumber(workOrderNumber);
-
-      if (workOrder == null) {
-        // 如果工單號不存在，記錄錯誤並跳過
-        errors.add("找不到對應的工單: " + workOrderNumber);
-        continue;
-      }
-
-      // 如果工單號存在，將其加入 existingWorkOrderNumbers 集合
-      existingWorkOrderNumbers.add(workOrderNumber);
-      System.out.println("找到工單號並加入集合: " + workOrderNumber);
-
-      // ** 新增: 計算當前實際的記錄數量 **
-      Long currentCount = workOrderDetailRepository.countByWorkOrderNumber(workOrderNumber);
-      currentDetailCounts.put(workOrderNumber, currentCount.intValue());
-    }
-
-    /****************************************** */
 
     // 獲取當前每個工單的最大 detailId
     Map<String, Integer> maxDetailIds = workOrderNumbers.stream()
@@ -105,8 +121,12 @@ public class WorkOrderDetailController {
             }));
 
     // API測試
-    System.out.println("Received request: " + requests);
-    logger.info("Received request to process work order detail: {}", requests);
+    // System.out.println("Received request: " + requests);
+    // logger.info("Received request to process work order detail: {}", requests);
+
+    // ** 新增：準備批量保存的列表 **
+    List<WorkOrderDetail> detailsToSave = new ArrayList<>();
+    Set<WorkOrder> workOrdersToUpdate = new HashSet<>();
 
     // 數據驗證
     for (WorkOrderDetailRequest request : requests) {
@@ -116,17 +136,11 @@ public class WorkOrderDetailController {
           continue;
         }
 
-        // 檢查對應的WorkOrder是否存在
-        if (!existingWorkOrderNumbers.contains(request.getWorkOrderNumber())) {
-          errors.add("找不到對應的工單: " + request.getWorkOrderNumber());
-          continue;
+        WorkOrder workOrder = workOrderCache.get(request.getWorkOrderNumber());
+        if (workOrder == null) {
+            errors.add("找不到對應的工單: " + request.getWorkOrderNumber());
+            continue;
         }
-
-        WorkOrder workOrder = workOrderRepository.findByWorkOrderNumber(request.getWorkOrderNumber());
-
-        // 獲取當前 detailId 並檢查是否超過數量限制
-        Integer currentDetailId = maxDetailIds.get(request.getWorkOrderNumber());
-        int newDetailId = (currentDetailId == null) ? 1 : currentDetailId + 1;
 
         // ** 修改: 使用實際記錄數檢查數量限制 **
         Integer currentCount = currentDetailCounts.get(request.getWorkOrderNumber());
@@ -134,6 +148,12 @@ public class WorkOrderDetailController {
             errors.add("工單 " + request.getWorkOrderNumber() + " 的實際記錄數量已達到上限 " + workOrder.getQuantity());
             continue;
         }
+
+        // WorkOrder workOrder = workOrderRepository.findByWorkOrderNumber(request.getWorkOrderNumber());
+
+        // 獲取當前 detailId 並檢查是否超過數量限制
+        Integer currentDetailId = maxDetailIds.get(request.getWorkOrderNumber());
+        int newDetailId = (currentDetailId == null) ? 1 : currentDetailId + 1;
 
         // ** 更新記錄數量 **
         currentDetailCounts.put(request.getWorkOrderNumber(), currentCount + 1);
@@ -162,25 +182,49 @@ public class WorkOrderDetailController {
         workOrderDetail.setEdit_date(LocalDate.now());
         workOrderDetail.setEdit_user(request.getEdit_user());
 
-        workOrderDetailRepository.save(workOrderDetail);
-        logger.info("Work order detail saved successfully: {}", workOrderDetail);
+        // workOrderDetailRepository.save(workOrderDetail);
+        // logger.info("Work order detail saved successfully: {}", workOrderDetail);
+
+        // ** 加入批次保存列表，而不是立即保存 **
+        detailsToSave.add(workOrderDetail);
 
         // 更新WorkOrder的相關字段
         workOrder.setEditDate(LocalDate.now());
         workOrder.setEditUser(request.getEdit_user());
-        workOrderRepository.save(workOrder);
-        logger.info("Work order updated successfully: {}", workOrder);
+        workOrdersToUpdate.add(workOrder);
+        // workOrderRepository.save(workOrder);
+        // logger.info("Work order updated successfully: {}", workOrder);
 
         response.append("工單詳細信息已成功處理: ").append(request.getWorkOrderNumber())
             .append(", detailId: ").append(newDetailId)
             .append(", 當前數量: ").append(newDetailId)
             .append("/").append(workOrder.getQuantity())
             .append("\n");
-      } catch (Exception e) {
-        logger.error("Error occurred while processing work order detail", e);
-        errors.add("處理工單時發生錯誤: " + request.getWorkOrderNumber() + " - " + e.getMessage());
-      }
+            
+          } catch (Exception e) {
+            logger.error("Error occurred while processing work order detail", e);
+            errors.add("處理工單時發生錯誤: " + request.getWorkOrderNumber() + " - " + e.getMessage());
+            continue;  // 繼續處理下一筆
+        }
+      } 
+    
+      // ** 新增：批次保存所有資料 **
+      if (!detailsToSave.isEmpty()) {
+        workOrderDetailRepository.saveAll(detailsToSave);
+        workOrderRepository.saveAll(workOrdersToUpdate);
     }
+
+     // ** 新增：記錄處理時間 **
+     long endTime = System.currentTimeMillis();
+     logger.info("批次處理完成，共處理 {} 筆資料，耗時 {} 毫秒", detailsToSave.size(), (endTime - startTime));
+
+    } catch (Exception e) {
+      // 處理其他非工單處理相關的錯誤
+        logger.error("Unexpected error occurred", e);
+        errors.add("發生未預期的錯誤: " + e.getMessage());
+    }
+
+    
 
     if (!errors.isEmpty()) {
       response.append("\n錯誤信息:\n");
