@@ -65,8 +65,7 @@ const Menu = () => {
 
               <Link to="/register/reload">{formatMessage({ id: 'create_account' })}</Link>
 
-              {/* <Link to="/importOracle">{formatMessage({ id: 'oracle import' })}</Link> */}
-              {/* 先註解調 */}
+            {/* 先註解調 */}
               {/* <Link to="/importOracle/reload">{formatMessage({ id: 'oracle import' })}</Link> */}
             </>
           )}

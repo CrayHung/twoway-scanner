@@ -362,6 +362,7 @@ const EditWork = () => {
         if (isRequestBodyEmpty) {
             // 呼叫 Get all
             fetchAllTable1();
+            setShowTableData(table1Data);
         } else {
             // 如果任一欄不是空陣列,則用模糊搜尋
             callFuzzy(requestBody);

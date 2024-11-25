@@ -181,7 +181,7 @@ const SearchTable1 = () => {
             updatedField[index] = newValue;
             return {
                 ...prevData,
-                [field]: updatedField.every((item) => item === '') ? null : updatedField,
+                [field]: updatedField.every((item) => item === '') ? [''] : updatedField,
             };
         });
     };
