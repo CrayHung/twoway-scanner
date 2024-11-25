@@ -212,7 +212,7 @@ const SearchForm = () => {
                 }
             } catch (error) {
                 console.error('Error adding rows:', error);
-            } 
+            }
         };
 
 
@@ -549,6 +549,14 @@ const SearchForm = () => {
             isDuplicateInDatabase = false;
             //指定的比對欄位
         } else if (checkColumn.includes(colKey)) {
+
+            const newID = extractID(newValue);
+
+            if (newID === null) {
+                alert("字串格式不正確！請確保字串符合規定格式：.$ID:<內容>.$");
+                setInputValue(''); // 清空輸入框
+                return;
+            }
             isDuplicateInDatabase = table2Data.some((item: { [x: string]: string; }) => item[colKey] === newValue);
         } else {
             isDuplicateInDatabase = false;
@@ -576,7 +584,7 @@ const SearchForm = () => {
         const originalValue = table2Data.find((item: any) => item.id === originalData[rowIndex].id)?.[colKey];
 
         console.log("這個欄位的值是 : " + newValue)
-        if (originalValue !== newValue) {
+        // if (originalValue !== newValue) {
             const fetchUpdateRows = async () => {
                 try {
 
@@ -591,6 +599,7 @@ const SearchForm = () => {
                         updateData[`${colKey}_BEDID`] = extractID(newValue);
                     }
 
+                    console.log("要更新的資料是 : ",JSON.stringify(updateData, null, 2) )
 
                     const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
                         method: 'PUT',
@@ -610,7 +619,7 @@ const SearchForm = () => {
                 }
             };
             fetchUpdateRows();
-        }
+        // }
         /**新增PUT即時更新 */
 
         //複製原值並將該欄位值更新
@@ -1385,7 +1394,7 @@ const SearchForm = () => {
 
     const handleDeleteClick = async (id: any, workOrder: any) => {
 
-        console.log("handleDeleteClick接收到的資料:"+id+" , "+workOrder);
+        console.log("handleDeleteClick接收到的資料:" + id + " , " + workOrder);
 
         //const confirmMessage = {formatMessage({ id: 'text9' })};
         const isConfirmed = window.confirm(formatMessage({ id: 'text9' }));
@@ -1410,7 +1419,7 @@ const SearchForm = () => {
                     }
                 } catch (error) {
                     console.error('Error updating rows:', error);
-                } 
+                }
             };
 
             await fetchDeleteRows();
@@ -1422,13 +1431,13 @@ const SearchForm = () => {
 
                 const updatedTable1Data = {
                     workOrderNumber: workOrder,
-                    quantity: (quant-1),
+                    quantity: (quant - 1),
                     partNumber: part,
                     editUser: currentUser,
                     company: company
                 };
 
-                console.log("要更新的資料:",JSON.stringify(updatedTable1Data, null, 2))
+                console.log("要更新的資料:", JSON.stringify(updatedTable1Data, null, 2))
                 try {
                     const response = await fetch(`${globalUrl.url}/api/update-work-orders/${table1Id}`, {
                         method: 'PUT',
@@ -1452,7 +1461,7 @@ const SearchForm = () => {
 
 
             setLoading(false); // 完成後結束Loading
- 
+
             // navigate('/editworker/reload');
         }
     }
@@ -1571,8 +1580,8 @@ const SearchForm = () => {
 
 
     return (
-        <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
-
+        // <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
+        <div style={{ overflow: "hidden" }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                 <Typography variant="h4" gutterBottom>
                     {formatMessage({ id: 'Menu-edit-WorkOrders' })}
@@ -1721,13 +1730,13 @@ const SearchForm = () => {
                             ></div>
                         )}
 
-
-                        <TableContainer component={Paper} style={{
+<TableContainer component={Paper} style={{ height: 'calc(100vh - 110px)', overflow: 'auto' }}>
+                        {/* <TableContainer component={Paper} style={{
                             maxHeight: '70vh', // 設置最大高度，避免超出視窗
                             overflowX: 'auto', // 確保左右滾動條出現
                             overflowY: 'auto', // 確保上下滾動條出現
                         }}
-                        >
+                        > */}
                             <Table stickyHeader aria-label="sticky table"
                                 style={{
                                     minWidth: '800px', // 最小寬度，確保資料過多時滾動
