@@ -260,7 +260,9 @@ const PartTable = () => {
 
 
     return (
+
         // <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
+
         <div style={{ overflow: "hidden" }}>
             <Modal open={openAddForm} onClose={handleAddClose}>
                 <Box sx={modalStyle}>
@@ -489,6 +491,7 @@ const PartTable = () => {
                 <button onClick={() => { setOpenAddForm(true) }}>{formatMessage({ id: 'add-part' })}</button>
                 <button style={{ float: 'right' }} onClick={handleExitButtonClick}>{formatMessage({ id: 'exit' })}</button>
             </div> */}
+
 
             <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
                  <TableContainer component={Paper} style={{ height: 'calc(100vh - 110px)', overflow: 'auto' }}>
