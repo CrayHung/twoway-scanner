@@ -6,7 +6,7 @@ import { useGlobalContext } from './global';
 
 const Menu = () => {
   const { formatMessage } = useIntl();
-  const { company,jwtToken,userRole, isLoggedIn, globalUrl } = useGlobalContext();
+  const { currentUser,company,jwtToken,userRole, isLoggedIn, globalUrl } = useGlobalContext();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -26,6 +26,7 @@ const Menu = () => {
     console.log('User is logged in:', isLoggedIn);
     console.log('User role:', userRole);
     console.log('company:', company);
+    console.log('currentUser:', currentUser);
   }, [isLoggedIn, userRole]);
 
   return (

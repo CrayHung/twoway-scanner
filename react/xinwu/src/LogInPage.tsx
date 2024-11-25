@@ -55,6 +55,8 @@ const LogInPage = () => {
         await fetchLogin();
         console.log("jwtToken=" + jwtToken);
         setCurrentUser(input1);
+        localStorage.setItem('currentUser', input1);
+
       };
 
     const handleInput1Change = (e: React.ChangeEvent<HTMLInputElement>) => {

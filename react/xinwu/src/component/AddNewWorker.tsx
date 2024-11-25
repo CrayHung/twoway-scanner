@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Button, Box, Typography } from '@mui/material';
 // import '../App.css';
 import { useNavigate } from 'react-router-dom';
-
+import { message } from 'antd';
 import { useGlobalContext } from '../global';
 import './hightlight.css';
 import { useIntl } from "react-intl";
@@ -134,19 +134,19 @@ function AddNewWorker() {
                         'Content-Type': 'application/json',
                     },
                 });
-    
+
                 if (!response.ok) {
                     throw new Error('Failed to get 所有對應表');
                 }
-    
+
                 const data = await response.json();
                 // console.log("table3所有對應 : " + JSON.stringify(data));
                 setTable3Data(data);
-    
+
             } catch (error) {
                 console.error('Error fetching token:', error);
             }
-        };fetchAllTable3();
+        }; fetchAllTable3();
 
     }, [])
 
@@ -625,13 +625,33 @@ function AddNewWorker() {
         const colKey = Object.keys(data[rowIndex])
             .filter((key) => key !== 'id' && key !== 'workOrderNumber')[colIndex];
 
-        // 只允許編輯QR_RFTray ,QR_PS,QR_HS ,QR_backup1,QR_backup2,QR_backup3,QR_backup4note的欄位
-        if (
-            colKey === 'id' || colKey === 'workOrderNumber' || colKey === 'detailId' ||
-            colKey === 'create_date' || colKey === 'create_user' || colKey === 'edit_date' || colKey === 'edit_user'
-        ) {
-            return;
+        /****************************************************** */
+        //因為alert會讓單元格無法點到, 所以用antd的message來處理
+        const nonEditableKeys = [
+            'id', 'workOrderNumber', 'detailId',
+            'create_date', 'create_user', 'edit_date', 'edit_user',
+            'QR_RFTray_BEDID', 'QR_PS_BEDID', 'QR_HS_BEDID'
+        ];
+        const alertKeys = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS'];
+
+        if (nonEditableKeys.includes(colKey)) {
+            return; // 禁止操作
         }
+        if (alertKeys.includes(colKey)) {
+            message.warning(formatMessage({ id: 'text' }), 1); 
+        }
+
+        /****************************************************** */
+        /****************************************************** */
+        // 只允許編輯QR_RFTray ,QR_PS,QR_HS ,QR_backup1,QR_backup2,QR_backup3,QR_backup4note的欄位
+        // if (
+        //     colKey === 'id' || colKey === 'workOrderNumber' || colKey === 'detailId' ||
+        //     colKey === 'create_date' || colKey === 'create_user' || colKey === 'edit_date' || colKey === 'edit_user'
+        // ) {
+        //     return;
+        // }
+        /****************************************************** */
+
         setEditCell({ rowIndex, colIndex });
     };
 
@@ -652,6 +672,14 @@ function AddNewWorker() {
             .filter((key) => key !== 'id' && key !== 'workOrderNumber')[colIndex];
 
         const newValue = e.target.value;
+
+        const newID = extractID(newValue);
+
+        if (newID === null) {
+            alert("字串格式不正確！請確保字串符合規定格式：.$ID:<內容>.$");
+            setInputValue(''); // 清空輸入框
+            return;
+        }
 
 
         /*新增防呆機制 */
@@ -899,7 +927,7 @@ function AddNewWorker() {
     return (
 
         <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
-            
+
 
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                 <Typography variant="h4" gutterBottom>
@@ -918,7 +946,7 @@ function AddNewWorker() {
                 </div>
             )}
 
-        {!hiddenInput &&
+            {!hiddenInput &&
                 <div>
                     <>
                         <label>{formatMessage({ id: 'workOrderNumber' })}：</label>

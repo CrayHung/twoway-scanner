@@ -81,7 +81,7 @@ const PartTable = () => {
     const [selectedPartNumber, setSelectedPartNumber] = useState('');
     const [selectedInputModel, setselectedInputModel] = useState('');
 
-    const [numberPerPallet, setNumberPerPallet] = useState(1);
+    const [numberPerPallet, setNumberPerPallet] = useState('');
     const [summary, setSummary] = useState('');
     const [note, setNote] = useState('');
 
@@ -93,7 +93,7 @@ const PartTable = () => {
         const newData = {
             partNumber: selectedPartNumber,
             inputMode: selectedInputModel,
-            numberPerPallet: numberPerPallet,
+            numberPerPallet: Number(numberPerPallet),
             summary: summary,
             note: note,
             createUser: currentUser,
@@ -195,7 +195,7 @@ const PartTable = () => {
                     partNumber: editPart.partNumber,
                     inputMode: editPart.inputMode,
 
-                    numberPerPallet: editPart.numberPerPallet,
+                    numberPerPallet: Number(editPart.numberPerPallet),
                     summary: editPart.summary,
                     note: editPart.note,
                     editUser: currentUser,
@@ -260,7 +260,8 @@ const PartTable = () => {
 
 
     return (
-        <div style={{ width: '100vw', position: 'relative', left: 0 }}>
+        // <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
+        <div style={{ overflow: "hidden" }}>
             <Modal open={openAddForm} onClose={handleAddClose}>
                 <Box sx={modalStyle}>
                     <Typography variant="h6" component="h2">
@@ -308,7 +309,7 @@ const PartTable = () => {
                                         <TextField
                                             label={formatMessage({ id: 'number_per_pallet' })}
                                             value={numberPerPallet}
-                                            onChange={(e) => setNumberPerPallet(Number(e.target.value))}
+                                            onChange={(e) => setNumberPerPallet(e.target.value)}
                                             fullWidth
                                             type="number"
                                         />
@@ -474,8 +475,8 @@ const PartTable = () => {
 
 
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                <Button variant="contained" onClick={()=>{setOpenAddForm(true)}}>
-                {formatMessage({ id: 'add-part' })}
+                <Button variant="contained" onClick={() => { setOpenAddForm(true) }}>
+                    {formatMessage({ id: 'add-part' })}
                 </Button>
 
                 <Button variant="contained" sx={{ marginRight: 1 }} onClick={handleExitButtonClick}>
@@ -488,53 +489,55 @@ const PartTable = () => {
                 <button onClick={() => { setOpenAddForm(true) }}>{formatMessage({ id: 'add-part' })}</button>
                 <button style={{ float: 'right' }} onClick={handleExitButtonClick}>{formatMessage({ id: 'exit' })}</button>
             </div> */}
-            <>
-                <Paper sx={{ width: '100vw%', overflow: 'hidden', height: '90%' }}>
-                    <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'scroll' }}>
-                        <Table stickyHeader aria-label="sticky table">
-                            <TableHead >
-                                <TableRow style={{ border: '1px solid #ccc' }}>
-                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
-                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'part' })}</TableCell>
-                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'part-shipping-model' })}</TableCell>
+
+            <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
+                 <TableContainer component={Paper} style={{ height: 'calc(100vh - 110px)', overflow: 'auto' }}>
+
+                {/* <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'scroll' }}> */}
+                    <Table stickyHeader aria-label="sticky table">
+                        <TableHead >
+                            <TableRow style={{ border: '1px solid #ccc' }}>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'part' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'part-shipping-model' })}</TableCell>
 
 
-                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'number_per_pallet' })}</TableCell>
-                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'summary' })}</TableCell>
-                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'note' })}</TableCell>
-                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
-                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
-                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
-                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'number_per_pallet' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'summary' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'note' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
 
 
-                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit-part' })}</TableCell>
-                                    <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'delete-part' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit-part' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'delete-part' })}</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {partTableData.map((row: any, rowIndex: number) => (
+                                <TableRow key={rowIndex}>
+                                    {Object.keys(row).map((colKey) => (
+                                        <TableCell key={colKey}>
+                                            {colKey === 'inputMode' ? formatInputMode(row.inputMode) : row[colKey]}
+                                        </TableCell>
+                                    ))}
+
+                                    <TableCell>
+                                        <button onClick={() => handleEdit(row)}>{formatMessage({ id: 'edit-part' })}</button>
+                                    </TableCell>
+
+                                    <TableCell>
+                                        <button onClick={() => handleDeleteClick(row)}>{formatMessage({ id: 'delete-part' })}</button>
+                                    </TableCell>
                                 </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {partTableData.map((row: any, rowIndex: number) => (
-                                    <TableRow key={rowIndex}>
-                                        {Object.keys(row).map((colKey) => (
-                                            <TableCell key={colKey}>
-                                                {colKey === 'inputMode' ? formatInputMode(row.inputMode) : row[colKey]}
-                                            </TableCell>
-                                        ))}
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Paper>
 
-                                        <TableCell>
-                                            <button onClick={() => handleEdit(row)}>{formatMessage({ id: 'edit-part' })}</button>
-                                        </TableCell>
-
-                                        <TableCell>
-                                            <button onClick={() => handleDeleteClick(row)}>{formatMessage({ id: 'delete-part' })}</button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Paper>
-            </>
         </div >
     );
 }

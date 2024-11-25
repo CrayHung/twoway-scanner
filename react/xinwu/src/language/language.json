@@ -24,6 +24,7 @@
                 "text6":"開始日期不能晚於結束日期",
                 "text7":"結束日期不能早於開始日期",
                 "text8": "登入腳色: ",
+                "text9": " 確認刪除? ",
                 "updated":"更新完畢",
        
 
@@ -110,6 +111,7 @@
                 "text6":"start date should early than end date",
                 "text7":"end date should late than start date",
                 "text8": "login Role :",
+                "text9": "delete ?",
                 "updated":"update finish",
 
                 "twowayexcel": "SN download",

@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, SelectChangeEvent, Select, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useGlobalContext } from '../global';
+import { message } from 'antd';
 import { useIntl } from "react-intl";
 import './SearchForm.css';
 
@@ -27,7 +28,7 @@ const SearchForm = () => {
     const [continueInput, setContinueInput] = useState(false); // 用來標記是否繼續輸入
     const [updateData, setUpdateData] = useState(false);    // 用來標記是否要修改工單
 
-    const [updateCell, setUpdateCell] = useState(false);    // 用來標記如果TableCell有更改過的話,要先將原本的button都隱藏,只顯示儲存
+    // const [updateCell, setUpdateCell] = useState(false);    // 用來標記如果TableCell有更改過的話,要先將原本的button都隱藏,只顯示儲存
 
     // for 編輯表單
     const [rows, setRows] = useState(0);  // 工單數量資料筆數
@@ -54,6 +55,7 @@ const SearchForm = () => {
     const [originalData, setOriginalData] = useState<any[]>([]);
     const [updatedRowData, setUpdatedRowData] = useState<any>([]);
 
+    const [editingCell, setEditingCell] = useState<{ rowIndex: number; colIndex: number } | null>(null);
     /**************************************************************************************************************** */
     /**
      * 
@@ -67,7 +69,7 @@ const SearchForm = () => {
         console.log("公單號碼的數量:" + quant);
         console.log("公單號碼的料號:" + part);
         console.log("公單號碼的料號對應模式:" + model);
-        
+
 
     }, [workNo, quant, part, model])
 
@@ -147,9 +149,9 @@ const SearchForm = () => {
                 note: '',
                 create_user: currentUser,
                 edit_user: currentUser,
-                QR_RFTray_BEDID: '',
-                QR_PS_BEDID: '',
-                QR_HS_BEDID: '',
+                // QR_RFTray_BEDID: '',
+                // QR_PS_BEDID: '',
+                // QR_HS_BEDID: '',
             })));
         }
 
@@ -331,9 +333,9 @@ const SearchForm = () => {
                     create_user: item.create_user,
                     edit_date: item.edit_date,
                     edit_user: item.edit_user,
-                    QR_RFTray_BEDID: item.QR_RFTray_BEDID,
-                    QR_PS_BEDID: item.QR_PS_BEDID,
-                    QR_HS_BEDID: item.QR_HS_BEDID,
+                    // QR_RFTray_BEDID: item.QR_RFTray_BEDID,
+                    // QR_PS_BEDID: item.QR_PS_BEDID,
+                    // QR_HS_BEDID: item.QR_HS_BEDID,
                     ...item,
 
                 }));
@@ -489,7 +491,6 @@ const SearchForm = () => {
      */
 
 
-
     // 處理單元格點擊進入編輯模式(接收row和column的key)
     // const handleCellClick = (rowIndex: number, colKey: string) => {
     //     //不開放編輯的欄位
@@ -502,32 +503,32 @@ const SearchForm = () => {
 
     // 處理單元格點擊進入編輯模式(接收row和column index)
     const handleCellClick = (rowIndex: number, colIndex: number) => {
+
         // 根據 colIndex 來取得實際的欄位名稱
         const colKey = Object.keys(originalData[rowIndex])
             .filter((key) => key !== 'id')[colIndex];
 
-        /*這邊要取消註解*/
-        // 只允許編輯QR_RFTray,QR_PS,QR_HS,QR_backup1,QR_backup2,QR_backup3,QR_backup4,note的欄位
-        if (
-            colKey === 'id' || colKey === 'workOrderNumber' || colKey === 'detailId' ||
-            colKey === 'create_date' || colKey === 'create_user' || colKey === 'edit_date' || colKey === 'edit_user'
-            || colKey === 'QR_RFTray_BEDID' || colKey === 'QR_PS_BEDID' || colKey === 'QR_HS_BEDID'
-        ) {
+        /****************************************************** */
+        //因為alert會讓單元格無法點到, 所以用antd的message來處理
+        const nonEditableKeys = [
+            'id', 'workOrderNumber', 'detailId',
+            'create_date', 'create_user', 'edit_date', 'edit_user',
+            'QR_RFTray_BEDID', 'QR_PS_BEDID', 'QR_HS_BEDID'
+        ];
+        const alertKeys = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS'];
+
+        if (nonEditableKeys.includes(colKey)) {
             return;
         }
+        if (alertKeys.includes(colKey)) {
+            message.warning(formatMessage({ id: 'text' }), 1);
+        }
+        setEditingCell({ rowIndex, colIndex });
         setEditCell({ rowIndex, colIndex });
+        // setEditingCell(colIndex);
     };
 
 
-    // 處理編輯完成後，更新edit_user和edit_date(使用colKey)
-    // const handleCellChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, rowIndex: number, colKey: string) => {
-    //     const updatedData = originalData.map((row: any, idx: any) =>
-    //         idx === rowIndex ? { ...row, [colKey]: e.target.value, edit_user: currentUser, edit_date: today } : row
-    //     );
-    //     setOriginalData(updatedData); // 更新整體表格資料..編輯在還沒按"儲存"按鈕以前,先不把資料更新回table2
-    // };
-
-    // 處理編輯完成後，更新edit_user和edit_date
     const handleCellChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, rowIndex: number, colIndex: number) => {
 
         //取得欄位名 , 略調id欄位
@@ -571,7 +572,7 @@ const SearchForm = () => {
         //檢查原欄位值和新輸入的質是否相同,如不同則PUT到API
         const originalValue = table2Data.find((item: any) => item.id === originalData[rowIndex].id)?.[colKey];
 
-        console.log("這個欄位的值是 : "+newValue)
+        console.log("這個欄位的值是 : " + newValue)
         if (originalValue !== newValue) {
             const fetchUpdateRows = async () => {
                 try {
@@ -619,17 +620,130 @@ const SearchForm = () => {
 
 
         setOriginalData(updatedData);
-        setUpdateCell(true);
+        // setUpdateCell(true);
     };
 
-    // 結束編輯模式(使用colKey)
-    // const handleCellBlur = () => {
-    //     setEditCell({ rowIndex: null, colKey: null });
+
+    // 處理編輯完成後，更新edit_user和edit_date
+    // const handleCellChange = (
+    //     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    //     rowIndex: number,
+    //     colIndex: number): boolean => {
+
+    //     // 防止 e.target 為 undefined
+    //     if (!e.target || typeof e.target.value === "undefined") {
+    //         alert("Invalid event target");
+    //         return false;
+    //     }
+
+    //     //取得欄位名 , 略調id欄位
+    //     const colKey = Object.keys(originalData[rowIndex])
+    //         .filter((key) => key !== 'id')[colIndex];
+
+    //     const newValue = e.target.value;
+
+    //     // const newID = extractID(newValue);
+
+    //     // if (newID === null) {
+    //     //     alert("字串格式不正確！請確保字串符合規定格式：.$ID:<內容>.$");
+    //     //     setInputValue(''); // 清空輸入框
+    //     //     return;
+    //     // }
+
+    //     /*新增防呆機制 */
+    //     const checkColumn = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS'];
+    //     let isDuplicateInDatabase = false;
+
+    //     // 若是空字串，視為不重複
+    //     if (newValue.trim() === "") {
+    //         isDuplicateInDatabase = false;
+    //         //指定的比對欄位
+    //     } else if (checkColumn.includes(colKey)) {
+    //         isDuplicateInDatabase = table2Data.some((item: { [x: string]: string; }) => item[colKey] === newValue);
+    //     } else {
+    //         isDuplicateInDatabase = false;
+    //     }
+
+
+    //     if (newValue.trim() !== "" && isDuplicateInDatabase) {
+    //         alert(`${colKey} 已存在，請輸入不同的 ${colKey}`);
+    //         setInputValue(''); // 清空輸入框
+    //         // return;
+    //         return false;
+    //     }
+
+    //     // const isDuplicateInDatabase = table2Data.some((item: any) => item[colKey] === newValue);
+    //     // if (isDuplicateInDatabase) {
+    //     //     alert(`${colKey} 已存在，請輸入不同的 ${colKey}`);
+    //     //     setInputValue(''); // 清空輸入框
+    //     //     return; // 阻止更新
+    //     // }
+    //     /*新增防呆機制 */
+
+
+    //     /**新增PUT即時更新 */
+
+    //     //檢查原欄位值和新輸入的質是否相同,如不同則PUT到API
+    //     const originalValue = table2Data.find((item: any) => item.id === originalData[rowIndex].id)?.[colKey];
+
+    //     if (originalValue !== newValue) {
+    //         const fetchUpdateRows = async () => {
+    //             try {
+
+    //                 //如果修改的欄位是QR_,則將PUT內容新增到table2的 _BEDID欄位
+    //                 const updateData = {
+    //                     id: originalData[rowIndex].id,
+    //                     [colKey]: newValue,
+    //                     edit_user: currentUser
+    //                 };
+
+    //                 if (checkColumn.includes(colKey)) {
+    //                     updateData[`${colKey}_BEDID`] = extractID(newValue);
+    //                 }
+
+
+    //                 const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
+    //                     method: 'PUT',
+    //                     headers: {
+    //                         'Content-Type': 'application/json',
+    //                     },
+    //                     body: JSON.stringify([updateData]),
+    //                 });
+
+    //                 if (!response.ok) {
+    //                     throw new Error('Failed to 更新');
+    //                 } else {
+    //                     console.log('完成table2更新現有資料');
+    //                 }
+    //             } catch (error) {
+    //                 console.error('Error updating rows:', error);
+    //             }
+    //         };
+    //         fetchUpdateRows();
+    //     }
+    //     /**新增PUT即時更新 */
+
+    //     //複製原值並將該欄位值更新
+    //     const updatedData = originalData.map((row: any, idx: any) =>
+    //         idx === rowIndex ? { ...row, [colKey]: e.target.value, edit_user: currentUser, edit_date: today, [`${colKey}_BEDID`]: extractID(newValue) } : row
+    //     );
+
+    //     // console.log("updatedData", JSON.stringify(updatedData, null, 2));
+
+
+
+    //     setOriginalData(updatedData);
+    //     setUpdateCell(true);
+
+    //     return true; // 檢查通過
     // };
+
+
 
     // 結束編輯模式(使用col index)
     const handleCellBlur = () => {
         setEditCell({ rowIndex: null, colIndex: null });
+        setEditingCell(null);
     };
 
 
@@ -753,8 +867,9 @@ const SearchForm = () => {
             event.preventDefault();
 
             const newValue = inputValue.trim();
-
             const rowIndex = currentRow !== null ? currentRow : 0;
+
+
             if (newValue && currentRow !== null && currentRow < rows) {
                 const updatedData = [...originalData];
                 let updatedRow = { ...updatedData[currentRow] };
@@ -951,7 +1066,7 @@ const SearchForm = () => {
             'B': [2, 3], // SN, QR_RFTray
             'C': [2, 4], // SN, QR_PS
             'D': [2, 4, 5], // SN, QR_PS, QR_HS
-            'E': [2,  3, 4, 5], // SN, QR_RFTray, QR_PS, QR_HS
+            'E': [2, 3, 4, 5], // SN, QR_RFTray, QR_PS, QR_HS
         };
 
         const columnOrder = columnOrderPerMode[inputMode]; // 取得當前模式的欄位順序
@@ -1266,31 +1381,100 @@ const SearchForm = () => {
 
 
     const handleDeleteClick = async (id: any, workOrder: any, quantity: any, partnumber: any) => {
-        const fetchDeleteRows = async () => {
-            setLoading(true); // 開始Loading
-            try {
-                const response = await fetch(`${globalUrl.url}/api/delete-work-order-details/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
+
+        //const confirmMessage = {formatMessage({ id: 'text9' })};
+        const isConfirmed = window.confirm(formatMessage({ id: 'text9' }));
+
+        if (isConfirmed) {
+
+            const fetchDeleteRows = async () => {
+                setLoading(true); // 開始Loading
+                try {
+                    const response = await fetch(`${globalUrl.url}/api/delete-work-order-details/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to 刪除');
+                    } else {
+                        console.log('完成table2 刪除資料');
                     }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to 刪除');
-                } else {
-                    console.log('完成table2 刪除資料');
+                } catch (error) {
+                    console.error('Error updating rows:', error);
+                } finally {
+                    setLoading(false); // 完成後結束Loading
                 }
-            } catch (error) {
-                console.error('Error updating rows:', error);
-            } finally {
-                setLoading(false); // 完成後結束Loading
-            }
-        };
-        fetchDeleteRows();
+            };
 
-        navigate('/editworker/reload');
+            await fetchDeleteRows();
+            await fetchAllTable2();
+            // navigate('/editworker/reload');
+        }
     }
+
+
+    const fetchAllTable2 = async () => {
+        try {
+            const response = await fetch(`${globalUrl.url}/api/get-work-order-details`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to get 所有工單');
+            }
+
+            const data: any[] = await response.json();
+
+
+            //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
+            //並且重新排序順序
+            const mappedData = data.map(item => ({
+                id: item.id,
+                workOrderNumber: item.workOrderNumber,
+                detailId: item.detailId,
+                SN: item.SN,
+                QR_RFTray: item.QR_RFTray,
+                QR_PS: item.QR_PS,
+                QR_HS: item.QR_HS,
+                QR_backup1: item.QR_backup1,
+                QR_backup2: item.QR_backup2,
+                QR_backup3: item.QR_backup3,
+                QR_backup4: item.QR_backup4,
+                note: item.note,
+                create_date: item.create_date,
+                create_user: item.create_user,
+                edit_date: item.edit_date,
+                edit_user: item.edit_user,
+                // QR_RFTray_BEDID: item.QR_RFTray_BEDID,
+                // QR_PS_BEDID: item.QR_PS_BEDID,
+                // QR_HS_BEDID: item.QR_HS_BEDID,
+                ...item,
+
+            }));
+
+            //用來將table2的不要欄位過濾掉(quantity,company,partNumber)
+            const filteredData = mappedData.map(({
+                partNumber,
+                // workOrderNumber,
+                company,
+                quantity,
+                ...rest
+            }) => rest);
+
+
+            await setTable2Data(filteredData);
+            handlefilterWorkOrder();
+
+        } catch (error) {
+            console.error('Error fetching token:', error);
+        }
+    };
 
 
     const handleExitButtonClick = () => {
@@ -1344,7 +1528,6 @@ const SearchForm = () => {
     }, [workNo, part, quant, table1Data, table2Data])
 
 
-
     return (
         <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
 
@@ -1381,8 +1564,8 @@ const SearchForm = () => {
                     }
                 </>
             )} */}
-
-            {!updateData && !continueInput && userRole !== 'USER' && userRole !== 'OPERATOR' && !updateCell &&
+            {/* {!updateData && !continueInput && userRole !== 'USER' && userRole !== 'OPERATOR' && !updateCell && */}
+            {!updateData && !continueInput && userRole !== 'USER' && userRole !== 'OPERATOR' &&
                 <button onClick={handleUpdate}>{formatMessage({ id: 'edit-workOrderDetail' })}</button>
             }
             {/* 
@@ -1411,7 +1594,8 @@ const SearchForm = () => {
                 </>
             }
 
-            {userRole !== 'USER' && !updateData && !updateCell && (
+            {/* {userRole !== 'USER' && !updateData && !updateCell && ( */}
+            {userRole !== 'USER' && !updateData && (
                 <>
                     {/* {continueInput ? (
                         <button onClick={handleSaveData} disabled={loading}>{formatMessage({ id: 'save' })}</button>
@@ -1480,6 +1664,22 @@ const SearchForm = () => {
                 originalData.length > 0 &&
                 <>
                     <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
+                        {/* for灰色背景 */}
+                        {editingCell !== null && (
+                            <div
+                                style={{
+                                    position: 'fixed',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    backgroundColor: 'rgba(0, 0, 0, 0.5)', // 背景灰色
+                                    zIndex: 1000,
+                                }}
+                            ></div>
+                        )}
+
+
                         <TableContainer component={Paper} style={{
                             maxHeight: '70vh', // 設置最大高度，避免超出視窗
                             overflowX: 'auto', // 確保左右滾動條出現
@@ -1497,7 +1697,7 @@ const SearchForm = () => {
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
+                                        <TableCell style={{ width: '500px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
@@ -1509,37 +1709,12 @@ const SearchForm = () => {
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray_BEDID' })}</TableCell>
+                                        {/* <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray_BEDID' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS_BEDID' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS_BEDID' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS_BEDID' })}</TableCell> */}
 
                                     </TableRow>
                                 </TableHead>
-                                {/* 使用colKey */}
-                                {/* <TableBody>
-                                    {originalData.map((row: any, rowIndex: number) => (
-                                        <TableRow key={rowIndex}>
-                                            {Object.keys(row)
-                                                .filter((colKey) => colKey !== 'id')
-                                                .map((colKey) => (
-                                                    <TableCell key={colKey} onClick={() => handleCellClick(rowIndex, colKey)}>
-                                                        {editCell.rowIndex === rowIndex && editCell.colKey === colKey ? (
-                                                            <TextField
-                                                                value={row[colKey] || ''}
-                                                                onChange={(e) => handleCellChange(e, rowIndex, colKey)}
-                                                                onBlur={handleCellBlur}
-                                                                autoFocus
-                                                            />
-                                                        ) : (
-                                                            row[colKey]
-                                                        )}
-                                                    </TableCell>
-                                                ))}
-                                        </TableRow>
-                                    ))}
-                                </TableBody> */}
-
-
                                 {/* 使用col index */}
                                 <TableBody>
                                     {originalData.map((row: any, rowIndex: number) => (
@@ -1555,7 +1730,7 @@ const SearchForm = () => {
                                             }
 
                                             {Object.keys(row)
-                                                .filter((colKey) => colKey !== 'id')
+                                                .filter((colKey) => colKey !== 'id' && colKey !== 'QR_RFTray_BEDID' && colKey !== 'QR_HS_BEDID' && colKey !== 'QR_PS_BEDID')
                                                 .map((colKey, colIndex) => (
                                                     // <TableCell
                                                     //     key={colKey}
@@ -1581,16 +1756,91 @@ const SearchForm = () => {
                                                             }
                                                         }}
                                                         className={currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : ''}
+
+
+
+
                                                     >
 
 
                                                         {editCell.rowIndex === rowIndex && editCell.colIndex === colIndex ? (
-                                                            <TextField
-                                                                value={row[colKey]}
-                                                                onChange={(e) => handleCellChange(e, rowIndex, colIndex)}  // 傳遞 rowIndex 和 colIndex
-                                                                onBlur={handleCellBlur}
-                                                                autoFocus
-                                                            />
+                                                            <>
+
+
+
+                                                                <TextField
+                                                                    value={row[colKey]}
+                                                                    onChange={(e) => handleCellChange(e, rowIndex, colIndex)}
+                                                                    onBlur={handleCellBlur}
+                                                                    autoFocus
+                                                                    fullWidth
+                                                                    style={{
+                                                                        backgroundColor: 'white',
+                                                                        width: '1000px',
+                                                                        position: 'absolute',
+                                                                        top: '50%',
+                                                                        left: '50%',
+                                                                        transform: 'translate(-50%, -50%)',
+                                                                        zIndex: 1002,
+                                                                    }}
+
+
+
+
+                                                                    // onChange={(e) => {
+                                                                    //     setTempValue(e.target.value);
+                                                                    //     const updatedValue = e.target.value;
+                                                                    //     row[colKey] = updatedValue; 
+                                                                    // }}
+
+                                                                    // onBlur={(e)=>{
+                                                                    //     handleBlurOrEnter(tempValue , rowIndex , colIndex);
+                                                                    // }}
+
+                                                                    /*按下enter才做判斷*/
+                                                                    // onKeyDown={(e) => {
+                                                                    //     if (e.key === 'Enter') {
+                                                                    //         e.preventDefault(); 
+                                                                    //         handleBlurOrEnter(tempValue , rowIndex , colIndex); 
+                                                                    //     }
+                                                                    // }}
+
+
+
+
+                                                                    // onBlur={(e) => {
+                                                                    //     const target = e.target as HTMLInputElement;
+                                                                    //     const fakeEvent = {
+                                                                    //         target: {
+                                                                    //             value: target.value,
+                                                                    //         },
+                                                                    //     } as React.ChangeEvent<HTMLInputElement>;
+                                                                
+                                                                    //     handleCellChange(fakeEvent, rowIndex, colIndex); 
+                                                                    // }}
+                                                                    // onChange={(e) => {
+                                                                    //     const updatedValue = e.target.value;
+                                                                        
+                                                                    //     row[colKey] = updatedValue;
+                                                                    // }}
+
+                                                                    // onKeyDown={(e) => {
+                                                                    //     if (e.key === 'Enter') {
+                                                                    //         e.preventDefault();
+                                                                    //         const target = e.target as HTMLInputElement;
+                                                                    //         const fakeEvent = {
+                                                                    //             target: {
+                                                                    //                 value: target.value,
+                                                                    //             },
+                                                                    //         } as React.ChangeEvent<HTMLInputElement>;
+                                                                
+                                                                    //         handleCellChange(fakeEvent, rowIndex, colIndex);
+                                                                    //     }
+                                                                    // }}
+
+
+                                                                />
+                                                            </>
                                                         ) : (
                                                             row[colKey]
                                                         )}
@@ -1603,15 +1853,7 @@ const SearchForm = () => {
                             </Table>
                         </TableContainer>
                     </Paper>
-                    {/* <TablePagination
-                        rowsPerPageOptions={[5, 10, 25, 100]}
-                        component="div"
-                        count={originalData.length}
-                        rowsPerPage={rowsPerPage}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                    /> */}
+
                 </>
             }
         </div >

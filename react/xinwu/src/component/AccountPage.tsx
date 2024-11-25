@@ -215,12 +215,13 @@ const AccountPage = () => {
 
 
     const handleExitButtonClick = () => {
-        navigate('/');
-      };
+        navigate('/reload');
+    };
 
 
     return (
         <div>
+
 
             {/* 重置 */}
             <Modal open={openResetForm} onClose={handleResetClose}>
@@ -353,7 +354,7 @@ const AccountPage = () => {
                     {formatMessage({ id: 'account-page' })}
                 </Typography>
                 <Button variant="contained" sx={{ marginRight: 1 }} onClick={handleExitButtonClick}>
-                {formatMessage({ id: 'exit' })}
+                    {formatMessage({ id: 'exit' })}
                 </Button>
             </Box>
             {

@@ -38,7 +38,7 @@ const EditWork = () => {
     const [productionDateStart, setProductionDateStart] = useState('');
     const [productionDateEnd, setProductionDateEnd] = useState('');
 
-    const [showTableData, setShowTableData] = useState(table1Data);
+    const [showTableData, setShowTableData] = useState([{}]);
 
     //fetch尚未完成,先用loading提示
     const [loading, setLoading] = useState(false);
@@ -109,7 +109,7 @@ const EditWork = () => {
 
             // const updatedData = removeWorkOrderDetails(data);
             setTable1Data(updatedData);
-            setShowTableData(updatedData);
+            // setShowTableData(updatedData);
 
             // console.log("setShowTableData:"+ JSON.stringify(updatedData))
 
@@ -214,7 +214,7 @@ const EditWork = () => {
         setModel('');
         setTable1Id('');
 
-        // setShowTableData([]);
+        setShowTableData([]);
     }, [])
 
     // useEffect(() => {

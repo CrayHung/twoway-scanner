@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, IconButton, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Container } from '@mui/material';
+import { TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, IconButton, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Container, Typography } from '@mui/material';
 import { useGlobalContext } from './global';
 import { useIntl } from "react-intl";
 import { useNavigate } from 'react-router-dom';
@@ -209,82 +209,96 @@ const Register = () => {
   const handleCompanyChange = (event: any) => {
     setSelectedCompany(event.target.value);
   };
-
+  const handleExitButtonClick = () => {
+    navigate('/reload');
+};
   return (
-    <Container >
-      <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-      }}
-      >
-        <>{formatMessage({ id: 'register' })}</>
-        {error && <div style={{ color: 'red' }}>{error}</div>}
-        {/* <Stack spacing={2}> */}
-        <TextField
-          label={formatMessage({ id: 'account' })}
-          variant="outlined"
-          value={input1}
-          onChange={handleInput1Change}
-          margin="normal"
-          sx={{ width: '300px' }}
-        />
-        <TextField
-          label={formatMessage({ id: 'password' })}
-          variant="outlined"
-          value={input2}
-          onChange={handleInput2Change}
-          margin="normal"
-          sx={{ width: '300px' }}
-        />
-        <TextField
-          select
-          label="Select Role"
-          value={selectedRole}
-          onChange={handleRoleChange}
+    <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+        <Typography variant="h4" gutterBottom>
+          {formatMessage({ id: 'create_account' })}
+        </Typography>
 
-          margin="normal"
-          sx={{ width: '300px' }}
-
-        >
-          <MenuItem value="USER">USER</MenuItem>
-          <MenuItem value="OPERATOR">OPERATOR</MenuItem>
-          <MenuItem value="SUPERVISOR">SUPERVISOR</MenuItem>
-          <MenuItem value="ADMIN">ADMIN</MenuItem>
-        </TextField>
-
-        {/**********************公司欄位*********************/}
-        <TextField
-          select
-          label="Select Company"
-          value={selectedCompany}
-          onChange={handleCompanyChange}
-
-          margin="normal"
-          sx={{ width: '300px' }}
-
-        >
-          <MenuItem value="Twoway">Twoway</MenuItem>
-          <MenuItem value="ACI">ACI</MenuItem>
-        
-        </TextField>
-        {/*******************************************/}
-
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginTop: 2,
-          }}
-        >
-          <Button variant="contained" onClick={handleButtonClick} sx={{ marginRight: 1 }}>
-            {formatMessage({ id: 'submit' })}
-          </Button>
-        </Box>
+        <Button variant="contained" sx={{ marginRight: 1 }} onClick={handleExitButtonClick}>
+          {formatMessage({ id: 'exit' })}
+        </Button>
       </Box>
-    </Container>
+
+      <Container >
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+        }}
+        >
+          <>{formatMessage({ id: 'register' })}</>
+          {error && <div style={{ color: 'red' }}>{error}</div>}
+          {/* <Stack spacing={2}> */}
+          <TextField
+            label={formatMessage({ id: 'account' })}
+            variant="outlined"
+            value={input1}
+            onChange={handleInput1Change}
+            margin="normal"
+            sx={{ width: '300px' }}
+          />
+          <TextField
+            label={formatMessage({ id: 'password' })}
+            variant="outlined"
+            value={input2}
+            onChange={handleInput2Change}
+            margin="normal"
+            sx={{ width: '300px' }}
+          />
+          <TextField
+            select
+            label="Select Role"
+            value={selectedRole}
+            onChange={handleRoleChange}
+
+            margin="normal"
+            sx={{ width: '300px' }}
+
+          >
+            <MenuItem value="USER">USER</MenuItem>
+            <MenuItem value="OPERATOR">OPERATOR</MenuItem>
+            <MenuItem value="SUPERVISOR">SUPERVISOR</MenuItem>
+            <MenuItem value="ADMIN">ADMIN</MenuItem>
+          </TextField>
+
+          {/**********************公司欄位*********************/}
+          <TextField
+            select
+            label="Select Company"
+            value={selectedCompany}
+            onChange={handleCompanyChange}
+
+            margin="normal"
+            sx={{ width: '300px' }}
+
+          >
+            <MenuItem value="Twoway">Twoway</MenuItem>
+            <MenuItem value="ACI">ACI</MenuItem>
+
+          </TextField>
+          {/*******************************************/}
+
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginTop: 2,
+            }}
+          >
+            <Button variant="contained" onClick={handleButtonClick} sx={{ marginRight: 1 }}>
+              {formatMessage({ id: 'submit' })}
+            </Button>
+          </Box>
+        </Box>
+      </Container>
+    </div>
   );
 }
 export default Register;

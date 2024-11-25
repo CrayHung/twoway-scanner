@@ -305,8 +305,12 @@ const SearchTable1 = () => {
                     detailId: item.detailId,
                     SN: item.SN,
                     QR_RFTray: item.QR_RFTray,
+                    QR_RFTray_BEDID:item.QR_RFTray_BEDID,
                     QR_PS: item.QR_PS,
+                    QR_PS_BEDID:item.QR_PS_BEDID,
                     QR_HS: item.QR_HS,
+                    QR_HS_BEDID:item. QR_HS_BEDID,
+
                     QR_backup1: item.QR_backup1,
                     QR_backup2: item.QR_backup2,
                     QR_backup3: item.QR_backup3,
@@ -362,9 +366,14 @@ const SearchTable1 = () => {
                     workOrderNumber: item.workOrderNumber,
                     detailId: item.detailId,
                     SN: item.SN,
+
                     QR_RFTray: item.QR_RFTray,
+                    QR_RFTray_BEDID:item.QR_RFTray_BEDID,
                     QR_PS: item.QR_PS,
+                    QR_PS_BEDID:item.QR_PS_BEDID,
                     QR_HS: item.QR_HS,
+                    QR_HS_BEDID:item. QR_HS_BEDID,
+
                     QR_backup1: item.QR_backup1,
                     QR_backup2: item.QR_backup2,
                     QR_backup3: item.QR_backup3,
@@ -394,6 +403,7 @@ const SearchTable1 = () => {
                 console.error('Error fetching:', error);
             }
         } else {
+            console.log("搜尋的資料是 : " , JSON.stringify(sanitizedFormData, null, 2))
             try {
                 const response = await fetch(`${globalUrl.url}/api/snfield-search-details `, {
                     method: 'POST',
@@ -418,8 +428,12 @@ const SearchTable1 = () => {
                     detailId: item.detailId,
                     SN: item.SN,
                     QR_RFTray: item.QR_RFTray,
+                    QR_RFTray_BEDID:item.QR_RFTray_BEDID,
                     QR_PS: item.QR_PS,
+                    QR_PS_BEDID:item.QR_PS_BEDID,
                     QR_HS: item.QR_HS,
+                    QR_HS_BEDID:item. QR_HS_BEDID,
+
                     QR_backup1: item.QR_backup1,
                     QR_backup2: item.QR_backup2,
                     QR_backup3: item.QR_backup3,
@@ -453,7 +467,7 @@ const SearchTable1 = () => {
                 setLoading(false); // 完成後結束Loading
             }
         }
-
+        setLoading(false); // 開始Loading
     };
 
 
@@ -665,7 +679,7 @@ const SearchTable1 = () => {
             }
 
             const data = await response.json();
-            console.log("table3所有對應 : " + JSON.stringify(data));
+            // console.log("table3所有對應 : " + JSON.stringify(data));
             setTable3Data(data);
 
         } catch (error) {
@@ -704,13 +718,40 @@ const SearchTable1 = () => {
                 <Box sx={modalStyle}>
                     <form>
                         <Grid container spacing={2}>
-                            {/* 工單號碼欄位 */}
-                            <Grid item xs={12}>
+                            {/* 工單號碼欄位-select版本 */}
+                            {/* <Grid item xs={12}>
                                 {formData.workOrderNumber?.map((workOrderNumber, index) => (
                                     <Grid container spacing={1} key={index}>
                                         <Grid item xs={10}>
                                             <TextField
                                                 select
+                                                label={formatMessage({ id: 'workOrderNumber' })}
+                                                value={workOrderNumber}
+                                                onChange={(e) => handleFieldChange('workOrderNumber', index, e.target.value)}
+                                                fullWidth
+                                            >
+                                                {tmpData.map((row: any, index: number) => (
+                                                    <MenuItem key={index} value={row.workOrderNumber}>
+                                                        {row.workOrderNumber}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
+                                        </Grid>
+                                        <Grid item xs={2}>
+                                            <IconButton onClick={() => handleAddField('workOrderNumber')}>
+                                                +
+                                            </IconButton>
+                                        </Grid>
+                                    </Grid>
+                                ))}
+                            </Grid> */}
+
+                            {/* 工單號碼欄位-key in版本 */}
+                            <Grid item xs={12}>
+                                {formData.workOrderNumber?.map((workOrderNumber, index) => (
+                                    <Grid container spacing={1} key={index}>
+                                        <Grid item xs={10}>
+                                            <TextField
                                                 label={formatMessage({ id: 'workOrderNumber' })}
                                                 value={workOrderNumber}
                                                 onChange={(e) => handleFieldChange('workOrderNumber', index, e.target.value)}
@@ -922,7 +963,6 @@ const SearchTable1 = () => {
                     <div>
                         <button onClick={handleDownloadAllExcel}>{formatMessage({ id: 'Allexcel' })}</button>
                     </div>
-
                     <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
                         <TableContainer component={Paper} style={{
                             maxHeight: '70vh', // 設置最大高度，避免超出視窗
@@ -965,8 +1005,14 @@ const SearchTable1 = () => {
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray_BEDID' })}</TableCell>
+
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS_BEDID' })}</TableCell>
+
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS_BEDID' })}</TableCell>
+
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
@@ -976,9 +1022,7 @@ const SearchTable1 = () => {
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray_BEDID' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS_BEDID' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS_BEDID' })}</TableCell>
+
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
