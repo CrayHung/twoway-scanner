@@ -531,14 +531,27 @@ const SearchForm = () => {
         // setEditingCell(colIndex);
     };
 
+    /************************************************************************ */
 
-    const handleCellChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, rowIndex: number, colIndex: number) => {
+    const [tempValue, setTempValue] = useState('');
+    const handleBlurOrEnter = (e: any, originalData: any, rowIndex: number, colIndex: number, colKey: string) => {
+        alert("執行到這1");
+        //傳一個內容給cellChange,並進行判斷是否重複或合乎格式
+        const fakeEvent = {
+            target: { value: tempValue },
+        } as React.ChangeEvent<HTMLInputElement>;
+        handleCellChange(fakeEvent, rowIndex, colIndex,colKey);
+    }
 
-        //取得欄位名 , 略調id欄位
-        const colKey = Object.keys(originalData[rowIndex])
-            .filter((key) => key !== 'id')[colIndex];
+    const handleCellChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, rowIndex: number, colIndex: number,colKey: string) => {
+
+        // //取得欄位名 , 略調id欄位
+        // const colKey = Object.keys(originalData[rowIndex])
+        //     .filter((key) => key !== 'id')[colIndex];
 
         const newValue = e.target.value;
+
+        console.log("目前輸入的字串是:"+newValue);
 
         /*新增防呆機制 */
         const checkColumn = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS'];
@@ -561,9 +574,10 @@ const SearchForm = () => {
         } else {
             isDuplicateInDatabase = false;
         }
+        console.log("目前isDuplicateInDatabase是:"+isDuplicateInDatabase);
 
-
-        if (newValue.trim() !== "" && isDuplicateInDatabase) {
+        // if (newValue.trim() !== "" && isDuplicateInDatabase) {
+        if (isDuplicateInDatabase) {
             alert(`${colKey} 已存在，請輸入不同的 ${colKey}`);
             setInputValue(''); // 清空輸入框
             return;
@@ -585,40 +599,40 @@ const SearchForm = () => {
 
         console.log("這個欄位的值是 : " + newValue)
         // if (originalValue !== newValue) {
-            const fetchUpdateRows = async () => {
-                try {
+        const fetchUpdateRows = async () => {
+            try {
 
-                    //如果修改的欄位是QR_,則將PUT內容新增到table2的 _BEDID欄位
-                    const updateData = {
-                        id: originalData[rowIndex].id,
-                        [colKey]: newValue,
-                        edit_user: currentUser
-                    };
+                //如果修改的欄位是QR_,則將PUT內容新增到table2的 _BEDID欄位
+                const updateData = {
+                    id: originalData[rowIndex].id,
+                    [colKey]: newValue,
+                    edit_user: currentUser
+                };
 
-                    if (checkColumn.includes(colKey)) {
-                        updateData[`${colKey}_BEDID`] = extractID(newValue);
-                    }
-
-                    console.log("要更新的資料是 : ",JSON.stringify(updateData, null, 2) )
-
-                    const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify([updateData]),
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to 更新');
-                    } else {
-                        console.log('完成table2更新現有資料');
-                    }
-                } catch (error) {
-                    console.error('Error updating rows:', error);
+                if (checkColumn.includes(colKey)) {
+                    updateData[`${colKey}_BEDID`] = extractID(newValue);
                 }
-            };
-            fetchUpdateRows();
+
+                console.log("要更新的資料是 : ", JSON.stringify(updateData, null, 2))
+
+                const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify([updateData]),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to 更新');
+                } else {
+                    console.log('完成table2更新現有資料');
+                }
+            } catch (error) {
+                console.error('Error updating rows:', error);
+            }
+        };
+        fetchUpdateRows();
         // }
         /**新增PUT即時更新 */
 
@@ -634,33 +648,14 @@ const SearchForm = () => {
         setOriginalData(updatedData);
         // setUpdateCell(true);
     };
-
-
-    // 處理編輯完成後，更新edit_user和edit_date
-    // const handleCellChange = (
-    //     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    //     rowIndex: number,
-    //     colIndex: number): boolean => {
-
-    //     // 防止 e.target 為 undefined
-    //     if (!e.target || typeof e.target.value === "undefined") {
-    //         alert("Invalid event target");
-    //         return false;
-    //     }
+    /************************************************************************** */
+    // const handleCellChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, rowIndex: number, colIndex: number) => {
 
     //     //取得欄位名 , 略調id欄位
     //     const colKey = Object.keys(originalData[rowIndex])
     //         .filter((key) => key !== 'id')[colIndex];
 
     //     const newValue = e.target.value;
-
-    //     // const newID = extractID(newValue);
-
-    //     // if (newID === null) {
-    //     //     alert("字串格式不正確！請確保字串符合規定格式：.$ID:<內容>.$");
-    //     //     setInputValue(''); // 清空輸入框
-    //     //     return;
-    //     // }
 
     //     /*新增防呆機制 */
     //     const checkColumn = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS'];
@@ -671,6 +666,14 @@ const SearchForm = () => {
     //         isDuplicateInDatabase = false;
     //         //指定的比對欄位
     //     } else if (checkColumn.includes(colKey)) {
+
+    //         const newID = extractID(newValue);
+
+    //         if (newID === null) {
+    //             alert("字串格式不正確！請確保字串符合規定格式：.$ID:<內容>.$");
+    //             setInputValue(''); // 清空輸入框
+    //             return;
+    //         }
     //         isDuplicateInDatabase = table2Data.some((item: { [x: string]: string; }) => item[colKey] === newValue);
     //     } else {
     //         isDuplicateInDatabase = false;
@@ -680,8 +683,7 @@ const SearchForm = () => {
     //     if (newValue.trim() !== "" && isDuplicateInDatabase) {
     //         alert(`${colKey} 已存在，請輸入不同的 ${colKey}`);
     //         setInputValue(''); // 清空輸入框
-    //         // return;
-    //         return false;
+    //         return;
     //     }
 
     //     // const isDuplicateInDatabase = table2Data.some((item: any) => item[colKey] === newValue);
@@ -698,41 +700,43 @@ const SearchForm = () => {
     //     //檢查原欄位值和新輸入的質是否相同,如不同則PUT到API
     //     const originalValue = table2Data.find((item: any) => item.id === originalData[rowIndex].id)?.[colKey];
 
-    //     if (originalValue !== newValue) {
-    //         const fetchUpdateRows = async () => {
-    //             try {
+    //     console.log("這個欄位的值是 : " + newValue)
+    //     // if (originalValue !== newValue) {
+    //     const fetchUpdateRows = async () => {
+    //         try {
 
-    //                 //如果修改的欄位是QR_,則將PUT內容新增到table2的 _BEDID欄位
-    //                 const updateData = {
-    //                     id: originalData[rowIndex].id,
-    //                     [colKey]: newValue,
-    //                     edit_user: currentUser
-    //                 };
+    //             //如果修改的欄位是QR_,則將PUT內容新增到table2的 _BEDID欄位
+    //             const updateData = {
+    //                 id: originalData[rowIndex].id,
+    //                 [colKey]: newValue,
+    //                 edit_user: currentUser
+    //             };
 
-    //                 if (checkColumn.includes(colKey)) {
-    //                     updateData[`${colKey}_BEDID`] = extractID(newValue);
-    //                 }
-
-
-    //                 const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
-    //                     method: 'PUT',
-    //                     headers: {
-    //                         'Content-Type': 'application/json',
-    //                     },
-    //                     body: JSON.stringify([updateData]),
-    //                 });
-
-    //                 if (!response.ok) {
-    //                     throw new Error('Failed to 更新');
-    //                 } else {
-    //                     console.log('完成table2更新現有資料');
-    //                 }
-    //             } catch (error) {
-    //                 console.error('Error updating rows:', error);
+    //             if (checkColumn.includes(colKey)) {
+    //                 updateData[`${colKey}_BEDID`] = extractID(newValue);
     //             }
-    //         };
-    //         fetchUpdateRows();
-    //     }
+
+    //             console.log("要更新的資料是 : ", JSON.stringify(updateData, null, 2))
+
+    //             const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
+    //                 method: 'PUT',
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                 },
+    //                 body: JSON.stringify([updateData]),
+    //             });
+
+    //             if (!response.ok) {
+    //                 throw new Error('Failed to 更新');
+    //             } else {
+    //                 console.log('完成table2更新現有資料');
+    //             }
+    //         } catch (error) {
+    //             console.error('Error updating rows:', error);
+    //         }
+    //     };
+    //     fetchUpdateRows();
+    //     // }
     //     /**新增PUT即時更新 */
 
     //     //複製原值並將該欄位值更新
@@ -745,9 +749,7 @@ const SearchForm = () => {
 
 
     //     setOriginalData(updatedData);
-    //     setUpdateCell(true);
-
-    //     return true; // 檢查通過
+    //     // setUpdateCell(true);
     // };
 
 
@@ -1730,8 +1732,8 @@ const SearchForm = () => {
                             ></div>
                         )}
 
-<TableContainer component={Paper} style={{ height: 'calc(100vh - 110px)', overflow: 'auto' }}>
-                        {/* <TableContainer component={Paper} style={{
+                        <TableContainer component={Paper} style={{ height: 'calc(100vh - 110px)', overflow: 'auto' }}>
+                            {/* <TableContainer component={Paper} style={{
                             maxHeight: '70vh', // 設置最大高度，避免超出視窗
                             overflowX: 'auto', // 確保左右滾動條出現
                             overflowY: 'auto', // 確保上下滾動條出現
@@ -1821,7 +1823,7 @@ const SearchForm = () => {
 
                                                                 <TextField
                                                                     value={row[colKey]}
-                                                                    onChange={(e) => handleCellChange(e, rowIndex, colIndex)}
+                                                                    // onChange={(e) => handleCellChange(e, rowIndex, colIndex)}
                                                                     onBlur={handleCellBlur}
                                                                     autoFocus
                                                                     fullWidth
@@ -1838,23 +1840,24 @@ const SearchForm = () => {
 
 
 
-                                                                // onChange={(e) => {
-                                                                //     setTempValue(e.target.value);
-                                                                //     const updatedValue = e.target.value;
-                                                                //     row[colKey] = updatedValue; 
-                                                                // }}
+                                                                    onChange={(e) => {
+                                                                        setTempValue(e.target.value);
 
-                                                                // onBlur={(e)=>{
-                                                                //     handleBlurOrEnter(tempValue , rowIndex , colIndex);
-                                                                // }}
+                                                                        const updatedValue = e.target.value;
+                                                                        row[colKey] = updatedValue;
+                                                                    }}
 
-                                                                /*按下enter才做判斷*/
-                                                                // onKeyDown={(e) => {
-                                                                //     if (e.key === 'Enter') {
-                                                                //         e.preventDefault(); 
-                                                                //         handleBlurOrEnter(tempValue , rowIndex , colIndex); 
-                                                                //     }
-                                                                // }}
+                                                                    // onBlur={(e)=>{
+                                                                    //     handleBlurOrEnter(tempValue , rowIndex , colIndex);
+                                                                    // }}
+
+                                                                    /*按下enter才做判斷*/
+                                                                    onKeyDown={(e) => {
+                                                                        if (e.key === 'Enter') {
+                                                                            e.preventDefault();
+                                                                            handleBlurOrEnter(e, originalData, rowIndex, colIndex, colKey);
+                                                                        }
+                                                                    }}
 
 
 
