@@ -214,8 +214,17 @@ BODY 範例(JSON):
 2. 必須提供每個要更新的記錄的 id。
 3. edit_date 會由系統自動設置為當前日期，無需手動提供。
 4. 不允許更改 create_user 和 create_date。
+5. 若要清空，需傳入該 項目data: null，沒有傳入的項目就會維持原樣 
+  傳入body例如: 
+  {
+    "id": 2,  
+    "SN": "EDITED_SN_NUMBER2",
+    "edit_user": "EDIT_USER3",
+    "note": null
+  }
+  其餘的QR等項目都會維持原樣
 
-#### 新增 data 時，檢查重複SN/BEDID 的 API (PUT)
+#### 新增 data 時，檢查重複SN/BEDID 的 PUT API (PUT)
 
 URL: http://localhost:8080/api/batch-create-work-order-details
 方法: PUT

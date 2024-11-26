@@ -288,51 +288,64 @@ try {
   }
 
   private void updateWorkOrderDetailFromDTO(WorkOrderDetail workOrderDetail, UpdateWorkOrderDetailDTO dto) {
-        // 只在值不為 null 且不為空字串時才更新
-        if (dto.getSn() != null && !dto.getSn().trim().isEmpty()) {
-          workOrderDetail.setSn(dto.getSn());
-      }
-      if (dto.getQrRfTray() != null && !dto.getQrRfTray().trim().isEmpty()) {
-          workOrderDetail.setQrRfTray(dto.getQrRfTray());
-      }
-      if (dto.getQrPs() != null && !dto.getQrPs().trim().isEmpty()) {
-          workOrderDetail.setQrPs(dto.getQrPs());
-      }
-      if (dto.getQrHs() != null && !dto.getQrHs().trim().isEmpty()) {
-          workOrderDetail.setQrHs(dto.getQrHs());
-      }
-      
-      // 新增 BEDID 字段的更新邏輯
-      if (dto.getQrRfTrayBedid() != null && !dto.getQrRfTrayBedid().trim().isEmpty()) {
-        workOrderDetail.setQrRfTrayBedid(dto.getQrRfTrayBedid());
-      }
-      if (dto.getQrPsBedid() != null && !dto.getQrPsBedid().trim().isEmpty()) {
-        workOrderDetail.setQrPsBedid(dto.getQrPsBedid());
-      }
-      if (dto.getQrHsBedid() != null && !dto.getQrHsBedid().trim().isEmpty()) {
-        workOrderDetail.setQrHsBedid(dto.getQrHsBedid());
-      }
-      
-      if (dto.getQrBackup1() != null && !dto.getQrBackup1().trim().isEmpty()) {
-          workOrderDetail.setQrBackup1(dto.getQrBackup1());
-      }
-      if (dto.getQrBackup2() != null && !dto.getQrBackup2().trim().isEmpty()) {
-          workOrderDetail.setQrBackup2(dto.getQrBackup2());
-      }
-      if (dto.getQrBackup3() != null && !dto.getQrBackup3().trim().isEmpty()) {
-          workOrderDetail.setQrBackup3(dto.getQrBackup3());
-      }
-      if (dto.getQrBackup4() != null && !dto.getQrBackup4().trim().isEmpty()) {
-          workOrderDetail.setQrBackup4(dto.getQrBackup4());
-      }
-      if (dto.getNote() != null && !dto.getNote().trim().isEmpty()) {
-          workOrderDetail.setNote(dto.getNote());
-      }
-      
-      // 由後端紀錄的欄位更新
-      workOrderDetail.setEdit_date(LocalDate.now());
-      if (dto.getEdit_user() != null && !dto.getEdit_user().trim().isEmpty()) {
-          workOrderDetail.setEdit_user(dto.getEdit_user());
+
+    boolean hasUpdates = false;  // 用於追踪是否有任何更新
+
+    if (dto.isFieldSet("SN")) {
+      workOrderDetail.setSn(dto.getSn());
+      hasUpdates = true;
+  }
+  if (dto.isFieldSet("QR_RFTray")) {
+      workOrderDetail.setQrRfTray(dto.getQrRfTray());
+      hasUpdates = true;
+  }
+  if (dto.isFieldSet("QR_PS")) {
+      workOrderDetail.setQrPs(dto.getQrPs());
+      hasUpdates = true;
+  }
+  if (dto.isFieldSet("QR_HS")) {
+      workOrderDetail.setQrHs(dto.getQrHs());
+      hasUpdates = true;
+  }
+  if (dto.isFieldSet("QR_RFTray_BEDID")) {
+      workOrderDetail.setQrRfTrayBedid(dto.getQrRfTrayBedid());
+      hasUpdates = true;
+  }
+  if (dto.isFieldSet("QR_PS_BEDID")) {
+      workOrderDetail.setQrPsBedid(dto.getQrPsBedid());
+      hasUpdates = true;
+  }
+  if (dto.isFieldSet("QR_HS_BEDID")) {
+      workOrderDetail.setQrHsBedid(dto.getQrHsBedid());
+      hasUpdates = true;
+  }
+  if (dto.isFieldSet("QR_backup1")) {
+      workOrderDetail.setQrBackup1(dto.getQrBackup1());
+      hasUpdates = true;
+  }
+  if (dto.isFieldSet("QR_backup2")) {
+      workOrderDetail.setQrBackup2(dto.getQrBackup2());
+      hasUpdates = true;
+  }
+  if (dto.isFieldSet("QR_backup3")) {
+      workOrderDetail.setQrBackup3(dto.getQrBackup3());
+      hasUpdates = true;
+  }
+  if (dto.isFieldSet("QR_backup4")) {
+      workOrderDetail.setQrBackup4(dto.getQrBackup4());
+      hasUpdates = true;
+  }
+  if (dto.isFieldSet("note")) {
+      workOrderDetail.setNote(dto.getNote());
+      hasUpdates = true;
+  }
+
+     // 只有在有更新時才設置編輯時間和用戶
+        if (hasUpdates || dto.isFieldSet("edit_user")) {
+          workOrderDetail.setEdit_date(LocalDate.now());
+          if (dto.isFieldSet("edit_user")) {
+              workOrderDetail.setEdit_user(dto.getEdit_user());
+          }
       }
   }
 
