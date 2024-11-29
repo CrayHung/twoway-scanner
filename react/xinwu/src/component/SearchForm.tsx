@@ -1597,7 +1597,7 @@ const SearchForm = () => {
                     company: company
                 };
 
-                console.log("要更新的資料:", JSON.stringify(updatedTable1Data, null, 2))
+                // console.log("要更新的資料:", JSON.stringify(updatedTable1Data, null, 2))
                 try {
                     const response = await fetch(`${globalUrl.url}/api/update-work-orders/${table1Id}`, {
                         method: 'PUT',
@@ -1617,6 +1617,7 @@ const SearchForm = () => {
             }
 
             await fetchUpdateTable1();
+            setQuant(quant-1);
 
 
 
@@ -1740,8 +1741,8 @@ const SearchForm = () => {
 
 
     return (
-        // <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
-        <div style={{ overflow: "hidden" }}>
+        // <div style={{ overflow: "hidden" }}>
+        <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                 <Typography variant="h4" gutterBottom>
                     {formatMessage({ id: 'Menu-edit-WorkOrders' })}
@@ -1872,11 +1873,10 @@ const SearchForm = () => {
                 </>
             }
             {
-                originalData.length > 0 &&
+                originalData.length != 0 ? (
                 <>
-                    <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
-                        {/* for灰色背景 */}
-                        {editingCell !== null && (
+                         {/* for灰色背景 */}
+                         {editingCell !== null && (
                             <div
                                 style={{
                                     position: 'fixed',
@@ -1890,6 +1890,8 @@ const SearchForm = () => {
                             ></div>
                         )}
 
+                    <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
+               
                         <TableContainer component={Paper} style={{ height: 'calc(100vh - 110px)', overflow: 'auto' }}>
                             {/* <TableContainer component={Paper} style={{
                             maxHeight: '70vh', // 設置最大高度，避免超出視窗
@@ -2067,7 +2069,9 @@ const SearchForm = () => {
                     </Paper>
 
                 </>
-            }
+            ) : (
+                <p>NO DATA</p>
+            )}
         </div >
     );
 };

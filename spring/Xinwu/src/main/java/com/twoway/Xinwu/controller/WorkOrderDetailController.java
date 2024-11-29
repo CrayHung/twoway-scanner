@@ -316,7 +316,7 @@ try {
       hasUpdates = true;
   }
   if (dto.isFieldSet("QR_HS_BEDID")) {
-      workOrderDetail.setQrHsBedid(dto.getQrHsBedid());
+      workOrderDetail.setQrHsBedid(dto.getQrHsBedid()); 
       hasUpdates = true;
   }
   if (dto.isFieldSet("QR_backup1")) {
