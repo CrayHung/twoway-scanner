@@ -1646,15 +1646,22 @@ const SearchForm = () => {
             //刪掉其中一比,更新table1
             if (newQuant > 0) {
                 await fetchUpdateTable1();
+                setQuant(newQuant);
             }
             //已刪掉table2最後一筆.把整個table1刪掉
             else if(newQuant===0){
 
                 await deleteTable1(table1Id);
+                setQuant(0);
+                setWorkNo('');
+                setTable1Id('');
+                setPart('');
+                setModel('');
+
             }
 
 
-            await setQuant(newQuant);
+
 
 
 
