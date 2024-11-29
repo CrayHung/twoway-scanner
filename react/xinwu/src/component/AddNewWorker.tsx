@@ -685,17 +685,25 @@ function AddNewWorker() {
             //指定的比對欄位
         } else if (checkColumn.includes(colKey)) {
 
-            const newID = extractID(newValue);
+            if (colKey === 'SN') {
+                isDuplicateInDatabase = table2Data.some(
+                    (item: { [x: string]: string }) => item[colKey] === newValue
+                );
+            } else {
+                //格式檢查
+                const newID = extractID(newValue);
+                if (newID === null) {
+                    alert("字串格式不正確！請確保字串符合規定格式：.$ID:<內容>.$");
+                    setInputValue(''); // 清空輸入框
+                    return;
+                }
 
-            if (newID === null) {
-                alert("字串格式不正確！請確保字串符合規定格式：.$ID:<內容>.$");
-                setInputValue(''); // 清空輸入框
-                return;
+                //重複檢查
+                isDuplicateInDatabase = table2Data.some(
+                    (item: { [x: string]: string; }) => item[colKey] === newValue
+                );
             }
 
-            isDuplicateInDatabase = table2Data.some((item: { [x: string]: string; }) => item[colKey] === newValue);
-        } else {
-            isDuplicateInDatabase = false;
         }
 
         if (newValue.trim() !== "" && isDuplicateInDatabase) {

@@ -791,18 +791,25 @@ const SearchForm = () => {
         } else if (checkColumn.includes(colKey)) {
 
 
-            //格式檢查
-            const newID = extractID(newValue);
-            if (newID === null) {
-                alert("字串格式不正確！請確保字串符合規定格式：.$ID:<內容>.$");
-                setInputValue(''); // 清空輸入框
-                return;
+            if (colKey === 'SN') {
+                isDuplicateInDatabase = table2Data.some(
+                    (item: { [x: string]: string }) => item[colKey] === newValue
+                );
+            } else {
+                //格式檢查
+                const newID = extractID(newValue);
+                if (newID === null) {
+                    alert("字串格式不正確！請確保字串符合規定格式：.$ID:<內容>.$");
+                    setInputValue(''); // 清空輸入框
+                    return;
+                }
+
+                //重複檢查
+                isDuplicateInDatabase = table2Data.some(
+                    (item: { [x: string]: string; }) => item[colKey] === newValue
+                );
             }
 
-            //重複檢查
-            isDuplicateInDatabase = table2Data.some(
-                (item: { [x: string]: string; }) => item[colKey] === newValue
-            );
         }
 
         // else {
@@ -1617,7 +1624,7 @@ const SearchForm = () => {
             }
 
             await fetchUpdateTable1();
-            setQuant(quant-1);
+            setQuant(quant - 1);
 
 
 
@@ -1874,9 +1881,9 @@ const SearchForm = () => {
             }
             {
                 originalData.length != 0 ? (
-                <>
-                         {/* for灰色背景 */}
-                         {editingCell !== null && (
+                    <>
+                        {/* for灰色背景 */}
+                        {editingCell !== null && (
                             <div
                                 style={{
                                     position: 'fixed',
@@ -1890,188 +1897,188 @@ const SearchForm = () => {
                             ></div>
                         )}
 
-                    <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
-               
-                        <TableContainer component={Paper} style={{ height: 'calc(100vh - 110px)', overflow: 'auto' }}>
-                            {/* <TableContainer component={Paper} style={{
+                        <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
+
+                            <TableContainer component={Paper} style={{ height: 'calc(100vh - 110px)', overflow: 'auto' }}>
+                                {/* <TableContainer component={Paper} style={{
                             maxHeight: '70vh', // 設置最大高度，避免超出視窗
                             overflowX: 'auto', // 確保左右滾動條出現
                             overflowY: 'auto', // 確保上下滾動條出現
                         }}
                         > */}
-                            <Table stickyHeader aria-label="sticky table"
-                                style={{
-                                    minWidth: '800px', // 最小寬度，確保資料過多時滾動
-                                    tableLayout: 'auto',
-                                }}>
-                                <TableHead >
-                                    <TableRow style={{ border: '1px solid #ccc' }}>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'delete' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
-                                        <TableCell style={{ width: '500px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup4' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'note' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
-                                        {/* <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray_BEDID' })}</TableCell>
+                                <Table stickyHeader aria-label="sticky table"
+                                    style={{
+                                        minWidth: '800px', // 最小寬度，確保資料過多時滾動
+                                        tableLayout: 'auto',
+                                    }}>
+                                    <TableHead >
+                                        <TableRow style={{ border: '1px solid #ccc' }}>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'delete' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
+                                            <TableCell style={{ width: '500px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup4' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'note' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
+                                            {/* <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray_BEDID' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS_BEDID' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS_BEDID' })}</TableCell> */}
 
-                                    </TableRow>
-                                </TableHead>
-                                {/* 使用col index */}
-                                <TableBody>
-                                    {originalData.map((row: any, rowIndex: number) => (
-                                        <TableRow key={rowIndex}>
-
-                                            {['ADMIN', 'SUPERVISOR', 'OPERATOR'].includes(userRole) &&
-                                                <TableCell>
-                                                    <button onClick={(e) => {
-                                                        handleDeleteClick(row.id, row.workOrderNumber)
-                                                    }}>
-                                                        {formatMessage({ id: 'delete' })}</button>
-                                                </TableCell>
-                                            }
-
-                                            {Object.keys(row)
-                                                .filter((colKey) => colKey !== 'id' && colKey !== 'QR_RFTray_BEDID' && colKey !== 'QR_HS_BEDID' && colKey !== 'QR_PS_BEDID')
-                                                .map((colKey, colIndex) => (
-                                                    // <TableCell
-                                                    //     key={colKey}
-                                                    //     onClick={() => handleCellClick(rowIndex, colIndex)}  // 傳遞 rowIndex 和 colIndex
-                                                    //     className={currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : ''}
-                                                    // >
-                                                    <TableCell
-                                                        key={colKey}
-                                                        onClick={() => {
-                                                            if (userRole === 'ADMIN' || userRole === 'SUPERVISOR') {
-                                                                // 依據 model 的條件 , 訂出不可編輯的欄位
-                                                                const restrictedFields: { [key in 'A' | 'B' | 'C' | 'D']: string[] } = {
-                                                                    A: ['QR_PS', 'QR_RFTray'],
-                                                                    B: ['QR_PS', 'QR_HS'],
-                                                                    C: ['QR_RFTray', 'QR_HS'],
-                                                                    D: ['QR_RFTray'],
-                                                                };
-                                                                // 檢查當前的欄位是否在 restrictedFields[model] 中
-                                                                if (!model || !restrictedFields[model as 'A' | 'B' | 'C' | 'D']?.includes(colKey)) {
-                                                                    // 如果不在不可編輯的欄位中，才允許編輯
-                                                                    handleCellClick(rowIndex, colIndex);
-                                                                }
-                                                            }
-                                                        }}
-                                                        className={currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : ''}
-
-
-
-
-                                                    >
-
-
-                                                        {editCell.rowIndex === rowIndex && editCell.colIndex === colIndex ? (
-                                                            <>
-
-
-
-                                                                <TextField
-                                                                    value={row[colKey]}
-                                                                    // value={tempValue}
-                                                                    onChange={(e) => handleCellChange(e, rowIndex, colIndex)}
-                                                                    onBlur={handleCellBlur}
-                                                                    // onBlur={(e) => handleCellChange(e, rowIndex, colIndex)}
-                                                                    autoFocus
-                                                                    fullWidth
-                                                                    style={{
-                                                                        backgroundColor: 'white',
-                                                                        width: '1000px',
-                                                                        position: 'absolute',
-                                                                        top: '50%',
-                                                                        left: '50%',
-                                                                        transform: 'translate(-50%, -50%)',
-                                                                        zIndex: 1002,
-                                                                    }}
-
-
-                                                                // onChange={(e) => {
-                                                                //     setTempValue(e.target.value);
-
-                                                                //     const updatedValue = e.target.value;
-                                                                //     row[colKey] = updatedValue;
-                                                                // }}
-
-                                                                // onBlur={(e)=>{
-                                                                //     handleBlurOrEnter(tempValue , rowIndex , colIndex);
-                                                                // }}
-
-                                                                /*按下enter才做判斷*/
-                                                                // onKeyDown={(e) => {
-                                                                //     if (e.key === 'Enter') {
-                                                                //         e.preventDefault();
-                                                                //         handleBlurOrEnter(e, originalData, rowIndex, colIndex, colKey);
-                                                                //     }
-                                                                // }}
-
-
-
-
-                                                                // onBlur={(e) => {
-                                                                //     const target = e.target as HTMLInputElement;
-                                                                //     const fakeEvent = {
-                                                                //         target: {
-                                                                //             value: target.value,
-                                                                //         },
-                                                                //     } as React.ChangeEvent<HTMLInputElement>;
-
-                                                                //     handleCellChange(fakeEvent, rowIndex, colIndex); 
-                                                                // }}
-                                                                // onChange={(e) => {
-                                                                //     const updatedValue = e.target.value;
-
-                                                                //     row[colKey] = updatedValue;
-                                                                // }}
-
-                                                                // onKeyDown={(e) => {
-                                                                //     if (e.key === 'Enter') {
-                                                                //         e.preventDefault();
-                                                                //         const target = e.target as HTMLInputElement;
-                                                                //         const fakeEvent = {
-                                                                //             target: {
-                                                                //                 value: target.value,
-                                                                //             },
-                                                                //         } as React.ChangeEvent<HTMLInputElement>;
-
-                                                                //         handleCellChange(fakeEvent, rowIndex, colIndex);
-                                                                //     }
-                                                                // }}
-
-
-                                                                />
-                                                            </>
-                                                        ) : (
-                                                            row[colKey]
-                                                        )}
-                                                    </TableCell>
-                                                ))}
                                         </TableRow>
-                                    ))}
-                                </TableBody>
+                                    </TableHead>
+                                    {/* 使用col index */}
+                                    <TableBody>
+                                        {originalData.map((row: any, rowIndex: number) => (
+                                            <TableRow key={rowIndex}>
 
-                            </Table>
-                        </TableContainer>
-                    </Paper>
+                                                {['ADMIN', 'SUPERVISOR', 'OPERATOR'].includes(userRole) &&
+                                                    <TableCell>
+                                                        <button onClick={(e) => {
+                                                            handleDeleteClick(row.id, row.workOrderNumber)
+                                                        }}>
+                                                            {formatMessage({ id: 'delete' })}</button>
+                                                    </TableCell>
+                                                }
 
-                </>
-            ) : (
-                <p>NO DATA</p>
-            )}
+                                                {Object.keys(row)
+                                                    .filter((colKey) => colKey !== 'id' && colKey !== 'QR_RFTray_BEDID' && colKey !== 'QR_HS_BEDID' && colKey !== 'QR_PS_BEDID')
+                                                    .map((colKey, colIndex) => (
+                                                        // <TableCell
+                                                        //     key={colKey}
+                                                        //     onClick={() => handleCellClick(rowIndex, colIndex)}  // 傳遞 rowIndex 和 colIndex
+                                                        //     className={currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : ''}
+                                                        // >
+                                                        <TableCell
+                                                            key={colKey}
+                                                            onClick={() => {
+                                                                if (userRole === 'ADMIN' || userRole === 'SUPERVISOR') {
+                                                                    // 依據 model 的條件 , 訂出不可編輯的欄位
+                                                                    const restrictedFields: { [key in 'A' | 'B' | 'C' | 'D']: string[] } = {
+                                                                        A: ['QR_PS', 'QR_RFTray'],
+                                                                        B: ['QR_PS', 'QR_HS'],
+                                                                        C: ['QR_RFTray', 'QR_HS'],
+                                                                        D: ['QR_RFTray'],
+                                                                    };
+                                                                    // 檢查當前的欄位是否在 restrictedFields[model] 中
+                                                                    if (!model || !restrictedFields[model as 'A' | 'B' | 'C' | 'D']?.includes(colKey)) {
+                                                                        // 如果不在不可編輯的欄位中，才允許編輯
+                                                                        handleCellClick(rowIndex, colIndex);
+                                                                    }
+                                                                }
+                                                            }}
+                                                            className={currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : ''}
+
+
+
+
+                                                        >
+
+
+                                                            {editCell.rowIndex === rowIndex && editCell.colIndex === colIndex ? (
+                                                                <>
+
+
+
+                                                                    <TextField
+                                                                        value={row[colKey]}
+                                                                        // value={tempValue}
+                                                                        onChange={(e) => handleCellChange(e, rowIndex, colIndex)}
+                                                                        onBlur={handleCellBlur}
+                                                                        // onBlur={(e) => handleCellChange(e, rowIndex, colIndex)}
+                                                                        autoFocus
+                                                                        fullWidth
+                                                                        style={{
+                                                                            backgroundColor: 'white',
+                                                                            width: '1000px',
+                                                                            position: 'absolute',
+                                                                            top: '50%',
+                                                                            left: '50%',
+                                                                            transform: 'translate(-50%, -50%)',
+                                                                            zIndex: 1002,
+                                                                        }}
+
+
+                                                                    // onChange={(e) => {
+                                                                    //     setTempValue(e.target.value);
+
+                                                                    //     const updatedValue = e.target.value;
+                                                                    //     row[colKey] = updatedValue;
+                                                                    // }}
+
+                                                                    // onBlur={(e)=>{
+                                                                    //     handleBlurOrEnter(tempValue , rowIndex , colIndex);
+                                                                    // }}
+
+                                                                    /*按下enter才做判斷*/
+                                                                    // onKeyDown={(e) => {
+                                                                    //     if (e.key === 'Enter') {
+                                                                    //         e.preventDefault();
+                                                                    //         handleBlurOrEnter(e, originalData, rowIndex, colIndex, colKey);
+                                                                    //     }
+                                                                    // }}
+
+
+
+
+                                                                    // onBlur={(e) => {
+                                                                    //     const target = e.target as HTMLInputElement;
+                                                                    //     const fakeEvent = {
+                                                                    //         target: {
+                                                                    //             value: target.value,
+                                                                    //         },
+                                                                    //     } as React.ChangeEvent<HTMLInputElement>;
+
+                                                                    //     handleCellChange(fakeEvent, rowIndex, colIndex); 
+                                                                    // }}
+                                                                    // onChange={(e) => {
+                                                                    //     const updatedValue = e.target.value;
+
+                                                                    //     row[colKey] = updatedValue;
+                                                                    // }}
+
+                                                                    // onKeyDown={(e) => {
+                                                                    //     if (e.key === 'Enter') {
+                                                                    //         e.preventDefault();
+                                                                    //         const target = e.target as HTMLInputElement;
+                                                                    //         const fakeEvent = {
+                                                                    //             target: {
+                                                                    //                 value: target.value,
+                                                                    //             },
+                                                                    //         } as React.ChangeEvent<HTMLInputElement>;
+
+                                                                    //         handleCellChange(fakeEvent, rowIndex, colIndex);
+                                                                    //     }
+                                                                    // }}
+
+
+                                                                    />
+                                                                </>
+                                                            ) : (
+                                                                row[colKey]
+                                                            )}
+                                                        </TableCell>
+                                                    ))}
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+
+                                </Table>
+                            </TableContainer>
+                        </Paper>
+
+                    </>
+                ) : (
+                    <p>NO DATA</p>
+                )}
         </div >
     );
 };
