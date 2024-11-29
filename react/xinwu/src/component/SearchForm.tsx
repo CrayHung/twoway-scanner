@@ -1562,6 +1562,7 @@ const SearchForm = () => {
     const handleDeleteClick = async (id: any, workOrder: any) => {
 
         console.log("handleDeleteClick接收到的資料:" + id + " , " + workOrder);
+        console.log("table1 ID : "+table1Id);
 
         //const confirmMessage = {formatMessage({ id: 'text9' })};
         const isConfirmed = window.confirm(formatMessage({ id: 'text9' }));
@@ -1569,6 +1570,9 @@ const SearchForm = () => {
 
         if (isConfirmed) {
 
+            const newQuant = quant - 1;
+
+            //for table2
             const fetchDeleteRows = async () => {
                 setLoading(true); // 開始Loading
                 try {
@@ -1592,13 +1596,14 @@ const SearchForm = () => {
             await fetchDeleteRows();
             await fetchAllTable2();
 
+        
 
-            //刪除後 更新table1內容
+            //更新table1內容(非刪除table2最後一筆)
             const fetchUpdateTable1 = async () => {
 
                 const updatedTable1Data = {
                     workOrderNumber: workOrder,
-                    quantity: (quant - 1),
+                    quantity: newQuant,
                     partNumber: part,
                     editUser: currentUser,
                     company: company
@@ -1623,8 +1628,39 @@ const SearchForm = () => {
                 }
             }
 
-            await fetchUpdateTable1();
-            setQuant(quant - 1);
+
+            //刪除table1(刪除table2最後一筆)
+            const deleteTable1 = async (table1Id: any) => {
+                try {
+                    const response = await fetch(`${globalUrl.url}/api/delete-work-orders/${table1Id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    })
+                } catch (error) {
+                    console.error('Error updating rows:', error);
+                }
+            }
+
+            //刪掉其中一比,更新table1
+            if (newQuant > 0) {
+                await fetchUpdateTable1();
+            }
+            //已刪掉table2最後一筆.把整個table1刪掉
+            else if(newQuant===0){
+
+                await deleteTable1(table1Id);
+            }
+
+
+            await setQuant(newQuant);
+
+
+
+
+
+
 
 
 
@@ -1633,6 +1669,9 @@ const SearchForm = () => {
             // navigate('/editworker/reload');
         }
     }
+    useEffect(() => {
+        console.log("目前比數 : " + quant)
+    }, [quant])
 
 
     const fetchAllTable2 = async () => {
