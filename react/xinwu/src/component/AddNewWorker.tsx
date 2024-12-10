@@ -55,12 +55,7 @@ function AddNewWorker() {
 
 
 
-    useEffect(() => {
-        // console.log('目前所有table1的內容是:', JSON.stringify(table1Data, null, 2));
-        // console.log('目前所有table2的內容是:', JSON.stringify(table2Data, null, 2));
-        // console.log('目前所有table3的內容是:', JSON.stringify(table3Data, null, 2));
-        alert("QR CODE模式為 : .$DT+3碼.$DM:3碼NAN或12碼.$VN:3碼ACI.$SN:8~12碼.$MN:不超過25碼ACI的part Number.$HW:4碼.$ID:固定15碼.$")
-    }, []);
+
 
     /**************************************************************************************************************** */
     /**

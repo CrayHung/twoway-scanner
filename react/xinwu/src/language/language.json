@@ -73,6 +73,9 @@
                 "quantity": "數量",
                 "part": "料號",
                 "company": "單位",
+                "produce_date":"開始生產日期",
+                
+
                 "create_date": "建表日期",
                 "create_user": "建表者",
                 "edit_date": "編輯日期",
@@ -157,6 +160,9 @@
                 "quantity": "quantity",
                 "part": "part number",
                 "company": "company",
+                "produce_date":"produce_date",
+
+
                 "create_user": "create_user",
                 "edit_date": "edit_date",
                 "edit_user": "edit_user",

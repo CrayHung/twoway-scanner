@@ -60,6 +60,9 @@ const SearchForm = () => {
 
     //for 編輯時的放大輸入框
     const [isEditing, setIsEditing] = useState(false);
+    //for 點擊單元格染色框用
+    const [clickedCell, setClickedCell] = useState<{ rowIndex: number; colIndex: number | null } | null>(null);
+
     /**************************************************************************************************************** */
     /**
      * 
@@ -1553,6 +1556,12 @@ const SearchForm = () => {
         handlefilterWorkOrder();
     }, [workNo, part, quant, table1Data, table2Data])
 
+    //for 點擊單元格變紅框用
+    useEffect(() => {
+        if (!isEditing) {
+            setClickedCell(null);
+        }
+    }, [isEditing]);
 
     return (
         // <div style={{ overflow: "hidden" }}>
@@ -1696,7 +1705,9 @@ const SearchForm = () => {
                                     }}>
                                     <TableHead >
                                         <TableRow style={{ border: '1px solid #ccc' }}>
+                                        {['ADMIN', 'SUPERVISOR'].includes(userRole) &&
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'delete' })}</TableCell>
+                                        }
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
@@ -1708,7 +1719,7 @@ const SearchForm = () => {
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup4' })}</TableCell>
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'note' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'produce_date' })}</TableCell>
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
@@ -1723,7 +1734,7 @@ const SearchForm = () => {
                                         {originalData.map((row: any, rowIndex: number) => (
                                             <TableRow key={rowIndex}>
 
-                                                {['ADMIN', 'SUPERVISOR', 'OPERATOR'].includes(userRole) &&
+                                                {['ADMIN', 'SUPERVISOR'].includes(userRole) &&
                                                     <TableCell>
                                                         <button onClick={(e) => {
                                                             handleDeleteClick(row.id, row.workOrderNumber)
@@ -1750,10 +1761,24 @@ const SearchForm = () => {
                                                                     if (!model || !restrictedFields[model as 'A' | 'B' | 'C' | 'D']?.includes(colKey)) {
                                                                         // 如果不在不可編輯的欄位中，才允許編輯
                                                                         handleCellClick(rowIndex, colIndex);
+
+                                                                        // e.stopPropagation(); // 防止點擊事件冒泡到 Backdrop
+                                                                        setClickedCell({ rowIndex, colIndex });
+                                                                        
                                                                     }
                                                                 }
                                                             }}
-                                                            className={currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : ''}
+                                                            // className={currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : ''}
+                                                            // className={`${
+                                                            //     currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : ''
+                                                            // } ${clickedCells.has(`${rowIndex}-${colIndex}`) ? 'clicked-cell' : ''}`}
+                                                            className={[
+                                                                currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : '',
+                                                                clickedCell?.rowIndex === rowIndex && clickedCell?.colIndex === colIndex ? 'highlight-cell' : '',
+                                                            ]
+                                                                .filter(Boolean)
+                                                                .join(' ')} // 合併 className 並過濾空值
+
                                                         >
 
                                                             {isEditing &&
@@ -1778,7 +1803,7 @@ const SearchForm = () => {
                                                                             transform: 'translate(-50%, -50%)',
                                                                             zIndex: 1002,
                                                                         }}
-
+                                                                        onBlur={() => setIsEditing(false)}
                                                                     />
                                                                 </>
                                                             ) : (
