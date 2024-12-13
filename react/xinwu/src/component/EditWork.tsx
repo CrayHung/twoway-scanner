@@ -3,6 +3,10 @@ import { Button, Grid, Modal, Box, Table, TableBody, TableCell, TableHead, Table
 import { useNavigate } from 'react-router-dom';
 import { useGlobalContext } from '../global';
 import { useIntl } from "react-intl";
+import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
+
+
 
 import './hightlight.css';
 import './SearchForm.css';
@@ -24,6 +28,13 @@ const modalStyle = {
 };
 
 const EditWork = () => {
+
+
+    const [productionDateStart, setProductionDateStart] = useState<Date | null>(null);
+    const [productionDateEnd, setProductionDateEnd] = useState<Date | null>(null);
+
+
+
     const { formatMessage } = useIntl();
     const { company, setTable1Id, userRole, globalUrl, table1Data, setTable1Data, setTable2Data, table3Data,
         setTable3Data, setWorkNo, setPart, setQuant, setModel } = useGlobalContext();
@@ -35,8 +46,8 @@ const EditWork = () => {
 
     const [open, setOpen] = useState(true);
     const [searchWorkNumber, setSearchWorkNumber] = useState('');
-    const [productionDateStart, setProductionDateStart] = useState('');
-    const [productionDateEnd, setProductionDateEnd] = useState('');
+    // const [productionDateStart, setProductionDateStart] = useState('');
+    // const [productionDateEnd, setProductionDateEnd] = useState('');
 
     const [showTableData, setShowTableData] = useState([{}]);
 
@@ -261,51 +272,21 @@ const EditWork = () => {
         navigate('/reload');
     };
 
-    //避免start日期大於end
-    const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedStartDate = e.target.value;
 
-        if (productionDateEnd && selectedStartDate > productionDateEnd) {
-            alert(formatMessage({ id: 'text6' }));
-        } else {
-            setProductionDateStart(selectedStartDate);
-        }
+
+    // 將date格式化為"YYYY-MM-DD"
+    const formatDate = (date: Date | null): string | null => {
+        return date ? date.toISOString().split("T")[0] : null;
     };
 
-    //避免end日期小於start
-    const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedEndDate = e.target.value;
-
-        if (productionDateStart && selectedEndDate < productionDateStart) {
-            alert(formatMessage({ id: 'text7' }));
-        } else {
-            setProductionDateEnd(selectedEndDate);
-        }
-    };
-
-    //
-
-    //篩選資料,由得到所有資料再篩選(但只能做正確的資料查詢 , 下面用table1的API模糊查詢取代)
-    // const handleFetchTable1Data = () => {
-
-    //     const filteredData = table1Data.filter((item: { workOrderNumber: string; createDate: string | number | Date; }) => {
-    //         const isWorkOrderMatch = item.workOrderNumber === searchWorkNumber;
-    //         const isDateInRange = new Date(item.createDate) >= new Date(productionDateStart) &&
-    //             new Date(item.createDate) <= new Date(productionDateEnd);
-
-    //         return isWorkOrderMatch || isDateInRange;
-    //     });
-
-    //     setShowTableData(filteredData);
-    // }
 
 
     const handleFetchTable1Data = async () => {
 
         const requestBody = {
             workOrderNumber: searchWorkNumber ? [searchWorkNumber] : [],
-            createDateStart: productionDateStart ? [productionDateStart] : [],
-            createDateEnd: productionDateEnd ? [productionDateEnd] : [],
+            createDateStart: productionDateStart ? [formatDate(productionDateStart)].filter(Boolean) as string[] : [],
+            createDateEnd: productionDateEnd ? [formatDate(productionDateEnd)].filter(Boolean) as string[] : [],
         };
 
         // console.log("requestBody : " + JSON.stringify(requestBody, null, 2));
@@ -328,15 +309,7 @@ const EditWork = () => {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(requestBody),
-                    // body: JSON.stringify({
-                    //     workOrderNumber: searchWorkNumber ? [searchWorkNumber] : [],
-                    //     createDateStart: productionDateStart ? [productionDateStart] : [],
-                    //     createDateEnd: productionDateEnd ? [productionDateEnd] : [],
-                    // }),
-
                 });
-
-
                 if (!response.ok) {
                     throw new Error('Failed to get 所有對應表');
                 }
@@ -418,21 +391,24 @@ const EditWork = () => {
                         onChange={(e) => setSearchWorkNumber(e.target.value)}
                     />
                 </>
-                <>
-                    <label>{formatMessage({ id: 'startdate' })}：</label>
-                    <input
-                        type="date"
-                        value={productionDateStart}
-                        onChange={handleStartDateChange}
-                    />
-                </>                    <>
-                    <label>{formatMessage({ id: 'enddate' })}：</label>
-                    <input
-                        type="date"
-                        value={productionDateEnd}
-                        onChange={handleEndDateChange}
-                    />
-                </>
+
+                <label>{formatMessage({ id: 'startdate' })}：</label>
+                <DatePicker
+                    selectsStart
+                    selected={productionDateStart}
+                    onChange={(date) => setProductionDateStart(date)}
+                    startDate={productionDateStart}
+                />
+                <label>{formatMessage({ id: 'enddate' })}：</label>
+                <DatePicker
+                    selectsEnd
+                    selected={productionDateEnd}
+                    onChange={(date) => setProductionDateEnd(date)}
+                    endDate={productionDateEnd}
+                    startDate={productionDateStart}
+                    minDate={productionDateStart}
+                />
+
                 <button onClick={handleFetchTable1Data}>{formatMessage({ id: 'submit-search' })}</button>
             </div>
 
