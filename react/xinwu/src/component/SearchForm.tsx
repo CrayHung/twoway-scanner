@@ -572,7 +572,7 @@ const SearchForm = () => {
         if (event.key === "Enter") {
             // alert("原本的值:" + originalData[rowIndex][colKey])
 
-            const checkColumn = ['SN','QR_RFTray', 'QR_PS', 'QR_HS'];
+            const checkColumn = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS'];
             let isDuplicateInDatabase = false;
 
             const newValue = tempValue;
@@ -581,7 +581,7 @@ const SearchForm = () => {
 
 
             // 若是空字串，視為不重複
-            if (newValue=== "") {
+            if (newValue === "") {
                 isDuplicateInDatabase = false;
                 //指定的比對欄位
             } else if (checkColumn.includes(colKey)) {
@@ -798,9 +798,9 @@ const SearchForm = () => {
             );
 
             setOriginalData(updatedData);
-        } 
+        }
     };
-    
+
     /************************************************************* */
 
 
@@ -1564,8 +1564,13 @@ const SearchForm = () => {
     }, [isEditing]);
 
     return (
-        // <div style={{ overflow: "hidden" }}>
-        <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
+        <div
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                height: "90vh",
+                overflow: "auto",
+            }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                 <Typography variant="h4" gutterBottom>
                     {formatMessage({ id: 'Menu-edit-WorkOrders' })}
@@ -1583,7 +1588,7 @@ const SearchForm = () => {
                 </div>
             )}
 
-         
+
             {/* {userRole !== 'USER' || userRole !== 'OPERATOR' && (
                 <>
                     {!updateData && !continueInput &&
@@ -1593,7 +1598,9 @@ const SearchForm = () => {
             )} */}
             {/* {!updateData && !continueInput && userRole !== 'USER' && userRole !== 'OPERATOR' && !updateCell && */}
             {!updateData && !continueInput && userRole !== 'USER' && userRole !== 'OPERATOR' &&
-                <button onClick={handleUpdate}>{formatMessage({ id: 'edit-workOrderDetail' })}</button>
+                <div>
+                    <button onClick={handleUpdate}>{formatMessage({ id: 'edit-workOrderDetail' })}</button>
+                </div>
             }
             {/* 
             {
@@ -1610,28 +1617,32 @@ const SearchForm = () => {
             {
                 !isComplete && continueInput && userRole !== 'USER' &&
                 <>
-                    <input
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        onKeyDown={handleBarcodeInput}
-                        placeholder={formatMessage({ id: 'text' })}
-                        disabled={isComplete} // 當掃描完成後禁用輸入框
-                        autoFocus />
+                    <div>
+                        <input
+                            type="text"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={handleBarcodeInput}
+                            placeholder={formatMessage({ id: 'text' })}
+                            disabled={isComplete} // 當掃描完成後禁用輸入框
+                            autoFocus />
+                    </div>
                 </>
             }
 
             {/* {userRole !== 'USER' && !updateData && !updateCell && ( */}
             {userRole !== 'USER' && !updateData && (
                 <>
-                    {/* {continueInput ? (
+                    <div>
+                        {/* {continueInput ? (
                         <button onClick={handleSaveData} disabled={loading}>{formatMessage({ id: 'save' })}</button>
                     ) : (
                         <button onClick={handleContinueInput}>{formatMessage({ id: 'continueinput' })}</button>
                     )} */}
-                    {!continueInput && (
-                        <button onClick={handleContinueInput}>{formatMessage({ id: 'continueinput' })}</button>
-                    )}
+                        {!continueInput && (
+                            <button onClick={handleContinueInput}>{formatMessage({ id: 'continueinput' })}</button>
+                        )}
+                    </div>
                 </>
             )}
             <>
@@ -1695,19 +1706,37 @@ const SearchForm = () => {
             {
                 originalData.length != 0 ? (
                     <>
-                        <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
+                        {/* <Paper sx={{ width: '90%', height: '90%' }}> */}
+                        {/* <TableContainer
+                                component={Paper}
+                                style={{ height: 'calc(100vh - 110px)', overflowY: 'auto', overflowX: 'auto' }}
+                            > */}
+                        <Paper style={{ flex: 1, overflowX: "auto" }}>
+                            <TableContainer
+                                component="div"
+                                style={{
+                                    height: "100%",
+                                    overflowY: "hidden",
+                                    overflowX: "auto",
+                                }}
+                                onWheel={(e) => {
+                                    const container = e.currentTarget;
+                                    container.scrollTop += e.deltaY;
+                                }}
+                            >
 
-                            <TableContainer component={Paper} style={{ height: 'calc(100vh - 110px)', overflow: 'auto' }}>
-                                <Table stickyHeader aria-label="sticky table"
+                                <Table
+                                    stickyHeader
+                                    aria-label="sticky table"
                                     style={{
                                         minWidth: '800px',
                                         tableLayout: 'auto',
                                     }}>
                                     <TableHead >
                                         <TableRow style={{ border: '1px solid #ccc' }}>
-                                        {['ADMIN', 'SUPERVISOR'].includes(userRole) &&
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'delete' })}</TableCell>
-                                        }
+                                            {['ADMIN', 'SUPERVISOR'].includes(userRole) &&
+                                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'delete' })}</TableCell>
+                                            }
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
@@ -1764,7 +1793,7 @@ const SearchForm = () => {
 
                                                                         // e.stopPropagation(); // 防止點擊事件冒泡到 Backdrop
                                                                         setClickedCell({ rowIndex, colIndex });
-                                                                        
+
                                                                     }
                                                                 }
                                                             }}
@@ -1809,7 +1838,7 @@ const SearchForm = () => {
                                                             ) : (
                                                                 <span
                                                                     onClick={() => {
-                                                                        setEditCell({ rowIndex, colIndex }); 
+                                                                        setEditCell({ rowIndex, colIndex });
                                                                         setTempValue(row[colKey] || "");
                                                                         setIsEditing(true);
                                                                     }}

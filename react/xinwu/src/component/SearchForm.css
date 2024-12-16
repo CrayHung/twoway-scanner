@@ -19,3 +19,7 @@
   .highlight-cell {
     border: 2px solid red;
 }
+
+.react-datepicker-popper {
+  z-index: 9999 !important;
+}

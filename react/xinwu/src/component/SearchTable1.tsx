@@ -305,11 +305,11 @@ const SearchTable1 = () => {
                     detailId: item.detailId,
                     SN: item.SN,
                     QR_RFTray: item.QR_RFTray,
-                    QR_RFTray_BEDID:item.QR_RFTray_BEDID,
+                    QR_RFTray_BEDID: item.QR_RFTray_BEDID,
                     QR_PS: item.QR_PS,
-                    QR_PS_BEDID:item.QR_PS_BEDID,
+                    QR_PS_BEDID: item.QR_PS_BEDID,
                     QR_HS: item.QR_HS,
-                    QR_HS_BEDID:item. QR_HS_BEDID,
+                    QR_HS_BEDID: item.QR_HS_BEDID,
 
                     QR_backup1: item.QR_backup1,
                     QR_backup2: item.QR_backup2,
@@ -368,11 +368,11 @@ const SearchTable1 = () => {
                     SN: item.SN,
 
                     QR_RFTray: item.QR_RFTray,
-                    QR_RFTray_BEDID:item.QR_RFTray_BEDID,
+                    QR_RFTray_BEDID: item.QR_RFTray_BEDID,
                     QR_PS: item.QR_PS,
-                    QR_PS_BEDID:item.QR_PS_BEDID,
+                    QR_PS_BEDID: item.QR_PS_BEDID,
                     QR_HS: item.QR_HS,
-                    QR_HS_BEDID:item. QR_HS_BEDID,
+                    QR_HS_BEDID: item.QR_HS_BEDID,
 
                     QR_backup1: item.QR_backup1,
                     QR_backup2: item.QR_backup2,
@@ -403,7 +403,7 @@ const SearchTable1 = () => {
                 console.error('Error fetching:', error);
             }
         } else {
-            console.log("搜尋的資料是 : " , JSON.stringify(sanitizedFormData, null, 2))
+            console.log("搜尋的資料是 : ", JSON.stringify(sanitizedFormData, null, 2))
             try {
                 const response = await fetch(`${globalUrl.url}/api/snfield-search-details `, {
                     method: 'POST',
@@ -428,11 +428,11 @@ const SearchTable1 = () => {
                     detailId: item.detailId,
                     SN: item.SN,
                     QR_RFTray: item.QR_RFTray,
-                    QR_RFTray_BEDID:item.QR_RFTray_BEDID,
+                    QR_RFTray_BEDID: item.QR_RFTray_BEDID,
                     QR_PS: item.QR_PS,
-                    QR_PS_BEDID:item.QR_PS_BEDID,
+                    QR_PS_BEDID: item.QR_PS_BEDID,
                     QR_HS: item.QR_HS,
-                    QR_HS_BEDID:item. QR_HS_BEDID,
+                    QR_HS_BEDID: item.QR_HS_BEDID,
 
                     QR_backup1: item.QR_backup1,
                     QR_backup2: item.QR_backup2,
@@ -703,7 +703,14 @@ const SearchTable1 = () => {
     };
 
     return (
-        <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
+        <div
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                height: "90vh",
+                overflow: "auto",
+            }}>
+
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                 <Typography variant="h4" gutterBottom>
                     {formatMessage({ id: 'Menu-Search-WorkOrders' })}
@@ -963,16 +970,22 @@ const SearchTable1 = () => {
                     <div>
                         <button onClick={handleDownloadAllExcel}>{formatMessage({ id: 'Allexcel' })}</button>
                     </div>
-                    <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
-                        <TableContainer component={Paper} style={{
-                            maxHeight: '70vh', // 設置最大高度，避免超出視窗
-                            overflowX: 'auto', // 確保左右滾動條出現
-                            overflowY: 'auto', // 確保上下滾動條出現
-                        }}
+                    <Paper style={{ flex: 1, overflowX: "auto" }}>
+                        <TableContainer
+                            component="div"
+                            style={{
+                                height: "100%",
+                                overflowY: "hidden",
+                                overflowX: "auto", 
+                            }}
+                            onWheel={(e) => {
+                                const container = e.currentTarget;
+                                container.scrollTop += e.deltaY;
+                            }}
                         >
                             <Table stickyHeader aria-label="sticky table"
                                 style={{
-                                    minWidth: '800px', // 最小寬度，確保資料過多時滾動
+                                    minWidth: '800px',
                                     tableLayout: 'auto',
                                 }}>
                                 <TableHead >
@@ -1035,7 +1048,7 @@ const SearchTable1 = () => {
                                             ))}
                                         </TableRow>
 
-                                        
+
 
                                     ))}
                                 </TableBody>
