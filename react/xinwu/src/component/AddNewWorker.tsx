@@ -4,7 +4,7 @@
  * 
  */
 import React, { useEffect, useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Button, Box, Typography } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Button, Box, Typography, Backdrop } from '@mui/material';
 // import '../App.css';
 import { useNavigate } from 'react-router-dom';
 import { message } from 'antd';
@@ -47,6 +47,13 @@ function AddNewWorker() {
     //接收字串
     // const [editCell, setEditCell] = useState<{ rowIndex: number | null; colKey: string | null }>({ rowIndex: null, colKey: null }); //編輯當前的行和列
     const [savedData, setSavedData] = useState<any[]>([]); // 用來追蹤每行已儲存的資料
+
+    //for 編輯時的放大輸入框
+    const [isEditing, setIsEditing] = useState(false);
+    //for 點擊單元格染色框用
+    const [clickedCell, setClickedCell] = useState<{ rowIndex: number; colIndex: number | null } | null>(null);
+    const [editingCell, setEditingCell] = useState<{ rowIndex: number; colIndex: number } | null>(null);
+    const [tempValue, setTempValue] = useState('');
 
 
     const navigate = useNavigate();
@@ -601,21 +608,46 @@ function AddNewWorker() {
 
     /***************************************************************** */
 
-    // 處理單元格點擊進入編輯模式(接收row和column的key)
-    // const handleCellClick = (rowIndex: number, colKey: string) => {
-    //     //只開放note欄位可手動新增
-    //     if (
-    //         colKey === 'workOrderNumber' || colKey === 'id' || colKey === 'sn' || colKey === 'qr_RFTray' ||
-    //         colKey === 'qr_PS' || colKey === 'qr_HS' || colKey === 'qr_backup1' || colKey === 'qr_backup2' ||
-    //         colKey === 'qr_backup3' || colKey === 'qr_backup4' ||
-    //         colKey === 'create_date' || colKey === 'create_user' || colKey === 'edit_date' || colKey === 'edit_user') {
-    //         return;
+    // 處理單元格點擊進入編輯模式(接收row和column index)
+    // const handleCellClick = (rowIndex: number, colIndex: number) => {
+    //     // 根據 colIndex 來取得實際的欄位名稱
+    //     const colKey = Object.keys(data[rowIndex])
+    //         .filter((key) => key !== 'id' && key !== 'workOrderNumber')[colIndex];
+
+    //     /****************************************************** */
+    //     //因為alert會讓單元格無法點到, 所以用antd的message來處理
+    //     const nonEditableKeys = [
+    //         'id', 'workOrderNumber', 'detailId',
+    //         'create_date', 'create_user', 'edit_date', 'edit_user',
+    //         'QR_RFTray_BEDID', 'QR_PS_BEDID', 'QR_HS_BEDID'
+    //     ];
+    //     const alertKeys = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS'];
+
+    //     if (nonEditableKeys.includes(colKey)) {
+    //         return; // 禁止操作
     //     }
-    //     setEditCell({ rowIndex, colKey });
+    //     if (alertKeys.includes(colKey)) {
+    //         message.warning(formatMessage({ id: 'text' }), 1);
+    //     }
+
+    //     /****************************************************** */
+    //     /****************************************************** */
+    //     // 只允許編輯QR_RFTray ,QR_PS,QR_HS ,QR_backup1,QR_backup2,QR_backup3,QR_backup4note的欄位
+    //     // if (
+    //     //     colKey === 'id' || colKey === 'workOrderNumber' || colKey === 'detailId' ||
+    //     //     colKey === 'create_date' || colKey === 'create_user' || colKey === 'edit_date' || colKey === 'edit_user'
+    //     // ) {
+    //     //     return;
+    //     // }
+    //     /****************************************************** */
+
+    //     setEditCell({ rowIndex, colIndex });
     // };
 
-    // 處理單元格點擊進入編輯模式(接收row和column index)
+
     const handleCellClick = (rowIndex: number, colIndex: number) => {
+
+        setIsEditing(true);
         // 根據 colIndex 來取得實際的欄位名稱
         const colKey = Object.keys(data[rowIndex])
             .filter((key) => key !== 'id' && key !== 'workOrderNumber')[colIndex];
@@ -647,7 +679,9 @@ function AddNewWorker() {
         // }
         /****************************************************** */
 
+        setEditingCell({ rowIndex, colIndex });
         setEditCell({ rowIndex, colIndex });
+        // setEditingCell(colIndex);
     };
 
 
@@ -928,6 +962,128 @@ function AddNewWorker() {
         navigate('/reload');
     };
 
+    const handleBackgroundClick = () => {
+        setIsEditing(false); // 點擊背景結束編輯
+        setEditCell({ rowIndex: null, colIndex: null });
+        setEditingCell(null);
+        setTempValue(""); // 清空輸入框值
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
+    // change時將變更的值設定給tempValue , 
+    // keyDown時 執行判斷
+    //     - 符合規格的話 , 將tempValue的值給PUT更新
+    //     - 不符合規格的話 , 將tempValue的值反空 , 跳出alert , 結束keyDown
+    // 更新完畢後, 將更新的值設定給originalData 並將 tempValue值反空
+
+    const handleKeyDown = async (event: React.KeyboardEvent<HTMLInputElement>, rowIndex: number, colKey: string) => {
+
+        if (event.key === "Enter") {
+            // alert("原本的值:" + originalData[rowIndex][colKey])
+
+            const checkColumn = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS'];
+            let isDuplicateInDatabase = false;
+
+            const newValue = tempValue;
+            // alert("輸入的值:" + newValue)
+
+
+
+            // 若是空字串，視為不重複
+            if (newValue === "") {
+                isDuplicateInDatabase = false;
+                //指定的比對欄位
+            } else if (checkColumn.includes(colKey)) {
+
+                if (colKey === 'SN') {
+                    isDuplicateInDatabase = table2Data.some(
+                        (item: { [x: string]: string }) => item[colKey] === newValue
+                    );
+                } else {
+                    //格式檢查
+                    const newID = extractID(newValue);
+                    if (newID === null) {
+                        alert("字串格式不正確！請確保字串符合規定格式：.$ID:<內容>.$");
+                        setTempValue('');
+                        setInputValue(''); // 清空輸入框
+                        return;
+                    }
+
+                    //重複檢查
+                    isDuplicateInDatabase = table2Data.some(
+                        (item: { [x: string]: string; }) => item[colKey] === newValue
+                    );
+                }
+
+            }
+
+            const originalValue = table2Data.find((item: any) => item.id === data[rowIndex].id)?.[colKey];
+            //如果和資料庫資料重複 , 則將渲染的table改回原值
+            // if (newValue.trim() !== "" && isDuplicateInDatabase) {
+            if (isDuplicateInDatabase) {
+                alert(`${colKey} 已存在，請輸入不同的 ${colKey}`);
+                setTempValue('');
+
+                // 將table值還原為原始值
+                // const updatedData = originalData.map((row: any, idx: number) =>
+                //     idx === rowIndex ? { ...row, [colKey]: originalValue } : row
+                // );
+
+                // setOriginalData(updatedData);
+
+                setInputValue(''); // 清空輸入框
+                return;
+            }
+            else {
+                //如果沒有重複 , 將該欄位值更新
+
+
+                console.log("這個欄位的值是 : " + newValue)
+                // if (originalValue !== newValue) {
+                const fetchUpdateRows = async () => {
+
+                    try {
+                        // 發送 PUT 請求進行資料更新
+                        const updateData: any = {
+                            id: data[rowIndex].id,
+                            [colKey]: newValue,
+                            edit_user: currentUser,
+                        };
+
+                        if (checkColumn.includes(colKey) && colKey !== 'SN') {
+                            updateData[`${colKey}_BEDID`] = extractID(newValue);
+                        }
+
+                        const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify([updateData]),
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to 更新');
+                        }
+
+                        // 更新 data 並清空 tempValue
+                        const updatedData = [...data];
+                        updatedData[rowIndex][colKey] = newValue;
+                        setData(updatedData);
+                        setTempValue(""); // 清空 tempValue
+                        console.log('完成資料更新');
+                    } catch (error) {
+                        console.error('Error updating rows:', error);
+                    }
+                };
+                await fetchUpdateRows();
+
+
+            }
+            setIsEditing(false);
+        };
+    }
+
 
     return (
 
@@ -980,7 +1136,11 @@ function AddNewWorker() {
                 </div>
             }
 
-
+            <Backdrop
+                open={isEditing}
+                onClick={handleBackgroundClick}
+                style={{ zIndex: 10, backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+            />
             {data.length > 0 &&
                 <>
                     {!isComplete &&
@@ -1087,20 +1247,74 @@ function AddNewWorker() {
                                                             if (!inputMode || !restrictedFields[inputMode as 'A' | 'B' | 'C' | 'D']?.includes(colKey)) {
                                                                 // 如果不在不可編輯的欄位中，才允許編輯
                                                                 handleCellClick(rowIndex, colIndex);
+
+                                                                // e.stopPropagation(); // 防止點擊事件冒泡到 Backdrop
+                                                                setClickedCell({ rowIndex, colIndex });
                                                             }
                                                         }}
-                                                        className={currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : ''}
+                                                        //     className={currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : ''}
+                                                        // >
+
+                                                        //{editCell.rowIndex === rowIndex && editCell.colIndex === colIndex ? (
+                                                        //    <TextField
+                                                        //        value={row[colKey]}
+                                                        //        onChange={(e) => handleCellChange(e, rowIndex, colIndex)}
+                                                        //        onBlur={handleCellBlur}
+                                                        //        autoFocus
+                                                        //    />
+                                                        //) : (
+                                                        //    row[colKey]
+                                                        //)}  
+                                                    
+
+
+                                                        className={[
+                                                            currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : '',
+                                                            clickedCell?.rowIndex === rowIndex && clickedCell?.colIndex === colIndex ? 'highlight-cell' : '',
+                                                        ]
+                                                            .filter(Boolean)
+                                                            .join(' ')} // 合併 className 並過濾空值
+
                                                     >
-                                                        {editCell.rowIndex === rowIndex && editCell.colIndex === colIndex ? (
-                                                            <TextField
-                                                                value={row[colKey]}
-                                                                onChange={(e) => handleCellChange(e, rowIndex, colIndex)}
-                                                                onBlur={handleCellBlur}
-                                                                autoFocus
-                                                            />
+                                                        {isEditing &&
+                                                            editCell.rowIndex === rowIndex &&
+                                                            editCell.colIndex === colIndex ? (
+
+
+                                                            <>
+                                                                <input
+                                                                    type="text"
+                                                                    value={tempValue}
+                                                                    onChange={(e) => setTempValue(e.target.value)}
+                                                                    onKeyDown={(event) => handleKeyDown(event, rowIndex, colKey)}
+                                                                    style={{
+                                                                        backgroundColor: 'white',
+                                                                        width: '1000px',
+                                                                        height: '50px',
+                                                                        fontSize: '18px',
+                                                                        position: 'absolute',
+                                                                        top: '50%',
+                                                                        left: '50%',
+                                                                        transform: 'translate(-50%, -50%)',
+                                                                        zIndex: 1002,
+                                                                    }}
+                                                                    onBlur={() => setIsEditing(false)}
+                                                                />
+                                                            </>
                                                         ) : (
-                                                            row[colKey]
+                                                            <span
+                                                                onClick={() => {
+                                                                    setEditCell({ rowIndex, colIndex });
+                                                                    setTempValue(row[colKey] || "");
+                                                                    setIsEditing(true);
+                                                                }}
+                                                                style={{ cursor: "pointer" }}
+                                                            >
+                                                                {row[colKey]}
+                                                            </span>
                                                         )}
+
+
                                                     </TableCell>
                                                 ))}
                                         </TableRow>
@@ -1116,7 +1330,7 @@ function AddNewWorker() {
                     </Paper>
                 </>
             }
-        </div>
+        </div >
 
     );
 }

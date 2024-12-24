@@ -28,6 +28,7 @@ import useGetMessage from "./language/useGetMessage";
 
 import TwowayScannerImportOracleXlsx from './component/twowayScannerImportOracleXlsx';
 import HomePage from './HomePage';
+import ACIPicking from './component/ACIPicking';
 
 function App() {
   const [locale, setLocale] = useNavigatorLanguage();
@@ -88,6 +89,10 @@ function App() {
 
             <Route path="/importOracle" Component={TwowayScannerImportOracleXlsx} /> 
             <Route path="/importOracle/reload" element={<Navigate to="/importOracle" />} />
+
+
+            <Route path="/ACI/picking" Component={ACIPicking} /> 
+            <Route path="/ACI/picking/reload" element={<Navigate to="/ACI/picking" />} />
 
             
 

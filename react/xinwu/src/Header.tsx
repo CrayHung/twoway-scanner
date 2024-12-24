@@ -30,7 +30,7 @@ const Header = () => {
   return (
 
     <div className="header">
-      <Link to="/" style={{ float: 'left' }} >home img</Link>
+      <Link to="/" style={{ float: 'left' }} >home</Link>
       {/* {jwtToken ? ( */}
       {isLoggedIn ? (
         <>

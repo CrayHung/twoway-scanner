@@ -417,25 +417,28 @@ const EditWork = () => {
 
             {showTableData.length > 0 &&
                 <>
-                    <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
-                        {/* <TableContainer component={Paper} style={{
-                            maxHeight: '70vh', // 設置最大高度，避免超出視窗
-                            overflowX: 'auto', // 確保左右滾動條出現
-                            // overflowY: 'auto', // 確保上下滾動條出現
-                            position: 'static',
-                        }}   >*/}
-
+                    <Paper style={{ flex: 1, overflowX: "auto" }}>
                         <TableContainer
-                            component={Paper}
-                            style={{ height: 'calc(100vh - 110px)', overflowY: 'hidden', overflowX: 'auto' }}
-                      
+                            component="div"
+                            style={{
+                                height: "100%",
+                                overflowY: "hidden",
+                                overflowX: "auto",
+                            }}
+                            onWheel={(e) => {
+                                const container = e.currentTarget;
+                                container.scrollTop += e.deltaY;
+                            }}
                         >
-                            <Table stickyHeader aria-label="sticky table"
+
+
+                            <Table
+                                stickyHeader
+                                aria-label="sticky table"
                                 style={{
-                                    minWidth: '800px', // 最小寬度，確保資料過多時滾動
+                                    minWidth: '800px',
                                     tableLayout: 'auto',
-                                }}
-                            >
+                                }}>
                                 <TableHead >
                                     <TableRow style={{ border: '1px solid #ccc' }}>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit' })}</TableCell>

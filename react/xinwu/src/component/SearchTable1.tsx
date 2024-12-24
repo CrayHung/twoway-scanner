@@ -295,7 +295,7 @@ const SearchTable1 = () => {
                 }
                 const data: any[] = await response.json();
                 console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
-                setDataForDownload(data);
+    
 
                 //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
                 //並且重新排序順序
@@ -332,7 +332,7 @@ const SearchTable1 = () => {
                     quantity,
                     ...rest
                 }) => rest);
-
+                setDataForDownload(data);
                 setResultData(filteredData);
                 // console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
 
@@ -561,7 +561,7 @@ const SearchTable1 = () => {
     /********************************************************* */
 
     /******************************************************** */
-    //達運專用下載excel (xlsx中不包含標題 項次,SN)
+    //達運專用(棧板SN)下載excel (xlsx中不包含標題 項次,SN)
     /********************************************************* */
     const handleDownloadTwowayExcel = () => {
 
@@ -644,7 +644,7 @@ const SearchTable1 = () => {
 
         const worksheet = XLSX.utils.json_to_sheet(customerExcelData);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "客戶專用下載excel");
+        XLSX.utils.book_append_sheet(workbook, worksheet, "customer_excel");
         XLSX.writeFile(workbook, "customerData.xlsx");
     };
 

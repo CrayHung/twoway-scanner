@@ -81,9 +81,9 @@ const SearchForm = () => {
     }, [workNo, quant, part, model])
 
     // 把originalData清空
-    useEffect(() => {
-        setOriginalData([]);
-    }, [])
+    // useEffect(() => {
+    //     setOriginalData([]);
+    // }, [])
 
     // useEffect(() => {
     //     console.log("目前資料:",JSON.stringify(originalData, null, 2) );
@@ -108,6 +108,121 @@ const SearchForm = () => {
         setRowsPerPage(+event.target.value);
         setPage(0);
     };
+
+    // const fetchAllTable1 = async () => {
+
+    //     try {
+    //         const response = await fetch(`${globalUrl.url}/api/get-work-orders`, {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //         });
+
+    //         if (!response.ok) {
+    //             throw new Error('Failed to get 所有工單');
+    //         }
+
+    //         const updatedData: any[] = await response.json();
+
+
+    //         // const updatedData = removeWorkOrderDetails(data);
+    //         setTable1Data(updatedData);
+
+
+    //     } catch (error) {
+    //         console.error('Error fetching token:', error);
+    //     }
+    // };
+    // const fetchAllTable2 = async () => {
+    //     try {
+    //         const response = await fetch(`${globalUrl.url}/api/get-work-order-details`, {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //         });
+
+    //         if (!response.ok) {
+    //             throw new Error('Failed to get 所有工單');
+    //         }
+
+    //         const data: any[] = await response.json();
+
+
+    //         //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
+    //         //並且重新排序順序
+    //         const mappedData = data.map(item => ({
+    //             id: item.id,
+    //             workOrderNumber: item.workOrderNumber,
+    //             detailId: item.detailId,
+    //             SN: item.SN,
+    //             QR_RFTray: item.QR_RFTray,
+    //             QR_PS: item.QR_PS,
+    //             QR_HS: item.QR_HS,
+    //             QR_backup1: item.QR_backup1,
+    //             QR_backup2: item.QR_backup2,
+    //             QR_backup3: item.QR_backup3,
+    //             QR_backup4: item.QR_backup4,
+    //             note: item.note,
+    //             create_date: item.create_date,
+    //             create_user: item.create_user,
+    //             edit_date: item.edit_date,
+    //             edit_user: item.edit_user,
+    //             // QR_RFTray_BEDID: item.QR_RFTray_BEDID,
+    //             // QR_PS_BEDID: item.QR_PS_BEDID,
+    //             // QR_HS_BEDID: item.QR_HS_BEDID,
+    //             ...item,
+
+    //         }));
+
+    //         //用來將table2的不要欄位過濾掉(quantity,company,partNumber)
+    //         const filteredData = mappedData.map(({
+    //             partNumber,
+    //             // workOrderNumber,
+    //             company,
+    //             quantity,
+    //             ...rest
+    //         }) => rest);
+
+
+    //         setTable2Data(filteredData);
+
+    //     } catch (error) {
+    //         console.error('Error fetching token:', error);
+    //     }
+    // };
+    const fetchAllTable3 = async () => {
+        try {
+            const response = await fetch(`${globalUrl.url}/api/get-input-modes`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to get 所有對應表');
+            }
+
+            const data = await response.json();
+            // console.log("table3所有對應 : " + JSON.stringify(data));
+            setTable3Data(data);
+
+        } catch (error) {
+            console.error('Error fetching token:', error);
+        }
+    };
+    const fetchAll = () => {
+        fetchAllTable1();
+        fetchAllTable2();
+        fetchAllTable3();
+        // setWorkNo('');
+        // setQuant('');
+        // setPart('');
+        // setModel('');
+        // setTable1Id('');
+    }
     /**************************************************************************************************************** */
     /**
      * 
@@ -126,82 +241,14 @@ const SearchForm = () => {
     //將有更改的內容PUT到 table1 ,table2做修改
     const handleConfirm = async () => {
 
-        /******************************************* */
-        // 更新 table1Data
-        /******************************************* */
-        // for table1 update
-        const updatedTable1Data = {
-            workOrderNumber: updateWorkNo !== workNo ? updateWorkNo : workNo,
-            quantity: updateWorkQuantity !== quant ? updateWorkQuantity : quant,
-            partNumber: updateWorkPart !== part ? updateWorkPart : part,
-            editUser: currentUser,
-            company: company,
-        };
-        //for table2 update
-        const updatedRows = table2Data.filter((row: { workOrderNumber: any; }) => row.workOrderNumber === workNo).map((row: { workOrderNumber: any; }) => ({
-            ...row,
-            workOrderNumber: updateWorkNo || row.workOrderNumber
-        }));
-        const originalRowCount = updatedRows.length;
-
-        // for table2 add
-        const additionalRows: any = [];
-        if (updateWorkQuantity > originalRowCount) {
-            additionalRows.push(...Array.from({ length: updateWorkQuantity - originalRowCount }, (_, index) => ({
-                workOrderNumber: updateWorkNo || workNo,
-                // detailId: originalRowCount + index + 1,  //這個由後端自行累加
-                SN: '',
-                QR_RFTray: '',
-                QR_PS: '',
-                QR_HS: '',
-                QR_backup1: '',
-                QR_backup2: '',
-                QR_backup3: '',
-                QR_backup4: '',
-                note: '',
-                create_user: currentUser,
-                edit_user: currentUser,
-                // QR_RFTray_BEDID: '',
-                // QR_PS_BEDID: '',
-                // QR_HS_BEDID: '',
-            })));
-        }
 
         setLoading(true); // 開始Loading
-
-        /**
-                更新tbale2Data邏輯為
-                步驟1.  將舊的table2資料更新....資料庫join的關係似乎連動改了?...所以這部份不用做
-                步驟2.  新增資料   (有修改updateWorkQuantity的話)
-         */
+        // console.log("originalData : ", JSON.stringify(originalData, null, 2));
 
 
-        // 第一次table2 的 API請求 - 更新資料 ( 有用join的關係  免做)
-        // const fetchUpdateRows = async () => {
-        //     console.log("table2的第一個更新請求 : ", JSON.stringify(updatedRows, null, 2));
-        //     try {
-        //         const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
-        //             method: 'PUT',
-        //             headers: {
-        //                 'Content-Type': 'application/json',
-        //             },
-        //             body: JSON.stringify(updatedRows),
-        //         });
-
-        //         if (!response.ok) {
-        //             throw new Error('Failed to 更新已存在資料');
-        //         } else {
-        //             console.log('完成更新現有資料');
-        //         }
-        //     } catch (error) {
-        //         console.error('Error updating rows:', error);
-        //     }
-        // };
-
-
-        // 第二次table2的 API 請求 - 新增資料
-        const fetchAddRows = async () => {
-            console.log("additionalRows", JSON.stringify(additionalRows, null, 2))
+          // 第二次table2的 API 請求 - 新增資料
+          const fetchAddRows = async () => {
+            // console.log("additionalRows", JSON.stringify(additionalRows, null, 2))
 
             try {
                 const response = await fetch(`${globalUrl.url}/api/post-work-order-details`, {
@@ -250,24 +297,136 @@ const SearchForm = () => {
             }
         }
 
-        fetchUpdateTable1();
 
-        // fetch(`${globalUrl.url}/api/update-work-orders/${table1Id}`, {
-        //     method: 'PUT',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify(updatedData),
-        // })
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         console.log('更新成功:', data);
-        //         await fetchAddRows();
-        //     })
-        //     .catch((error) => {
-        //         console.error('更新失敗:', error);
-        //     });
 
+
+        /******************************************* */
+        // 更新 table1Data
+        /******************************************* */
+        // for table1 update
+        const updatedTable1Data = {
+            workOrderNumber: updateWorkNo !== workNo ? updateWorkNo : workNo,
+            quantity: updateWorkQuantity !== quant ? updateWorkQuantity : quant,
+            partNumber: updateWorkPart !== part ? updateWorkPart : part,
+            editUser: currentUser,
+            company: company,
+        };
+        //for table2 update
+        const updatedRows = table2Data.filter((row: { workOrderNumber: any; }) => row.workOrderNumber === workNo).map((row: { workOrderNumber: any; }) => ({
+            ...row,
+            workOrderNumber: updateWorkNo || row.workOrderNumber
+        }));
+        const originalRowCount = updatedRows.length;
+
+        // for table2 add
+        const additionalRows: any = [];
+
+        if (updateWorkQuantity > originalRowCount) {
+            additionalRows.push(...Array.from({ length: updateWorkQuantity - originalRowCount }, (_, index) => ({
+                workOrderNumber: updateWorkNo || workNo,
+                // detailId: originalRowCount + index + 1,  //這個由後端自行累加
+                SN: '',
+                QR_RFTray: '',
+                QR_PS: '',
+                QR_HS: '',
+                QR_backup1: '',
+                QR_backup2: '',
+                QR_backup3: '',
+                QR_backup4: '',
+                note: '',
+                create_user: currentUser,
+                edit_user: currentUser,
+                QR_RFTray_BEDID: '',
+                QR_PS_BEDID: '',
+                QR_HS_BEDID: '',
+            })));
+
+            await fetchUpdateTable1();
+
+            setUpdateData(false);
+
+            setLoading(false); // 完成後結束Loading
+            navigate("/editWorker/reload");
+        }
+
+      
+
+        //for table2 delete
+        //如果要更新的筆數 小於 目前的資料數
+        //1.判斷originalData中是否有所有欄位都是空的row
+        //2.如有,則刪除這些行
+        //3.如沒有足夠的空白行 , 則跳出警告
+        if (updateWorkQuantity < quant) {
+            // 需要刪除的行數
+            const rowsToDelete = quant - updateWorkQuantity;
+            // console.log("rowsToDelete : "+rowsToDelete);
+            // 找出所有欄位都是空字串的行
+            const excludedKeys = ["id", "workOrderNumber", "detailId", "create_date", "create_user", "edit_date", "edit_user"];
+            const emptyRows = originalData.filter(row =>
+                Object.keys(row).every(key =>
+                    excludedKeys.includes(key) || row[key] === ''|| row[key] === null || row[key] === undefined
+                )
+            );
+            // console.log("emptyRows : ", JSON.stringify(emptyRows, null, 2));
+
+            // 如果有足夠的空白行可以刪除
+            if (emptyRows.length >= rowsToDelete) {
+                // 收集要刪除的行的id
+                const rowsToDeleteIds = emptyRows.slice(0, rowsToDelete).map(row => row.id);
+                // console.log("rowsToDeleteIds : "+rowsToDeleteIds);
+
+                try {
+                    const results = await Promise.all(
+                        rowsToDeleteIds.map(id =>
+                            fetch(`${globalUrl.url}/api/delete-work-order-details/${id}`, {
+                                method: 'DELETE',
+                            }).then(response => {
+                                if (!response.ok) throw new Error(`刪除失敗，ID: ${id}`);
+                                return id;
+                            })
+                        )
+                    );
+
+                    // 更新
+                    const updatedData = originalData.filter(row => !rowsToDeleteIds.includes(row.id));
+
+
+                    alert(`成功刪除 ${results.length} 筆資料`);
+                    await fetchUpdateTable1();
+                    await fetchAll();
+
+                    setOriginalData(updatedData);
+                    setRows(updateWorkQuantity);
+                    setQuant(updateWorkQuantity);
+
+                    
+                    //將編輯按鈕顯現出來 ,關閉原本的3個input框
+                    setUpdateData(false);
+
+                    setLoading(false); // 完成後結束Loading
+
+                    navigate("/editWorker/reload");
+
+                } catch (error) {
+                    console.error('刪除失敗:', error);
+                    alert('刪除失敗，請稍後再試');
+                    setUpdateData(false);
+
+                    setLoading(false); // 完成後結束Loading
+                    // navigate("/editWorker/reload");
+                }
+
+            } else {
+                // 跳出警告，無法刪除足夠的空白行
+                alert("沒有足夠的空白行可以刪除！請檢查資料。");
+                //將編輯按鈕顯現出來 ,關閉原本的3個input框
+                setUpdateData(false);
+
+                setLoading(false); // 完成後結束Loading
+
+
+            }
+        }
 
         /******************************************* */
         // 更新 table1Data
@@ -279,216 +438,13 @@ const SearchForm = () => {
             return data.map(({ workOrderDetails, ...rest }) => rest);
         };
 
-
-        const fetchAllTable1 = async () => {
-
-            try {
-                const response = await fetch(`${globalUrl.url}/api/get-work-orders`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to get 所有工單');
-                }
-
-                const updatedData: any[] = await response.json();
-
-
-                // const updatedData = removeWorkOrderDetails(data);
-                setTable1Data(updatedData);
-
-
-            } catch (error) {
-                console.error('Error fetching token:', error);
-            }
-        };
-
-
-
-        const fetchAllTable2 = async () => {
-            try {
-                const response = await fetch(`${globalUrl.url}/api/get-work-order-details`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to get 所有工單');
-                }
-
-                const data: any[] = await response.json();
-
-
-                //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
-                //並且重新排序順序
-                const mappedData = data.map(item => ({
-                    id: item.id,
-                    workOrderNumber: item.workOrderNumber,
-                    detailId: item.detailId,
-                    SN: item.SN,
-                    QR_RFTray: item.QR_RFTray,
-                    QR_PS: item.QR_PS,
-                    QR_HS: item.QR_HS,
-                    QR_backup1: item.QR_backup1,
-                    QR_backup2: item.QR_backup2,
-                    QR_backup3: item.QR_backup3,
-                    QR_backup4: item.QR_backup4,
-                    note: item.note,
-                    create_date: item.create_date,
-                    create_user: item.create_user,
-                    edit_date: item.edit_date,
-                    edit_user: item.edit_user,
-                    // QR_RFTray_BEDID: item.QR_RFTray_BEDID,
-                    // QR_PS_BEDID: item.QR_PS_BEDID,
-                    // QR_HS_BEDID: item.QR_HS_BEDID,
-                    ...item,
-
-                }));
-
-                //用來將table2的不要欄位過濾掉(quantity,company,partNumber)
-                const filteredData = mappedData.map(({
-                    partNumber,
-                    // workOrderNumber,
-                    company,
-                    quantity,
-                    ...rest
-                }) => rest);
-
-
-                setTable2Data(filteredData);
-
-            } catch (error) {
-                console.error('Error fetching token:', error);
-            }
-        };
-
-        const fetchAllTable3 = async () => {
-            try {
-                const response = await fetch(`${globalUrl.url}/api/get-input-modes`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to get 所有對應表');
-                }
-
-                const data = await response.json();
-                // console.log("table3所有對應 : " + JSON.stringify(data));
-                setTable3Data(data);
-
-            } catch (error) {
-                console.error('Error fetching token:', error);
-            }
-        };
-
-        const fetchAll = () => {
-            fetchAllTable1();
-            fetchAllTable2();
-            fetchAllTable3();
-            // setWorkNo('');
-            // setQuant('');
-            // setPart('');
-            // setModel('');
-            // setTable1Id('');
-        }
-
-
-        // setTable2Data((prevTable2Data: any) => {
-
-        //     //將所有相同的workOderNumber抓出來
-        //     const originalRows = prevTable2Data.filter((row: { workOrderNumber: any; }) => row.workOrderNumber === workNo);
-
-        //     // 更新原有的workOrderNumber資料
-        //     let updatedRows = originalRows.map((row: { workOrderNumber: any;}) => ({
-        //         ...row,
-        //         //逐條比對,如果有新值 , 則更新
-        //         workOrderNumber: updateWorkNo && updateWorkNo !== workNo
-        //             ? updateWorkNo
-        //             : row.workOrderNumber,
-
-        //     }));
-
-        //     // 如果newQuantity大於現有資料數量，新增行
-        //     // 如果小於則不做任何改動
-        //     if (updateWorkQuantity && updateWorkQuantity > originalRows.length) {
-        //         const rowsToAdd = updateWorkQuantity - originalRows.length;
-
-        //         const additionalRows = Array.from({ length: rowsToAdd }, (_, index) => ({
-        //             workOrderNumber: updateWorkNo || workNo, // 如果updateWork有值則使用 , 沒有則用舊的
-        //             detailId: originalRows.length + index + 1,
-        //             sn: '',
-        //             qr_RFTray: '',
-        //             qr_PS: '',
-        //             qr_HS: '',
-        //             qr_backup1: '',
-        //             qr_backup2: '',
-        //             qr_backup3: '',
-        //             qr_backup4: '',
-        //             note: '',
-        //             create_date: today,
-        //             create_user: currentUser,
-        //             edit_date: today,
-        //             edit_user: currentUser,
-        //         }));
-
-        //         updatedRows = [...updatedRows, ...additionalRows]; // 新增的行加到已更新的資料
-        //     }
-
-        //     // 更新整個 table2Data
-        //     return updatedRows;
-        // });
-
-        // setOriginalData(table2Data);
-
-        //在同時更新和新增的情況下，應該先更新需要的workOrderNumber欄位，然後檢查是否需要新增行，最後將所有更新後的資料一起傳送到後端。
-
-        // 將table2Data資料UPDATE資料庫
-        // const fetchUpdateTable2 = async () => {
-        //     try {
-        //         const response = await fetch(`${globalUrl.url}/api/`, {
-        //             method: 'PUT',
-        //             headers: {
-        //                 'Content-Type': 'application/json',
-        //             },
-        //             body: JSON.stringify(table2Data),
-        //         });
-
-        //         if (!response.ok) {
-        //             throw new Error('Failed to 更新Table2');
-        //         } else {
-        //             console.log('完成更新table2');
-        //         }
-
-        //     } catch (error) {
-        //         console.error('Error fetching token:', error);
-        //     }
-        // };
-
-        // fetchUpdateTable2();
-
-
-
-
         //根據料號part , 找出table3該料號對應的model是哪個 , 更新setModel
         const selectedData = table3Data.find((data: any) => data.partNumber === updateWorkPart);
         if (selectedData) {
             setModel(selectedData.inputMode);
         }
 
-        //將編輯按鈕顯現出來 ,關閉原本的3個input框
-        setUpdateData(false);
 
-        setLoading(false); // 完成後結束Loading
-
-        navigate("/editWorker/reload");
     };
 
     /**************************************************************************************************************** */
@@ -629,7 +585,7 @@ const SearchForm = () => {
                 //如果沒有重複 , 將該欄位值更新
 
 
-                console.log("這個欄位的值是 : " + newValue)
+                // console.log("這個欄位的值是 : " + newValue)
                 // if (originalValue !== newValue) {
                 const fetchUpdateRows = async () => {
 
@@ -761,7 +717,7 @@ const SearchForm = () => {
                         updateData[`${colKey}_BEDID`] = extractID(newValue);
                     }
 
-                    console.log("要更新的資料是 : ", JSON.stringify(updateData, null, 2))
+                    // console.log("要更新的資料是 : ", JSON.stringify(updateData, null, 2))
 
                     const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
                         method: 'PUT',
@@ -1117,216 +1073,13 @@ const SearchForm = () => {
         return { rowIndex: -1, column: -1 };
     };
 
-    // "儲存"按鈕 , 將編輯過的資料originalData 新增或更新到table2Data裡面
-    // const handleSaveData = () => {
-
-    //     // 先將相同workOrderNumber的originalData合併到tabel2Data
-    //     const updatedTable2Data = [...table2Data];
-
-    //     //用來PUT更新的幾筆資料到資料庫的
-    //     const updatedRows = [];
-
-    //     //比對相同workOrderNumber
-    //     originalData.forEach((originalRow) => {
-    //         const matchingIndex = updatedTable2Data.findIndex(
-    //             // (tableRow) => tableRow.workOrderNumber === originalRow.workOrderNumber && tableRow.id === originalRow.id
-    //             (tableRow) => tableRow.workOrderNumber === originalRow.workOrderNumber
-    //         );
-
-    //         // 如果找到相同 workOrderNumber 的行，則合併原始資料和現有資料
-    //         if (matchingIndex !== -1) {
-    //             updatedTable2Data[matchingIndex] = {
-    //                 ...updatedTable2Data[matchingIndex],
-    //                 ...originalRow // 使用 originalRow 的數據覆蓋 table2Data 的相同欄位
-    //             };
-    //         }
-    //         // 如果找不到相同 workOrderNumber，將 originalRow 新增到 updatedTable2Data
-    //         else {
-    //             updatedTable2Data.push(originalRow);
-    //         }
-    //     });
-
-    //     //setOriginalData(updatedTable2Data);
-    //     // 將合併後的數據設定回 table2Data
-    //     setTable2Data(updatedTable2Data);
-
-    //     // 這邊用API將table2Data資料更新到DB , PUT
-
-
-    //     // 將相同 workOrderNumber 的行更新table1Data的 editUser 和 editDate
-    //     setTable1Data((prevData: any) =>
-    //         prevData.map((row: any) => {
-    //             if (row.workOrderNumber === workNo) {
-    //                 // 如果 workOrderNumber 匹配，更新 editUser 和 editDate
-    //                 return {
-    //                     ...row,
-    //                     editUser: currentUser,
-    //                     editDate: today,
-    //                 };
-    //             }
-    //             return row; // 如果不匹配，保持原數據不變
-    //         })
-    //     );
-
-    //     // 這邊用API將table1Data資料回存到DB
-
-    //     //save資料後將所有欄位都清空
-    //     // setOriginalData([]);
-    //     setContinueInput(false);
-
-    // };
-
-    // const handleSaveData = async () => {
-
-    //     setLoading(true); // 開始Loading
-
-    //     try {
-
-
-
-    //         // 將相同 workOrderNumber 的行更新table1Data的 editUser 和 editDate
-
-    //         // const updatedTable1Data = table1Data.map((row: any) => {      
-    //         const updatedTable1Data = originalData.map((row: any) => {
-    //             if (row.workOrderNumber === workNo) {
-    //                 // 如果 workOrderNumber 匹配，更新 editUser 和 editDate
-    //                 return {
-    //                     ...row,
-    //                     editUser: currentUser,
-    //                     editDate: today,
-    //                 };
-    //             }
-    //             return row; // 如果不匹配，保持原數據不變
-    //         });
-    //         //測試用setTable1Data(updatedTable1Data);
-
-    //         // console.log("table1要更新的資料:" + JSON.stringify(updatedTable1Data));
-
-    //         // 這邊用API將table1Data資料回存到DB
-    //         // 將所有的table1Data資料UPDATE資料庫
-    //         const fetchUpdateTable1 = async (id: number, updatedData: any) => {
-    //             try {
-    //                 const response = await fetch(`${globalUrl.url}/api/update-work-orders/${id}`, {
-    //                     method: 'PUT',
-    //                     headers: {
-    //                         'Content-Type': 'application/json',
-    //                     },
-    //                     body: JSON.stringify(updatedData),
-    //                 });
-
-    //                 if (!response.ok) {
-    //                     throw new Error('Failed to update work order');
-    //                 } else {
-    //                     console.log(`完成更新table1資料`);
-    //                 }
-    //             } catch (error) {
-    //                 console.error('Error updating work order:', error);
-    //             }
-    //         };
-
-    //         // 只針對相同 workOrderNumber 的行發送 API 請求
-    //         for (const row of updatedTable1Data) {
-    //             // 只發送更新符合 workNo 的資料
-    //             if (row.workOrderNumber === workNo) {
-    //                 // 更新後端資料
-    //                 await fetchUpdateTable1(row.id, {
-    //                     workOrderNumber: row.workOrderNumber,
-    //                     edit_user: currentUser,
-    //                     // editUser: row.editUser,
-    //                     // editDate: row.editDate,
-    //                     quantity: row.quantity,
-    //                     partNumber: row.partNumber,
-    //                     company: company
-
-    //                 });
-    //             }
-    //         }
-
-
-
-
-    //         const updatedTable2Data = [...table2Data];
-    //         const updatedRows: any[] = [];
-
-    //         // 比對相同的 workOrderNumber 和 id，然後更新有修改的欄位
-    //         originalData.forEach((originalRow) => {
-    //             const matchingIndex = updatedTable2Data.findIndex(
-    //                 (tableRow) => tableRow.id === originalRow.id
-    //             );
-
-    //             if (matchingIndex !== -1) {
-    //                 const tableRow = updatedTable2Data[matchingIndex];
-    //                 const updatedRow = { ...tableRow }; // 複製一份現有資料行
-    //                 let hasChanges = false; // 檢查是否有修改
-
-    //                 // 檢查原始資料和現有資料是否有差異
-    //                 Object.keys(originalRow).forEach((key) => {
-    //                     if (tableRow[key] !== originalRow[key]) {
-    //                         updatedRow[key] = originalRow[key];
-    //                         hasChanges = true; // 標記有變更
-    //                     }
-    //                 });
-
-    //                 if (hasChanges) {
-    //                     updatedTable2Data[matchingIndex] = updatedRow;
-    //                     updatedRows.push({ ...tableRow, ...originalRow }); // 將原有資料和修改的資料行加入陣列
-    //                 }
-    //             } else {
-    //                 // 如果找不到相同 id，將 originalRow 新增到 updatedTable2Data
-    //                 updatedTable2Data.push(originalRow);
-    //                 updatedRows.push(originalRow); // 新資料也加入到待發送的陣列
-    //             }
-    //         });
-
-    //         // 更新 table2Data 狀態
-    //         //setTable2Data(updatedTable2Data);
-
-    //         console.log("table2要更新的資料:" + JSON.stringify(updatedRows));
-
-    //         // 將table2有變更的資料"更新"
-    //         if (updatedRows.length > 0) {
-    //             const fetchUpdateRows = async () => {
-    //                 try {
-    //                     const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
-    //                         method: 'PUT',
-    //                         headers: {
-    //                             'Content-Type': 'application/json',
-    //                         },
-    //                         body: JSON.stringify(updatedRows),
-    //                     });
-
-    //                     if (!response.ok) {
-    //                         throw new Error('Failed to 更新已存在資料');
-    //                     } else {
-    //                         console.log('完成table2更新現有資料');
-    //                     }
-    //                 } catch (error) {
-    //                     console.error('Error updating rows:', error);
-    //                 }
-    //             };
-    //             fetchUpdateRows();
-    //         }
-
-
-
-    //         //save資料後將所有欄位都清空
-    //         // setOriginalData([]);
-    //         setContinueInput(false);
-
-    //         setUpdateCell(false);
-    //     } catch (error) {
-    //         console.error("Error saving data:", error);
-    //     } finally {
-    //         setLoading(false); // 完成後結束Loading
-    //     }
-
-    // };
+   
 
 
     const handleDeleteClick = async (id: any, workOrder: any) => {
 
-        console.log("handleDeleteClick接收到的資料:" + id + " , " + workOrder);
-        console.log("table1 ID : " + table1Id);
+        // console.log("handleDeleteClick接收到的資料:" + id + " , " + workOrder);
+        // console.log("table1 ID : " + table1Id);
 
         //const confirmMessage = {formatMessage({ id: 'text9' })};
         const isConfirmed = window.confirm(formatMessage({ id: 'text9' }));
