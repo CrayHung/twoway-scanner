@@ -485,9 +485,11 @@ try {
   public ResponseEntity<String> deleteWorkOrderDetail(@PathVariable Long id) {
     try {
       WorkOrderDetail workOrderDetail = workOrderDetailRepository.findById(id).orElse(null);
+      
       if (workOrderDetail == null) {
         return ResponseEntity.notFound().build();
       }
+      System.out.println("workOrderDetail" + workOrderDetail);
        // ** 新增: 取得工單號供後續使用 **
        String workOrderNumber = workOrderDetail.getWorkOrderNumber();
         

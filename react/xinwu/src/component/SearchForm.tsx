@@ -243,13 +243,11 @@ const SearchForm = () => {
 
 
         setLoading(true); // 開始Loading
-        // console.log("originalData : ", JSON.stringify(originalData, null, 2));
+        console.log("originalData : ", JSON.stringify(originalData, null, 2));
 
 
           // 第二次table2的 API 請求 - 新增資料
           const fetchAddRows = async () => {
-            // console.log("additionalRows", JSON.stringify(additionalRows, null, 2))
-
             try {
                 const response = await fetch(`${globalUrl.url}/api/post-work-order-details`, {
                     method: 'POST',
@@ -359,61 +357,59 @@ const SearchForm = () => {
         if (updateWorkQuantity < quant) {
             // 需要刪除的行數
             const rowsToDelete = quant - updateWorkQuantity;
-            // console.log("rowsToDelete : "+rowsToDelete);
+            console.log("rowsToDelete : "+rowsToDelete);
             // 找出所有欄位都是空字串的行
             const excludedKeys = ["id", "workOrderNumber", "detailId", "create_date", "create_user", "edit_date", "edit_user"];
             const emptyRows = originalData.filter(row =>
                 Object.keys(row).every(key =>
                     excludedKeys.includes(key) || row[key] === ''|| row[key] === null || row[key] === undefined
                 )
-            );
-            // console.log("emptyRows : ", JSON.stringify(emptyRows, null, 2));
+            ).reverse(); // 倒序排列，從最後一筆開始刪除
+            
+            console.log("emptyRows : ", JSON.stringify(emptyRows, null, 2));
 
             // 如果有足夠的空白行可以刪除
             if (emptyRows.length >= rowsToDelete) {
                 // 收集要刪除的行的id
                 const rowsToDeleteIds = emptyRows.slice(0, rowsToDelete).map(row => row.id);
-                // console.log("rowsToDeleteIds : "+rowsToDeleteIds);
+                console.log("rowsToDeleteIds : "+rowsToDeleteIds);
+
 
                 try {
-                    const results = await Promise.all(
-                        rowsToDeleteIds.map(id =>
-                            fetch(`${globalUrl.url}/api/delete-work-order-details/${id}`, {
-                                method: 'DELETE',
-                            }).then(response => {
-                                if (!response.ok) throw new Error(`刪除失敗，ID: ${id}`);
-                                return id;
-                            })
-                        )
-                    );
+
+
+                    for (const id of rowsToDeleteIds) {
+                        await fetch(`${globalUrl.url}/api/delete-work-order-details/${id}`, {
+                          method: 'DELETE',
+                        });
+                      }
 
                     // 更新
                     const updatedData = originalData.filter(row => !rowsToDeleteIds.includes(row.id));
 
 
-                    alert(`成功刪除 ${results.length} 筆資料`);
+                    alert(`成功刪除 ${rowsToDeleteIds.length} 筆資料`);
                     await fetchUpdateTable1();
                     await fetchAll();
 
                     setOriginalData(updatedData);
                     setRows(updateWorkQuantity);
-                    setQuant(updateWorkQuantity);
+                    // setQuant(updateWorkQuantity);
 
                     
                     //將編輯按鈕顯現出來 ,關閉原本的3個input框
                     setUpdateData(false);
 
+                    navigate("/editWorker/reload");
                     setLoading(false); // 完成後結束Loading
 
-                    navigate("/editWorker/reload");
+
 
                 } catch (error) {
                     console.error('刪除失敗:', error);
                     alert('刪除失敗，請稍後再試');
                     setUpdateData(false);
-
                     setLoading(false); // 完成後結束Loading
-                    // navigate("/editWorker/reload");
                 }
 
             } else {
@@ -426,6 +422,8 @@ const SearchForm = () => {
 
 
             }
+
+
         }
 
         /******************************************* */
@@ -1176,16 +1174,6 @@ const SearchForm = () => {
                 setModel('');
 
             }
-
-
-
-
-
-
-
-
-
-
 
 
             setLoading(false); // 完成後結束Loading
