@@ -515,10 +515,12 @@ const SearchForm = () => {
         setEditingCell(null);
     };
     /************************************************************************ */
-    const extractID = (value: string): string | null  => {
-
-        //const match = value.match(/\.\$ID:(.*?)\.\$/);
-        const match = value.match(/\$ID:(.+?)\.\$/);
+    const extractID = (value: string| null | undefined)  => {
+        if (typeof value !== 'string' || value === null || value === undefined) {
+            return null; // 如果值無效，回傳 null
+        }
+        const match = value.match(/\.\$ID:(.*?)\.\$/);
+        //const match = value.match(/\$ID:(.+?)\.\$/);
         return match ? match[1] : null;
     };
 
@@ -571,25 +573,28 @@ const SearchForm = () => {
                         return;
                     }
 
+                    // alert("newID : "+newID);
                     //重複檢查
-                    isDuplicateInDatabase = table2Data.some(
-                        (item: { [x: string]: string; }) => item[colKey] === newValue
-                    );
+                    // isDuplicateInDatabase = table2Data.some(
+                    //     (item: { [x: string]: string; }) => item[colKey] === newValue
+                    // );
 
-                    isDuplicateInUpdatedData = updatedRowData.some(
-                        (item: { [x: string]: string; }) => item[colKey] === newValue
-                    );
+                    // isDuplicateInUpdatedData = updatedRowData.some(
+                    //     (item: { [x: string]: string; }) => item[colKey] === newValue
+                    // );
 
                     // 重複檢查，僅比對 ID 部分
-                    // isDuplicateInDatabase = table2Data.some((item: { [x: string]: string }) => {
-                    //     const itemID = extractID(item[colKey]); // 提取資料庫中該欄位的 ID
-                    //     return itemID === newID; // 比對是否重複
-                    // });
+                    isDuplicateInDatabase = table2Data.some((item: { [x: string]: string }) => {
+                        const itemID = extractID(item[colKey]); // 提取資料庫中該欄位的 ID
+                        // alert("itemID in DB :"+itemID);
+                        return itemID === newID; // 比對是否重複
+                    });
 
-                    // isDuplicateInUpdatedData = updatedRowData.some((item: { [x: string]: string }) => {
-                    //     const itemID = extractID(item[colKey]);
-                    //     return itemID === newID;
-                    // });
+                    isDuplicateInUpdatedData = updatedRowData.some((item: { [x: string]: string }) => {
+                        const itemID = extractID(item[colKey]);
+                        // alert("itemID in update :"+itemID);
+                        return itemID === newID;
+                    });
 
 
                 }

@@ -374,8 +374,17 @@ function AddNewWorker() {
     const [updatedRowData, setUpdatedRowData] = useState<any>([]);
 
     //QR_後面的.$ID~.$的字串取出
-    const extractID = (value: string) => {
+    // const extractID = (value: string) => {
+    //     const match = value.match(/\.\$ID:(.*?)\.\$/);
+    //     return match ? match[1] : null;
+    // };
+
+    const extractID = (value: string| null | undefined)  => {
+        if (typeof value !== 'string' || value === null || value === undefined) {
+            return null; // 如果值無效，回傳 null
+        }
         const match = value.match(/\.\$ID:(.*?)\.\$/);
+        //const match = value.match(/\$ID:(.+?)\.\$/);
         return match ? match[1] : null;
     };
 
@@ -467,6 +476,7 @@ function AddNewWorker() {
 
                     if (newID === null) {
                         alert("字串格式不正確！請確保字串符合規定格式：.$ID:<內容>.$");
+                        setTempValue('');
                         setInputValue(''); // 清空輸入框
                         return;
                     }
@@ -539,6 +549,7 @@ function AddNewWorker() {
 
                     if (isDuplicateInDatabase || isDuplicateInUpdatedData) {
                         alert(`${fieldToCompare} 已存在，請輸入不同的 ${fieldToCompare}`);
+                        setTempValue('');
                         setInputValue(''); // 清空輸入框
                         return;
                     }
@@ -1081,12 +1092,25 @@ function AddNewWorker() {
                     }
 
                     //重複檢查
-                    isDuplicateInDatabase = table2Data.some(
-                        (item: { [x: string]: string; }) => item[colKey] === newValue
-                    );
-                    isDuplicateInUpdatedData = updatedRowData.some(
-                        (item: { [x: string]: string; }) => item[colKey] === newValue
-                    );
+                    // isDuplicateInDatabase = table2Data.some(
+                    //     (item: { [x: string]: string; }) => item[colKey] === newValue
+                    // );
+                    // isDuplicateInUpdatedData = updatedRowData.some(
+                    //     (item: { [x: string]: string; }) => item[colKey] === newValue
+                    // );
+
+                    // 重複檢查，僅比對 ID 部分
+                    isDuplicateInDatabase = table2Data.some((item: { [x: string]: string }) => {
+                        const itemID = extractID(item[colKey]); // 提取資料庫中該欄位的 ID
+                        // alert("itemID in DB :"+itemID);
+                        return itemID === newID; // 比對是否重複
+                    });
+
+                    isDuplicateInUpdatedData = updatedRowData.some((item: { [x: string]: string }) => {
+                        const itemID = extractID(item[colKey]);
+                        // alert("itemID in update :"+itemID);
+                        return itemID === newID;
+                    });
                 }
 
             }
@@ -1146,6 +1170,7 @@ function AddNewWorker() {
                         setData(updatedData);
                         setUpdatedRowData(updatedData);
                         setTempValue(""); // 清空 tempValue
+       
                         console.log('完成資料更新');
                     } catch (error) {
                         console.error('Error updating rows:', error);
