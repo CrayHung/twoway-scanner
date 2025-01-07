@@ -181,6 +181,7 @@ try {
         workOrderDetail.setCreate_user(request.getCreate_user());
         workOrderDetail.setEdit_date(LocalDate.now());
         workOrderDetail.setEdit_user(request.getEdit_user());
+        workOrderDetail.setCartonID(request.getCartonID());
 
         // workOrderDetailRepository.save(workOrderDetail);
         // logger.info("Work order detail saved successfully: {}", workOrderDetail);
@@ -339,6 +340,11 @@ try {
       workOrderDetail.setNote(dto.getNote());
       hasUpdates = true;
   }
+  if (dto.isFieldSet("cartonID")) {
+    workOrderDetail.setCartonID(dto.getCartonID());
+    hasUpdates = true;
+}
+
 
      // 只有在有更新時才設置編輯時間和用戶
         if (hasUpdates || dto.isFieldSet("edit_user")) {
@@ -543,6 +549,7 @@ class WorkOrderDetailRequest {
   private String note;
   private String create_user;
   private String edit_user;
+  private String cartonID;
 
   //新增 BEDID*3
   @JsonProperty("QR_RFTray_BEDID")
@@ -554,6 +561,8 @@ class WorkOrderDetailRequest {
   @JsonProperty("QR_HS_BEDID")
   private String QR_HS_BEDID;
 
+
+
   // 新增一個無參數構造函數
   public WorkOrderDetailRequest() {
   }
@@ -563,7 +572,7 @@ class WorkOrderDetailRequest {
       String QR_RFTray, String QR_PS, String QR_HS,
       String QR_RFTray_BEDID, String QR_PS_BEDID, String QR_HS_BEDID,
       String QR_backup1, String QR_backup2, String QR_backup3,
-      String QR_backup4, String note, String create_user, String edit_user) {
+      String QR_backup4, String note, String create_user, String edit_user , String cartonID) {
     this.workOrderNumber = workOrderNumber;
 
     this.SN = SN;
@@ -580,6 +589,7 @@ class WorkOrderDetailRequest {
     this.note = note;
     this.create_user = create_user;
     this.edit_user = edit_user;
+    this.cartonID = cartonID;
   }
   // Getters and setters for all fields
   // ...
@@ -622,6 +632,14 @@ class WorkOrderDetailRequest {
 
   public void setQR_HS(String qR_HS) {
     QR_HS = qR_HS;
+  }
+
+  public String getCartonID() {
+    return cartonID;
+  }
+  
+  public void setCartonID(String cartonID) {
+    this.cartonID = cartonID;
   }
 
   public String getQR_backup1() {
@@ -707,4 +725,7 @@ public String getQR_HS_BEDID() {
 public void setQR_HS_BEDID(String QR_HS_BEDID) {
     this.QR_HS_BEDID = QR_HS_BEDID;
 }
+
+
+
 }

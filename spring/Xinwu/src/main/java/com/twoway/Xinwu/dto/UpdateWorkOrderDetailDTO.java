@@ -46,7 +46,7 @@ public class UpdateWorkOrderDetailDTO {
 
     private String note;
     private String edit_user;
-
+    private String cartonID;
 
     @JsonAnySetter
     public void handleUnknown(String key, Object value) {
@@ -102,6 +102,18 @@ public class UpdateWorkOrderDetailDTO {
       this.qrHs = qrHs;
       fieldsSet.add("QR_HS");
   }
+
+
+  public String getCartonID() {
+    return cartonID;
+}
+
+public void setCartonID(String cartonID) {
+    this.cartonID = cartonID;
+    fieldsSet.add("cartonID");
+}
+
+
 
   public String getQrRfTrayBedid() {
       return qrRfTrayBedid;
@@ -190,6 +202,13 @@ public class UpdateWorkOrderDetailDTO {
       this.edit_user = edit_user;
       fieldsSet.add("edit_user");
   }
+
+
+      
+
+
+
+
 
   public boolean isFieldSet(String fieldName) {
       return fieldsSet.contains(fieldName);

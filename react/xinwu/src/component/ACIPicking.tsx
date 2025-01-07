@@ -35,6 +35,10 @@ const ACIPicking = () => {
     //for modal 合併用
     const [selectedWorkOrder, setSelectedWorkOrder] = useState<string | null>(null);
 
+    //for palletName
+    const [palletName, setPalletName] = useState('');
+    const [palletDetails, setPalletDetails] = useState([]);
+
 
 
     //下載.xlxs
@@ -47,7 +51,7 @@ const ACIPicking = () => {
 
     };
 
-
+    //for 出貨
     const handleActionOne = async () => {
         alert("刪除" + selectedRows);
         alert("下載xlsx");
@@ -60,6 +64,7 @@ const ACIPicking = () => {
 
     };
 
+    //for 合併
     const handleActionTwo = () => {
         setShowModal(true);
     };
@@ -71,45 +76,52 @@ const ACIPicking = () => {
         );
     };
 
-    const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.checked) {
-            const allIds = showTableData.map((row) => row.id);
-            setSelectedRows(allIds);
-        } else {
-            setSelectedRows([]);
-        }
-    };
+    // const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    //     if (event.target.checked) {
+    //         const allIds = palletDetails.map((row) => row.id);
+    //         setSelectedRows(allIds);
+    //     } else {
+    //         setSelectedRows([]);
+    //     }
+    // };
 
 
 
     const fetchData = async () => {
         setTableView(true);
-        const requestBody = { QR_PS: [1] };
 
 
+        if (!palletName.trim()) {
+            alert('請輸入有效的 Pallet Name');
+            setTableView(false);
+            return;
+        }
 
         try {
-            const response = await fetch(`${globalUrl.url}/api/snfuzzy-search-details `, {
+            const response = await fetch(`${globalUrl.url}/api/get-pallet-details`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ pallet_name: palletName }),
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to get 所有對應表');
+            if (response.ok) {
+                const data = await response.json();
+                setPalletDetails(data);
+            } else {
+                console.error('無法取得 Pallet 資料:', response.statusText);
+                setPalletDetails([]);
             }
-
-            const data = await response.json();
-            console.log(data);
-            setShowTableData(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error('Error fetching data:', error);
+            console.error('Error fetching pallet details:', error);
+            setPalletDetails([]);
         }
     };
 
     useEffect(() => {
-        console.log(showTableData);
-    }, [showTableData]);
+        console.log(palletDetails);
+    }, [palletDetails]);
 
 
     const handleConfirm = () => {
@@ -171,10 +183,32 @@ const ACIPicking = () => {
             </Modal>
 
             {!tableView &&
-                <input type="text" onChange={fetchData} placeholder="掃描barcode" />
+                // <input type="text" onChange={fetchData} placeholder="掃描barcode" />
+
+                <div style={{ marginBottom: '10px' }}>
+                <label htmlFor="palletName">Pallet Name: </label>
+                <input
+                    type="text"
+                    id="palletName"
+                    value={palletName}
+                    onChange={(e) => setPalletName(e.target.value)}
+                    placeholder="輸入 Pallet Name"
+                    style={{ padding: '5px', width: '250px' }}
+                />
+                <button
+                    onClick={fetchData}
+                    style={{
+                        marginLeft: '10px',
+                        padding: '5px 10px',
+                        cursor: 'pointer',
+                    }}
+                >
+                    查詢
+                </button>
+            </div>
             }
 
-            {tableView && showTableData.length > 0 && (
+            {tableView && palletDetails.length > 0 && (
                 <>
                     <div style={{ marginBottom: '10px' }}>
                         <Button variant="outlined" color="secondary" onClick={handleActionOne} >
@@ -194,24 +228,24 @@ const ACIPicking = () => {
                                         <Checkbox
                                             indeterminate={
                                                 selectedRows.length > 0 &&
-                                                selectedRows.length < showTableData.length
+                                                selectedRows.length < palletDetails.length
                                             }
-                                            checked={selectedRows.length === showTableData.length}
-                                            onChange={handleSelectAll}
+                                            checked={selectedRows.length === palletDetails.length}
+                                            // onChange={handleSelectAll}
                                         />
                                     </TableCell>
 
                                     <TableCell>ID</TableCell>
-                                    <TableCell>Work Order Number</TableCell>
-                                    <TableCell>QR_PS</TableCell>
-                                    <TableCell>QR_HS</TableCell>
-                                    <TableCell>QR_RF_TRAY</TableCell>
-                                    <TableCell>Part Number</TableCell>
-                                    <TableCell>Company</TableCell>
+                                    <TableCell>palletName</TableCell>
+                                    <TableCell>workOrderNumber</TableCell>
+                                    <TableCell>sn</TableCell>
+                                    <TableCell>qrRftrayBedid</TableCell>
+                                    <TableCell>qrPsBedid</TableCell>
+                                    <TableCell>qrHsBedid</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {showTableData.map((row: any) => (
+                                {palletDetails.map((row: any) => (
                                     <TableRow key={row.id}>
 
                                         <TableCell padding="checkbox">
@@ -222,12 +256,12 @@ const ACIPicking = () => {
                                         </TableCell>
 
                                         <TableCell>{row.id}</TableCell>
+                                        <TableCell>{row.palletName}</TableCell>
                                         <TableCell>{row.workOrderNumber}</TableCell>
-                                        <TableCell>{row.QR_PS_BEDID}</TableCell>
-                                        <TableCell>{row.QR_HS_BEDID}</TableCell>
-                                        <TableCell>{row.QR_RFTray_BEDID}</TableCell>
-                                        <TableCell>{row.partNumber}</TableCell>
-                                        <TableCell>{row.company || 'N/A'}</TableCell>
+                                        <TableCell>{row.sn}</TableCell>
+                                        <TableCell>{row.qrRftrayBedid}</TableCell>
+                                        <TableCell>{row.qrPsBedid}</TableCell>
+                                        <TableCell>{row.qrHsBedid || 'N/A'}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>

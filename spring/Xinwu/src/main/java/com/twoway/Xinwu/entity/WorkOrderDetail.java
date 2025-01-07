@@ -68,6 +68,9 @@ public class WorkOrderDetail {
     @Column(name = "edit_user")
     private String edit_user;
 
+    @Column(name = "cartonID")
+    private String cartonID;
+
     // 建立 work_order_number 為關聯第一層與第二層表單的項目
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "work_order_number", referencedColumnName = "work_order_number")
@@ -143,6 +146,16 @@ public class WorkOrderDetail {
         this.qrHs = qrHs;
     }
 
+        
+    public String getCartonID() {
+        return cartonID;
+    }
+
+    public void setCartonID(String cartonID) {
+        this.cartonID = cartonID;
+    }
+    
+    
     @JsonProperty("QR_backup1")
     public String getQrBackup1() {
         return qrBackup1;
@@ -222,6 +235,11 @@ public class WorkOrderDetail {
     public void setEdit_user(String edit_user) {
         this.edit_user = edit_user;
     }
+
+
+
+
+
 
     // Parent 類別的 WorkOrder 設定
     public WorkOrder getWorkOrder() {

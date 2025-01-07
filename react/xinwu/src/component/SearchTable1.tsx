@@ -295,7 +295,7 @@ const SearchTable1 = () => {
                 }
                 const data: any[] = await response.json();
                 console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
-    
+
 
                 //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
                 //並且重新排序順序
@@ -563,7 +563,7 @@ const SearchTable1 = () => {
     /******************************************************** */
     //達運專用(棧板SN)下載excel (xlsx中不包含標題 項次,SN)
     /********************************************************* */
-    const handleDownloadTwowayExcel = () => {
+    const handleDownloadTwowayExcel = async () => {
 
         //根據原始資料(dataForDownload)的partNumber做資料分組
         const groupedData = dataForDownload.reduce((acc: any, item: any) => {
@@ -576,9 +576,13 @@ const SearchTable1 = () => {
             }
             return acc;
         }, {});
-        // console.log("groupedData:", JSON.stringify(groupedData, null, 2));
+        console.log("groupedData:", JSON.stringify(groupedData, null, 2));
 
-        // Step 2: 根據每個PartNumber對應的number_per_pallet去產生資料
+        //for ACI
+        const palletDataToSave: any[] = [];
+        const palletDetailToSave: any[] = [];
+
+        // 根據每個PartNumber對應的number_per_pallet去產生資料
         Object.keys(groupedData).forEach(partNumber => {
             const numberPerPallet = table3Data.find((entry: any) => entry.partNumber === partNumber)?.numberPerPallet;
             const worksheetData = groupedData[partNumber].map((item: any, index: any) => ({
@@ -593,8 +597,8 @@ const SearchTable1 = () => {
             for (let i = 0; i < worksheetData.length; i += numberPerPallet) {
                 let sheetData = worksheetData.slice(i, i + numberPerPallet);
 
+
                 let formattedSheetData: any[] = [];
-                let currentColumn = 0;
 
                 // 每25筆資料將資料從AB欄位換到CD欄位
                 sheetData.forEach((data: any, index: any) => {
@@ -615,10 +619,72 @@ const SearchTable1 = () => {
                 } else {
                     console.log("sheet Data為空");
                 }
+
+
+                // 收集需要儲存到pallet資料庫的資料
+                const palletName = `${partNumber}_${new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15)}`;
+                palletDataToSave.push({
+                    quantity: sheetData.length,
+                    palletName
+                });
+
+                // for pallet details
+                sheetData.forEach((item: any) => {
+                    palletDetailToSave.push({
+                        palletName,
+                        sn: item.SN,
+                        qr: item.qr
+                    });
+                });
             }
 
-            XLSX.writeFile(workbook, `${partNumber}.xlsx`);
+            // XLSX.writeFile(workbook, `${partNumber}.xlsx`);
         });
+
+
+
+        //ACI 新增pallet API
+        try {
+            const response = await fetch(`${globalUrl.url}/api/post-pallet`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(palletDataToSave),
+            });
+
+            if (response.ok) {
+                console.log('Pallet data saved successfully');
+            } else {
+                console.error('Failed to save pallet data');
+            }
+        } catch (error) {
+            console.error('Error while saving pallet data:', error);
+        }
+
+
+        // ACI 新增 pallet_detail API
+        try {
+            const detailResponse = await fetch(`${globalUrl.url}/api/post-pallet-details`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(palletDetailToSave),
+            });
+
+            if (detailResponse.ok) {
+                console.log('Pallet details saved successfully');
+            } else {
+                console.error('Failed to save pallet details');
+            }
+        } catch (error) {
+            console.error('Error while saving pallet details:', error);
+        }
+
+
+
+
     }
     /********************************************************* */
 
@@ -976,7 +1042,7 @@ const SearchTable1 = () => {
                             style={{
                                 height: "100%",
                                 overflowY: "hidden",
-                                overflowX: "auto", 
+                                overflowX: "auto",
                             }}
                             onWheel={(e) => {
                                 const container = e.currentTarget;

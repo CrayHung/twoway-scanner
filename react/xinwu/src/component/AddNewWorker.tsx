@@ -190,6 +190,7 @@ function AddNewWorker() {
             QR_RFTray: '',
             QR_PS: '',
             QR_HS: '',
+            cartonID: '',
             QR_backup1: '',
             QR_backup2: '',
             QR_backup3: '',
@@ -202,6 +203,7 @@ function AddNewWorker() {
             QR_RFTray_BEDID: '',
             QR_HS_BEDID: '',
             QR_PS_BEDID: ''
+
         }));
 
         // setData(newData);
@@ -238,6 +240,7 @@ function AddNewWorker() {
                     QR_RFTray: item.QR_RFTray,
                     QR_PS: item.QR_PS,
                     QR_HS: item.QR_HS,
+                    cartonID: item.cartonID,
                     QR_backup1: item.QR_backup1,
                     QR_backup2: item.QR_backup2,
                     QR_backup3: item.QR_backup3,
@@ -394,6 +397,7 @@ function AddNewWorker() {
                 else if (currentColumn === 2) fieldToCompare = "QR_RFTray";
                 else if (currentColumn === 3) fieldToCompare = "QR_PS";
                 else if (currentColumn === 4) fieldToCompare = "QR_HS";
+                else if (currentColumn === 5) fieldToCompare = "cartonID";
 
                 // 比對資料庫 (table2Data) 和已輸入資料 (updatedData)
                 let isDuplicateInDatabase = false;
@@ -521,7 +525,68 @@ function AddNewWorker() {
 
                     // 移動到下一個欄位或下一行
                     moveToNextColumnOrRow();
-                } else {
+                } else if (fieldToCompare === "cartonID") {
+                    const newID = extractID(newValue);
+
+                    if (newID === null) {
+                        alert("字串格式不正確！請確保字串符合規定格式：.$ID:<內容>.$");
+                        setInputValue(''); // 清空輸入框
+                        return;
+                    }
+
+                    isDuplicateInDatabase = table2Data.some((item: { [x: string]: string; }) => extractID(item[fieldToCompare]) === extractID(newValue));
+                    isDuplicateInUpdatedData = updatedData.some((item, index) => index < currentRow && extractID(item[fieldToCompare]) === extractID(newValue));
+
+                    if (isDuplicateInDatabase || isDuplicateInUpdatedData) {
+                        alert(`${fieldToCompare} 已存在，請輸入不同的 ${fieldToCompare}`);
+                        setInputValue(''); // 清空輸入框
+                        return;
+                    }
+
+                    updatedRow[`${fieldToCompare}`] = newValue;
+                    updatedRow.edit_user = currentUser;
+                    updatedRow.edit_date = today;
+                    updatedData[currentRow] = updatedRow;
+                    setData(updatedData); // 更新整體表格資料
+                    setUpdatedRowData(updatedData);
+                    setInputValue(''); // 清空輸入框
+
+
+
+                    /**新增PUT即時更新剛行的資料到table2 */
+                    const fetchUpdateRows = async () => {
+                        setLoading(true); // 開始Loading
+                        try {
+                            const response = await fetch(`${globalUrl.url}/api/update-work-order-details`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify([{
+                                    id: data[rowIndex].id,
+                                    [fieldToCompare]: newValue,
+                                    edit_user: currentUser
+                                }]),
+                            });
+
+                            if (!response.ok) {
+                                throw new Error('Failed to 更新');
+                            } else {
+                                console.log('完成table2更新現有資料');
+                            }
+                        } catch (error) {
+                            console.error('Error updating rows:', error);
+                        } finally {
+                            setLoading(false); // 完成後結束Loading
+                        }
+                    };
+                    fetchUpdateRows();
+
+
+
+                    // 移動到下一個欄位或下一行
+                    moveToNextColumnOrRow();}
+                    else {
 
 
                     updatedRow[fieldToCompare] = newValue;
@@ -979,10 +1044,12 @@ function AddNewWorker() {
     const handleKeyDown = async (event: React.KeyboardEvent<HTMLInputElement>, rowIndex: number, colKey: string) => {
 
         if (event.key === "Enter") {
+            event.preventDefault();
             // alert("原本的值:" + originalData[rowIndex][colKey])
 
-            const checkColumn = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS'];
+            const checkColumn = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS','cartonID'];
             let isDuplicateInDatabase = false;
+            let isDuplicateInUpdatedData = false;
 
             const newValue = tempValue;
             // alert("輸入的值:" + newValue)
@@ -992,6 +1059,7 @@ function AddNewWorker() {
             // 若是空字串，視為不重複
             if (newValue === "") {
                 isDuplicateInDatabase = false;
+                isDuplicateInUpdatedData = false;
                 //指定的比對欄位
             } else if (checkColumn.includes(colKey)) {
 
@@ -999,6 +1067,9 @@ function AddNewWorker() {
                     isDuplicateInDatabase = table2Data.some(
                         (item: { [x: string]: string }) => item[colKey] === newValue
                     );
+                    isDuplicateInUpdatedData = updatedRowData.some(
+                        (item: { [x: string]: string; }, index: number) => item[colKey] === newValue);
+                    
                 } else {
                     //格式檢查
                     const newID = extractID(newValue);
@@ -1013,6 +1084,9 @@ function AddNewWorker() {
                     isDuplicateInDatabase = table2Data.some(
                         (item: { [x: string]: string; }) => item[colKey] === newValue
                     );
+                    isDuplicateInUpdatedData = updatedRowData.some(
+                        (item: { [x: string]: string; }) => item[colKey] === newValue
+                    );
                 }
 
             }
@@ -1020,7 +1094,7 @@ function AddNewWorker() {
             const originalValue = table2Data.find((item: any) => item.id === data[rowIndex].id)?.[colKey];
             //如果和資料庫資料重複 , 則將渲染的table改回原值
             // if (newValue.trim() !== "" && isDuplicateInDatabase) {
-            if (isDuplicateInDatabase) {
+            if (isDuplicateInDatabase|| isDuplicateInUpdatedData) {
                 alert(`${colKey} 已存在，請輸入不同的 ${colKey}`);
                 setTempValue('');
 
@@ -1050,7 +1124,7 @@ function AddNewWorker() {
                             edit_user: currentUser,
                         };
 
-                        if (checkColumn.includes(colKey) && colKey !== 'SN') {
+                        if (checkColumn.includes(colKey) && colKey !== 'SN' && colKey !== 'cartonID') {
                             updateData[`${colKey}_BEDID`] = extractID(newValue);
                         }
 
@@ -1070,6 +1144,7 @@ function AddNewWorker() {
                         const updatedData = [...data];
                         updatedData[rowIndex][colKey] = newValue;
                         setData(updatedData);
+                        setUpdatedRowData(updatedData);
                         setTempValue(""); // 清空 tempValue
                         console.log('完成資料更新');
                     } catch (error) {
@@ -1183,6 +1258,7 @@ function AddNewWorker() {
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'cartonID' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
@@ -1298,7 +1374,11 @@ function AddNewWorker() {
                                                                         transform: 'translate(-50%, -50%)',
                                                                         zIndex: 1002,
                                                                     }}
-                                                                    onBlur={() => setIsEditing(false)}
+                                                                    onBlur={
+                                                                        () => {
+                                                                            setIsEditing(false);
+                                                                            setClickedCell(null); // 清除紅框
+                                                                        }}
                                                                 />
                                                             </>
                                                         ) : (
