@@ -137,6 +137,10 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [table2Data, setTable2Data] = useState([]);
 
 
+  const [palletName, setPalletName] = useState(''); //紀錄目前選到的是哪個pallet
+
+  
+
   const contextValue = {
     company,
     setCompany,
@@ -177,7 +181,11 @@ export const GlobalUrlProvider: React.FC<{ children: ReactNode }> = ({ children 
     setCurrentUser,
 
     table1Id,
-    setTable1Id
+    setTable1Id,
+    palletName, 
+    setPalletName
+
+
   };
 
 

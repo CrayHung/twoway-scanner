@@ -1,0 +1,109 @@
+[33m02e1f0a[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m Remove large files and update .gitignore
+[33mfa2bba2[m 刪除zip
+[33mb0906aa[m for ACI第一 次小測
+[33mf99ff0e[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m 修正修改工單號碼錯誤的錯誤,新增CartonID欄位
+[33m05864ba[m fail
+[33mc51d185[m 修正編輯葉面的修改工單數量邏輯
+[33m4397e5e[m 新增頁面編輯單元格也改用大input+編輯頁面修改工單資料數量時可連動刪除
+[33m9c852df[m 調整Y軸bar
+[33m17a8891[m 修正起始結束時間邏輯,欄位名稱
+[33mcbc6bf1[m 1209修正
+[33meb92d9e[m 更新編輯供單細項要按enter才進行更新判斷
+[33m8488a23[m 更新
+[33mf54b40f[m 當刪除最後一筆資料時,整個work-order刪掉
+[33m65df3d8[m 在修正
+[33mfc6cf67[m 修正searchForm css+刪除時更新table1數量
+[33mca43156[m 判斷重複或格式修正
+[33m08269e0[m 編輯時重複判斷或隔是判斷做在onKeyDown還不行
+[33m91635a1[m Merge branch 'main' of https://github.com/CrayHung/twoway-scanner
+[33m805c2b4[m stash
+[33m57bb7f7[m 已修正 在 編輯功能 Put API 中，若將項目填入 null 就可清空該項目，沒有傳入的項目就會維持原樣; 並修正 API_Readme 範例
+[33m9afd707[m  刪除後重新{UTtable1
+[33mff16bef[m Merge branch 'main' of https://github.com/CrayHung/twoway-scanner
+[33m9063573[m 編輯工單-刪除細項時,PUT更新table1數量
+[33m670b9ea[m 初步優化 workOrderDetail Post 方法處理效率，從50筆約500ms減少至 160 ms; 200 筆約為 600-900ms
+[33mcca550f[m 修正查詢工單中如果填入某些東西又刪除欄位會消失,編輯工單如果條件都沒設查出全部
+[33mb480ca4[m conflict merge
+[33mee6988e[m 11/25
+[33mc2fc666[m Fix partTable.tsx
+[33m53b795f[m Merge branch 'main' of https://github.com/CrayHung/twoway-scanner
+[33mbc0573b[m 根據1106xlsx的11/22驗收項目更新
+[33mb8431c2[m 修正 第一層 update api 回傳第二層 data 的問題; 新增AOP功能監看DB執行API的消耗時間, 須重新 ./gradlew build
+[33m7c1f084[m Merge branch 'main' of https://github.com/CrayHung/twoway-scanner
+[33m9a6a7b6[m stash
+[33m0241f0d[m 修正第一層表單搜尋回傳時，不顯示第二層表單的data
+[33mc3a74a1[m Merge branch 'main' of https://github.com/CrayHung/twoway-scanner
+[33m54d1fef[m 改為每個單元格都PUT更新
+[33m1931d0c[m 修正第二層表單，第一層表單項目的Parent 字樣拿掉
+[33m9aa046d[m 修正第一層表單 get all 會出現 第二層資料的問題，改為不顯示
+[33ma661d40[m 新增 第一次輸入時檢查重複用的 PUT API ; API_readme 更新
+[33m5fccb66[m Merge branch 'main' of https://github.com/CrayHung/twoway-scanner
+[33m34644f8[m pull update for 3BEDID
+[33m7f91671[m 新增 BEDID *3 欄位, 並修正所有 API DTO 與 SearchService 以符合新欄位; API_Reedme 更新
+[33m1f549cf[m Merge branch 'main' of https://github.com/CrayHung/twoway-scanner
+[33mcce7a6b[m pull table1 search
+[33m35f3f2d[m 修改 第一層表單 API readme; 修正第二層 表單刪除時, detail_id 的計數方式
+[33mef85fe0[m 新增 第一層工單之 工單模糊搜尋 & 日期範圍搜尋 API
+[33m15c8690[m fix conflict
+[33m1f4cd51[m 新增company+link刷新頁面
+[33m8296f91[m 1. 修正 update 時, 傳入 null or 空值 會造成原始檔案被覆寫成 null 的問題，改為遇到 null or 空值則跳過update維持原本項目data; 2. 修正 DataLoder 在開發時啟動spring時先檢查是否已有使用者存在，避免重複新增使用者，造成系統崩潰
+[33m047f7ae[m 更換承NUC IP
+[33m3dbbe8f[m 更正ip
+[33m128e728[m 新增重置密碼
+[33m89d84a1[m qr->QR
+[33mfda975a[m 修改css,增加搜尋QR_HS
+[33mf7e689f[m 改成server ip
+[33m42411c3[m 功能修正
+[33m7c59b93[m Merge branch 'main' of https://github.com/CrayHung/twoway-scanner :
+[33maa4c09b[m stash
+[33m642e145[m 修正空值 或 無符合項目會返回所有data的 bug, 目前輸入空白/無符合會返回空值並出現 console 表示搜尋無符合
+[33mece85a9[m 修正 搜尋api, 統一工單變數為 workOrderNumber
+[33m825ef77[m 前端權限管理
+[33m23540db[m 帳號腳色顯示不同內容
+[33m419c5c3[m 料號對影表+前端使用admin帳號才可register
+[33mb6eaba8[m Merge branch 'main' of https://github.com/CrayHung/twoway-scanner
+[33mbaa0d8d[m 新增料號對應表版本1
+[33m9b80368[m Merge branch 'main' of github.com:CrayHung/twoway-scanner
+[33m257bf41[m 更新Input Mode表格與API
+[33m36205a9[m Add files via upload
+[33m5d61727[m 串接搜尋的API
+[33m4576b9b[m 前端更新1+修改post-work-order-details
+[33mcfbe460[m merge
+[33m9b132e5[m 前端功能更新
+[33m38d9309[m 修正 第一層 與 第二層表單 的 update 連動
+[33m56ba679[m 新增第三表格（料號與輸入模式）的 API readme 更新
+[33m21c61db[m 更新 update API 可傳多組data更新, 更新 api readme 文件
+[33m7ef40d7[m post 時檢查 workOrdernumber 是否已存在於第一層表單 workOrder 中, 若沒有會返回錯誤console 訊息
+[33ma537a0f[m 註解一直出現錯誤的LPR檔案，新增 post 可傳入 array 功能，並且可判斷是否超過 parentQuantity
+[33mfafba14[m 整合搜尋，分為 sn 範圍 與 sn 模糊兩種 api, 日期皆為範圍, 其餘項目模糊, 並更新 api readme 的搜尋部分
+[33m2aca57f[m 範圍搜尋修正，但尚未修正整合日期範圍與模糊搜尋
+[33m0c354b5[m 模糊搜尋完成
+[33mf5ebe78[m 調整欄位名稱，搜尋尚未測試完成
+[33mcbe6ec2[m 模糊搜尋雛形（未完成），調整欄位名稱  (SN)
+[33mb4be228[m 新增 序號 sn 的範圍搜尋, 將 parent 屬性的 workOrderNumber 都加上 parent 以供辨識其為 parent 屬性, 並測試 post 無問題
+[33me0d23ac[m 新增 table 3 InputMode
+[33m592565f[m 將 table1 inputmode 修改為 company, 暫時擱置中文 utf-8 的問題
+[33md3a6856[m 新增 input mode 欄位（待修改至 table 3 ); 建立 table1 & 2 JPA 關聯 ( 在 json 中每一項目可 call 出 parent / child 的屬性 ), ver1
+[33m55b1f53[m Upload 同Kevin_Lin與洪經理討論0930.pdf
+[33m311f964[m 新增 API 文件位置 /spring/Xinwu/API_README.md
+[33m283761a[m 更新 workorderDetail (表單二）之 put, del, search API ; workOrder (表單一）之 put, del, search API. API 測試已完成
+[33mf2ba87a[m 第二層 POST 功能測試成功
+[33me479377[m 0925 reset 正常可啟動設定
+[33m207392b[m 後端新增第二層 workOrderDetail 表單 ver 1, 初步 get ok 但測試未完成
+[33m36af7dc[m Upload 同Kevin_Lin與洪經理討論0913.pdf
+[33m19be22a[m update 4 項 create user, create date,  edit user, edit date 到欄位中, 並postman測試完畢
+[33md7be096[m 新增 get API 並加入 url 到白名單
+[33mdae1ec5[m 調整 init.sql 設定，排除 refresh_token 因未建立 users 導致的 Insert 錯誤，並加入 POST API 進白名單測試，加入假資料成功
+[33md877cac[m API controller ver1 未測試, Mysql 尚未輸入假資料成功
+[33m4afa67b[m react,spring分離說明
+[33m8b5a355[m 將react,spring先從docker-compose分離
+[33maffa7ed[m 新增使用說明README.md
+[33m3628f72[m 架構
+[33mab2dd84[m 更新websocket-no work?
+[33md1ab1d8[m 增加測速邏輯
+[33m95014c1[m JWT + JWT refresh token
+[33m4fd6b67[m commit
+[33m62648a4[m 可部屬於195了
+[33m4826f9e[m spring,mysql,react,nginx分離
+[33mae0db59[m first commit
+[33me3a477a[m Initial commit

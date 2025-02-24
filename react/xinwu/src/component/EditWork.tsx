@@ -157,7 +157,7 @@ const EditWork = () => {
                 QR_RFTray: item.QR_RFTray,
                 QR_PS: item.QR_PS,
                 QR_HS: item.QR_HS,
-                cartonID: item.cartonID,
+                cartonName: item.cartonName,
                 QR_backup1: item.QR_backup1,
                 QR_backup2: item.QR_backup2,
                 QR_backup3: item.QR_backup3,

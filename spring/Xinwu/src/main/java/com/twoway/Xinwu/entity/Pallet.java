@@ -1,26 +1,48 @@
 package com.twoway.Xinwu.entity;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
+@Table(name = "pallet")
 public class Pallet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private int quantity;
+    @Column(name = "pallet_name")
     private String palletName;
+    @Column(name = "max_quantity")
+    private int maxQuantity;
+    @Column(name = "quantity")
+    private int quantity;
+    @Column(name = "location")
+    private String location= "INSP";
+
     private LocalDateTime createdAt = LocalDateTime.now();
+
 
     public Long getId() {
         return this.id;
     }
 
     public void setId(Long id) {
-        this.id=id;
+        this.id = id;
     }
 
     public Integer getQuantity() {
@@ -28,7 +50,15 @@ public class Pallet {
     }
 
     public void setQuantity(Integer quantity) {
-        this.quantity=quantity;
+        this.quantity = quantity;
+    }
+
+    public Integer getMaxQuantity() {
+        return this.maxQuantity;
+    }
+
+    public void setMaxQuantity(Integer maxQuantity) {
+        this.maxQuantity = maxQuantity;
     }
 
     public String getPalletName() {
@@ -36,8 +66,15 @@ public class Pallet {
     }
 
     public void setPalletName(String palletName) {
-        this.palletName=palletName;
+        this.palletName = palletName;
     }
-  
+
+    public String getLocation() {
+        return this.location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
 
 }

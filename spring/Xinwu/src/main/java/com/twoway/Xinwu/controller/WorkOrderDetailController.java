@@ -181,7 +181,7 @@ try {
         workOrderDetail.setCreate_user(request.getCreate_user());
         workOrderDetail.setEdit_date(LocalDate.now());
         workOrderDetail.setEdit_user(request.getEdit_user());
-        workOrderDetail.setCartonID(request.getCartonID());
+        workOrderDetail.setCartonName(request.getCartonName());
 
         // workOrderDetailRepository.save(workOrderDetail);
         // logger.info("Work order detail saved successfully: {}", workOrderDetail);
@@ -340,8 +340,8 @@ try {
       workOrderDetail.setNote(dto.getNote());
       hasUpdates = true;
   }
-  if (dto.isFieldSet("cartonID")) {
-    workOrderDetail.setCartonID(dto.getCartonID());
+  if (dto.isFieldSet("cartonName")) {
+    workOrderDetail.setCartonName(dto.getCartonName());
     hasUpdates = true;
 }
 
@@ -549,7 +549,7 @@ class WorkOrderDetailRequest {
   private String note;
   private String create_user;
   private String edit_user;
-  private String cartonID;
+  private String cartonName;
 
   //新增 BEDID*3
   @JsonProperty("QR_RFTray_BEDID")
@@ -572,7 +572,7 @@ class WorkOrderDetailRequest {
       String QR_RFTray, String QR_PS, String QR_HS,
       String QR_RFTray_BEDID, String QR_PS_BEDID, String QR_HS_BEDID,
       String QR_backup1, String QR_backup2, String QR_backup3,
-      String QR_backup4, String note, String create_user, String edit_user , String cartonID) {
+      String QR_backup4, String note, String create_user, String edit_user , String cartonName) {
     this.workOrderNumber = workOrderNumber;
 
     this.SN = SN;
@@ -589,7 +589,7 @@ class WorkOrderDetailRequest {
     this.note = note;
     this.create_user = create_user;
     this.edit_user = edit_user;
-    this.cartonID = cartonID;
+    this.cartonName = cartonName;
   }
   // Getters and setters for all fields
   // ...
@@ -634,12 +634,12 @@ class WorkOrderDetailRequest {
     QR_HS = qR_HS;
   }
 
-  public String getCartonID() {
-    return cartonID;
+  public String getCartonName() {
+    return cartonName;
   }
   
-  public void setCartonID(String cartonID) {
-    this.cartonID = cartonID;
+  public void setCartonName(String cartonName) {
+    this.cartonName = cartonName;
   }
 
   public String getQR_backup1() {

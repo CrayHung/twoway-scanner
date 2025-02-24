@@ -190,7 +190,7 @@ function AddNewWorker() {
             QR_RFTray: '',
             QR_PS: '',
             QR_HS: '',
-            cartonID: '',
+            cartonName: '',
             QR_backup1: '',
             QR_backup2: '',
             QR_backup3: '',
@@ -240,7 +240,7 @@ function AddNewWorker() {
                     QR_RFTray: item.QR_RFTray,
                     QR_PS: item.QR_PS,
                     QR_HS: item.QR_HS,
-                    cartonID: item.cartonID,
+                    cartonName: item.cartonName,
                     QR_backup1: item.QR_backup1,
                     QR_backup2: item.QR_backup2,
                     QR_backup3: item.QR_backup3,
@@ -379,7 +379,7 @@ function AddNewWorker() {
     //     return match ? match[1] : null;
     // };
 
-    const extractID = (value: string| null | undefined)  => {
+    const extractID = (value: string | null | undefined) => {
         if (typeof value !== 'string' || value === null || value === undefined) {
             return null; // 如果值無效，回傳 null
         }
@@ -406,7 +406,7 @@ function AddNewWorker() {
                 else if (currentColumn === 2) fieldToCompare = "QR_RFTray";
                 else if (currentColumn === 3) fieldToCompare = "QR_PS";
                 else if (currentColumn === 4) fieldToCompare = "QR_HS";
-                else if (currentColumn === 5) fieldToCompare = "cartonID";
+                else if (currentColumn === 5) fieldToCompare = "cartonName";
 
                 // 比對資料庫 (table2Data) 和已輸入資料 (updatedData)
                 let isDuplicateInDatabase = false;
@@ -535,7 +535,7 @@ function AddNewWorker() {
 
                     // 移動到下一個欄位或下一行
                     moveToNextColumnOrRow();
-                } else if (fieldToCompare === "cartonID") {
+                } else if (fieldToCompare === "cartonName") {
                     const newID = extractID(newValue);
 
                     if (newID === null) {
@@ -596,8 +596,9 @@ function AddNewWorker() {
 
 
                     // 移動到下一個欄位或下一行
-                    moveToNextColumnOrRow();}
-                    else {
+                    moveToNextColumnOrRow();
+                }
+                else {
 
 
                     updatedRow[fieldToCompare] = newValue;
@@ -1058,7 +1059,7 @@ function AddNewWorker() {
             event.preventDefault();
             // alert("原本的值:" + originalData[rowIndex][colKey])
 
-            const checkColumn = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS','cartonID'];
+            const checkColumn = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS', 'cartonName'];
             let isDuplicateInDatabase = false;
             let isDuplicateInUpdatedData = false;
 
@@ -1080,7 +1081,7 @@ function AddNewWorker() {
                     );
                     isDuplicateInUpdatedData = updatedRowData.some(
                         (item: { [x: string]: string; }, index: number) => item[colKey] === newValue);
-                    
+
                 } else {
                     //格式檢查
                     const newID = extractID(newValue);
@@ -1118,7 +1119,7 @@ function AddNewWorker() {
             const originalValue = table2Data.find((item: any) => item.id === data[rowIndex].id)?.[colKey];
             //如果和資料庫資料重複 , 則將渲染的table改回原值
             // if (newValue.trim() !== "" && isDuplicateInDatabase) {
-            if (isDuplicateInDatabase|| isDuplicateInUpdatedData) {
+            if (isDuplicateInDatabase || isDuplicateInUpdatedData) {
                 alert(`${colKey} 已存在，請輸入不同的 ${colKey}`);
                 setTempValue('');
 
@@ -1148,7 +1149,7 @@ function AddNewWorker() {
                             edit_user: currentUser,
                         };
 
-                        if (checkColumn.includes(colKey) && colKey !== 'SN' && colKey !== 'cartonID') {
+                        if (checkColumn.includes(colKey) && colKey !== 'SN' && colKey !== 'cartonName') {
                             updateData[`${colKey}_BEDID`] = extractID(newValue);
                         }
 
@@ -1170,7 +1171,7 @@ function AddNewWorker() {
                         setData(updatedData);
                         setUpdatedRowData(updatedData);
                         setTempValue(""); // 清空 tempValue
-       
+
                         console.log('完成資料更新');
                     } catch (error) {
                         console.error('Error updating rows:', error);
@@ -1184,6 +1185,12 @@ function AddNewWorker() {
         };
     }
 
+
+    const [searchText, setSearchText] = useState('');
+    // 過濾符合搜尋文字的選項
+    const filteredOptions = table3Data.filter((item: { partNumber: string; }) =>
+        item.partNumber.toLowerCase().includes(searchText.toLowerCase())
+    );
 
     return (
 
@@ -1217,11 +1224,35 @@ function AddNewWorker() {
                             onChange={(e) => setWorkNumber(e.target.value)}
                         />
                     </>
+
                     <>
+                        <label>Part：</label>
+                        {/* 搜尋輸入框 */}
+                        <input
+                            type="text"
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                            placeholder="搜尋 Part Number"
+                        />
                         <label>{formatMessage({ id: 'part' })}：</label>
-                        <select value={selectedPartNumber} onChange={(e) => setSelectedPartNumber(e.target.value)}>
+                        {/* <select value={selectedPartNumber} onChange={(e) => setSelectedPartNumber(e.target.value)}>
                             <option value="">{formatMessage({ id: 'part' })}</option>
                             {table3Data.map((item: any) => (
+                                <option key={item.id} value={item.partNumber}>
+                                    {item.partNumber}
+                                </option>
+                            ))}
+                        </select> */}
+                        {/* 下拉選單 */}
+                        <select
+                            value={selectedPartNumber}
+                            onChange={(e) => {
+                                setSelectedPartNumber(e.target.value);
+                                setSearchText(''); // 選擇後清空搜尋框
+                            }}
+                        >
+                            <option value="">請選擇 Part</option>
+                            {filteredOptions.map((item:any) => (
                                 <option key={item.id} value={item.partNumber}>
                                     {item.partNumber}
                                 </option>
@@ -1283,7 +1314,7 @@ function AddNewWorker() {
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'cartonID' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'cartonName' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
@@ -1366,12 +1397,14 @@ function AddNewWorker() {
                                                         //) : (
                                                         //    row[colKey]
                                                         //)}  
-                                                    
+
 
 
                                                         className={[
                                                             currentRow === rowIndex && currentColumn === colIndex ? 'highlight-cell' : '',
-                                                            clickedCell?.rowIndex === rowIndex && clickedCell?.colIndex === colIndex ? 'highlight-cell' : '',
+                                                            clickedCell?.rowIndex === rowIndex && clickedCell?.colIndex === colIndex
+                                                                ? 'highlight-cell'
+                                                                : '',
                                                         ]
                                                             .filter(Boolean)
                                                             .join(' ')} // 合併 className 並過濾空值

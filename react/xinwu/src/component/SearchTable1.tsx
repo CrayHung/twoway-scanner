@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx';
 import { useGlobalContext } from '../global';
 import { useIntl } from "react-intl";
 import './SearchForm.css';
+import { downloadBarcode } from './GenerateBarCode';
 
 
 const modalStyle = {
@@ -24,6 +25,7 @@ const modalStyle = {
 
 
 const SearchTable1 = () => {
+
     const { formatMessage } = useIntl();
     const { table3Data, setTable3Data, currentUser, setCurrentUser, globalUrl, table1Data, setTable1Data, table2Data, setTable2Data, workNo, setWorkNo, part, setPart, quant, setQuant } = useGlobalContext();
 
@@ -292,9 +294,10 @@ const SearchTable1 = () => {
 
                 if (!response.ok) {
                     throw new Error('Failed to get ');
+                    setLoading(false); // Loading結束
                 }
                 const data: any[] = await response.json();
-                console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
+                // console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
 
 
                 //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
@@ -310,6 +313,7 @@ const SearchTable1 = () => {
                     QR_PS_BEDID: item.QR_PS_BEDID,
                     QR_HS: item.QR_HS,
                     QR_HS_BEDID: item.QR_HS_BEDID,
+                    cartonName: item.cartonName,
 
                     QR_backup1: item.QR_backup1,
                     QR_backup2: item.QR_backup2,
@@ -330,14 +334,17 @@ const SearchTable1 = () => {
                     // workOrderNumber,
                     company,
                     quantity,
+                    // cartonName,
                     ...rest
                 }) => rest);
                 setDataForDownload(data);
                 setResultData(filteredData);
                 // console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
+                setLoading(false); // Loading結束
 
             } catch (error) {
                 console.error('Error fetching:', error);
+                setLoading(false); // Loading結束
             }
         }
         //範圍snStart: [''],snEnd: ['']搜尋
@@ -354,6 +361,7 @@ const SearchTable1 = () => {
 
                 if (!response.ok) {
                     throw new Error('Failed to get ');
+                    setLoading(false); // Loading結束
                 }
                 const data: any[] = await response.json();
                 // console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
@@ -373,6 +381,7 @@ const SearchTable1 = () => {
                     QR_PS_BEDID: item.QR_PS_BEDID,
                     QR_HS: item.QR_HS,
                     QR_HS_BEDID: item.QR_HS_BEDID,
+                    cartonName: item.cartonName,
 
                     QR_backup1: item.QR_backup1,
                     QR_backup2: item.QR_backup2,
@@ -397,10 +406,12 @@ const SearchTable1 = () => {
                 }) => rest);
 
                 setResultData(filteredData);
-                console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
+                setLoading(false); // Loading結束
+                // console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
 
             } catch (error) {
                 console.error('Error fetching:', error);
+                setLoading(false); // Loading結束
             }
         } else {
             console.log("搜尋的資料是 : ", JSON.stringify(sanitizedFormData, null, 2))
@@ -415,6 +426,7 @@ const SearchTable1 = () => {
 
                 if (!response.ok) {
                     throw new Error('Failed to get ');
+                    setLoading(false); // Loading結束
                 }
                 const data: any[] = await response.json();
                 // console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
@@ -433,6 +445,7 @@ const SearchTable1 = () => {
                     QR_PS_BEDID: item.QR_PS_BEDID,
                     QR_HS: item.QR_HS,
                     QR_HS_BEDID: item.QR_HS_BEDID,
+                    cartonName: item.cartonName,
 
                     QR_backup1: item.QR_backup1,
                     QR_backup2: item.QR_backup2,
@@ -457,111 +470,26 @@ const SearchTable1 = () => {
                 }) => rest);
 
                 setResultData(filteredData);
+                setLoading(false); // Loading結束
                 // console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
 
 
 
             } catch (error) {
                 console.error('Error fetching:', error);
+                setLoading(false); // Loading結束
             } finally {
                 setLoading(false); // 完成後結束Loading
             }
         }
-        setLoading(false); // 開始Loading
+        setLoading(false); // 完成後結束Loading
     };
 
 
-
-
-    /******************************************************** */
-    //達運專用下載excel (xlsx中包含標題 項次,SN)
-    /********************************************************* */
-    // const handleDownloadTwowayExcel = () => {
-
-    //     //根據原始資料(dataForDownload)的partNumber做資料分組
-    //     const groupedData = dataForDownload.reduce((acc: any, item: any) => {
-    //         const { parentPartNumber } = item;
-    //         if (parentPartNumber) {  // 確保資料中有 parentPartNumber
-    //             if (!acc[parentPartNumber]) {
-    //                 acc[parentPartNumber] = [];
-    //             }
-    //             acc[parentPartNumber].push(item);
-    //         }
-    //         return acc;
-    //     }, {});
-    //     // console.log("groupedData:", JSON.stringify(groupedData, null, 2));
-
-    //     // Step 2: 根據每個parentPartNumber對應的numberPerPallet去產生資料
-    //     Object.keys(groupedData).forEach(parentPartNumber => {
-    //         const numberPerPallet = table3Data.find((entry: any) => entry.partNumber === parentPartNumber)?.numberPerPallet;
-    //         const worksheetData = groupedData[parentPartNumber].map((item: any, index: any) => ({
-    //             項次: index + 1,
-    //             SN: item.SN
-    //         }));
-
-    //         console.log("worksheetData:", JSON.stringify(worksheetData, null, 2));
-    //         console.log("此料號的棧板數量:" + numberPerPallet);
-
-    //         const workbook = XLSX.utils.book_new();
-
-    //         for (let i = 0; i < worksheetData.length; i += numberPerPallet) {
-    //             let sheetData = worksheetData.slice(i, i + numberPerPallet);
-    //             console.log("sheetData:" + sheetData);
-    //             console.log(`Sheet Data for ${parentPartNumber} (Sheet ${Math.floor(i / numberPerPallet) + 1}):`, sheetData);
-
-    //             let formattedSheetData: any[] = [];
-    //             let currentColumn = 0;
-
-
-    //             formattedSheetData[0] = {}; 
-    //             for (let j = 0; j < sheetData.length; j += 25) {
-    //                 const colItemHeader = String.fromCharCode(65 + currentColumn);
-    //                 const colSNHeader = String.fromCharCode(66 + currentColumn); 
-    //                 formattedSheetData[0][colItemHeader] = "項次";
-    //                 formattedSheetData[0][colSNHeader] = "SN";
-    //                 currentColumn += 2; // Move to the next set of columns for every 25 items
-    //             }
-    //             sheetData.forEach((data: any, index: any) => {
-    //                 const rowIndex = (index % 25) + 1; // Row index within each group
-    //                 const colIndex = Math.floor(index / 25) * 2; // Column index for groups of 25 (0, 2, 4, ...)
-    //                 const colItem = String.fromCharCode(65 + colIndex); // Column for 項次
-    //                 const colSN = String.fromCharCode(66 + colIndex);   // Column for SN
-
-    //                 if (!formattedSheetData[rowIndex]) formattedSheetData[rowIndex] = {}; // Ensure row exists
-    //                 formattedSheetData[rowIndex][colItem] = data.項次;
-    //                 formattedSheetData[rowIndex][colSN] = data.SN;
-    //             });
-
-
-    //             // 每25筆資料將資料從AB欄位換到CD欄位
-    //             sheetData.forEach((data: any, index: any) => {
-    //                 const rowIndex = (index % 25) + 1;
-    //                 const colIndex = Math.floor(index / 25) * 2; // Column index for groups of 25 (0, 2, 4, ...)
-    //                 const colItem = String.fromCharCode(65 + colIndex); // Column for 項次
-    //                 const colSN = String.fromCharCode(66 + colIndex);   // Column for SN
-
-    //                 if (!formattedSheetData[rowIndex]) formattedSheetData[rowIndex] = {}; // Ensure row exists
-    //                 formattedSheetData[rowIndex][colItem] = data.項次;
-    //                 formattedSheetData[rowIndex][colSN] = data.SN;
-    //             });
-
-    //             console.log(`Formatted Sheet Data for ${parentPartNumber} (Sheet ${Math.floor(i / numberPerPallet) + 1}):`, formattedSheetData);
-
-    //             if (formattedSheetData.length > 0) {
-    //                 const worksheet = XLSX.utils.json_to_sheet(formattedSheetData, { skipHeader: true });
-    //                 XLSX.utils.book_append_sheet(workbook, worksheet, `${parentPartNumber}_Sheet${Math.floor(i / numberPerPallet) + 1}`);
-    //             } else {
-    //                 console.log(`Sheet Data is empty for ${parentPartNumber} (Sheet ${Math.floor(i / numberPerPallet) + 1})`);
-    //             }
-    //         }
-
-    //         XLSX.writeFile(workbook, `${parentPartNumber}.xlsx`);
-    //     });
-    // }
-    /********************************************************* */
-
     /******************************************************** */
     //達運專用(棧板SN)下載excel (xlsx中不包含標題 項次,SN)
+    //同時將這些資料加入到pallet Table裡面
+    //並下載使用該pallet Name 所產生的barCode
     /********************************************************* */
     const handleDownloadTwowayExcel = async () => {
 
@@ -576,23 +504,37 @@ const SearchTable1 = () => {
             }
             return acc;
         }, {});
-        console.log("groupedData:", JSON.stringify(groupedData, null, 2));
+        // console.log("groupedData:", JSON.stringify(groupedData, null, 2));
 
         //for ACI
         const palletDataToSave: any[] = [];
-        const palletDetailToSave: any[] = [];
+        const cartonDetailToSave: any[] = [];
+
+        //避免產生相同的palletName
+        let palletCounter = 0;
 
         // 根據每個PartNumber對應的number_per_pallet去產生資料
         Object.keys(groupedData).forEach(partNumber => {
             const numberPerPallet = table3Data.find((entry: any) => entry.partNumber === partNumber)?.numberPerPallet;
+
+
+            //excel表格用資料
             const worksheetData = groupedData[partNumber].map((item: any, index: any) => ({
                 項次: index + 1,
-                SN: item.SN
+                SN: item.SN,
+
+                cartonName: item.cartonName,
+                QR_RFTray: item.QR_RFTray,
+                QR_PS: item.QR_PS,
+                QR_HS: item.QR_HS,
+                QR_RFTray_BEDID: item.QR_RFTray_BEDID, 
+                QR_PS_BEDID: item.QR_PS_BEDID,
+                QR_HS_BEDID: item.QR_HS_BEDID
             }));
 
-            // console.log(`Worksheet Data for ${partNumber}:`, worksheetData);
-
+            console.log(`Worksheet Data for ${partNumber}:`, worksheetData);
             const workbook = XLSX.utils.book_new();
+
 
             for (let i = 0; i < worksheetData.length; i += numberPerPallet) {
                 let sheetData = worksheetData.slice(i, i + numberPerPallet);
@@ -618,29 +560,59 @@ const SearchTable1 = () => {
                     XLSX.utils.book_append_sheet(workbook, worksheet, `${partNumber}_Sheet${Math.floor(i / numberPerPallet) + 1}`);
                 } else {
                     console.log("sheet Data為空");
+                    alert("sheet Data為空");
                 }
 
 
-                // 收集需要儲存到pallet資料庫的資料
-                const palletName = `${partNumber}_${new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15)}`;
+                // 產生palletName , 收集需要儲存到pallet資料庫的資料
+                const palletName = `${partNumber}_${new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15)}_${palletCounter++}`;
+                //直接下載條碼 for貼在棧板上的
+                downloadBarcode(palletName);
+                /**
+                 * 
+                 * pallet表格儲存的是(palletDataToSave)
+                 * 1.pallet name 
+                 * 2.此pallet目前已經裝了幾個箱子(sheetData.length)
+                 * 3.此pallet可裝的最大數量(numberPerPallet)
+                 * 
+                 */
                 palletDataToSave.push({
+                    palletName: palletName,
+                    maxQuantity: numberPerPallet,
                     quantity: sheetData.length,
-                    palletName
+
                 });
 
-                // for pallet details
+                /**
+                 * carton表格儲存的是
+                 * 1.pallet name
+                 * 2.cartonName
+                 * 3.SN , QR..等資訊
+                 * 
+                 */
+                // for carton details
                 sheetData.forEach((item: any) => {
-                    palletDetailToSave.push({
-                        palletName,
-                        sn: item.SN,
-                        qr: item.qr
+                    cartonDetailToSave.push({
+                        palletName: palletName,
+                        cartonName: item.cartonName || null,
+                        sn: item.SN || null,
+                        qrRftray: item.QR_RFTray || null,
+                        qrPs: item.QR_PS || null,
+                        qrHs: item.QR_HS || null,
+                        qrRftrayBedid: item.QR_RFTray_BEDID || null,
+                        qrPsBedid: item.QR_PS_BEDID || null,
+                        qrHsBedid: item.QR_HS_BEDID || null
                     });
                 });
+
+                alert("新增棧板 : "+palletName);
             }
+
 
             // XLSX.writeFile(workbook, `${partNumber}.xlsx`);
         });
-
+        console.log("palletDataToSave:", JSON.stringify(palletDataToSave, null, 2));
+        console.log("cartonDetailToSave:", JSON.stringify(cartonDetailToSave, null, 2));
 
 
         //ACI 新增pallet API
@@ -663,14 +635,14 @@ const SearchTable1 = () => {
         }
 
 
-        // ACI 新增 pallet_detail API
+        // ACI 新增 carton_detail API
         try {
-            const detailResponse = await fetch(`${globalUrl.url}/api/post-pallet-details`, {
+            const detailResponse = await fetch(`${globalUrl.url}/api/post-carton-details`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(palletDetailToSave),
+                body: JSON.stringify(cartonDetailToSave),
             });
 
             if (detailResponse.ok) {
@@ -685,7 +657,10 @@ const SearchTable1 = () => {
 
 
 
+
     }
+
+
     /********************************************************* */
 
     //客戶專用下載excel
@@ -791,34 +766,6 @@ const SearchTable1 = () => {
                 <Box sx={modalStyle}>
                     <form>
                         <Grid container spacing={2}>
-                            {/* 工單號碼欄位-select版本 */}
-                            {/* <Grid item xs={12}>
-                                {formData.workOrderNumber?.map((workOrderNumber, index) => (
-                                    <Grid container spacing={1} key={index}>
-                                        <Grid item xs={10}>
-                                            <TextField
-                                                select
-                                                label={formatMessage({ id: 'workOrderNumber' })}
-                                                value={workOrderNumber}
-                                                onChange={(e) => handleFieldChange('workOrderNumber', index, e.target.value)}
-                                                fullWidth
-                                            >
-                                                {tmpData.map((row: any, index: number) => (
-                                                    <MenuItem key={index} value={row.workOrderNumber}>
-                                                        {row.workOrderNumber}
-                                                    </MenuItem>
-                                                ))}
-                                            </TextField>
-                                        </Grid>
-                                        <Grid item xs={2}>
-                                            <IconButton onClick={() => handleAddField('workOrderNumber')}>
-                                                +
-                                            </IconButton>
-                                        </Grid>
-                                    </Grid>
-                                ))}
-                            </Grid> */}
-
                             {/* 工單號碼欄位-key in版本 */}
                             <Grid item xs={12}>
                                 {formData.workOrderNumber?.map((workOrderNumber, index) => (
@@ -1036,12 +983,12 @@ const SearchTable1 = () => {
                     <div>
                         <button onClick={handleDownloadAllExcel}>{formatMessage({ id: 'Allexcel' })}</button>
                     </div>
-                    <Paper style={{ flex: 1, overflowX: "auto" }}>
+                    <Paper style={{ flex: 1, overflowX: "auto", overflowY: "auto", }}>
                         <TableContainer
                             component="div"
                             style={{
                                 height: "100%",
-                                overflowY: "hidden",
+                                overflowY: "auto",
                                 overflowX: "auto",
                             }}
                             onWheel={(e) => {
@@ -1057,28 +1004,7 @@ const SearchTable1 = () => {
                                 <TableHead >
                                     <TableRow style={{ border: '1px solid #ccc' }}>
 
-                                        {/* <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup4' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'note' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'create_date' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray_BEDID' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS_BEDID' })}</TableCell>
-                                        <TableCell style={{ border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS_BEDID' })}</TableCell> */}
-
-
-
+        
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
@@ -1091,6 +1017,8 @@ const SearchTable1 = () => {
 
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS_BEDID' })}</TableCell>
+
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'CartonName' })}</TableCell>
 
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>

@@ -42,7 +42,32 @@ public class InputMode {
     @UpdateTimestamp
     private LocalDate editDate;
 
+    /**根據ACI新增兩欄位 */
+    @Column(name = "aci_part_number", nullable = false)
+    private String aciPartNumber;
+
+    @Column(name = "custom_part_number")
+    private String customPartNumber;
+
+
     // Getters and Setters
+    public String getCustomPartNumber() {
+        return customPartNumber;
+    }
+
+    public void setCustomPartNumber(String customPartNumber) {
+        this.customPartNumber = customPartNumber;
+    }
+
+    public String getAciPartNumber() {
+        return aciPartNumber;
+    }
+
+    public void setAciPartNumber(String aciPartNumber) {
+        this.aciPartNumber = aciPartNumber;
+    }
+
+
     public Long getId() {
         return id;
     }

@@ -220,8 +220,14 @@ const AccountPage = () => {
 
 
     return (
-        <div>
-
+        <div
+        style={{
+            display: "flex",
+            flexDirection: "column",
+            height: "90vh",
+            overflow: "auto",
+        }}>
+ 
 
             {/* 重置 */}
             <Modal open={openResetForm} onClose={handleResetClose}>
@@ -359,39 +365,52 @@ const AccountPage = () => {
             </Box>
             {
                 Data.length > 0 ? (
-                    <TableContainer component={Paper}>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>{formatMessage({ id: 'account' })}</TableCell>
-                                    <TableCell>{formatMessage({ id: 'role' })}</TableCell>
-                                    <TableCell>{formatMessage({ id: 'company' })}</TableCell>
-                                    <TableCell>{formatMessage({ id: 'reset-password' })}</TableCell>
-                                    <TableCell>{formatMessage({ id: 'edit' })}</TableCell>
-                                    <TableCell>{formatMessage({ id: 'delete' })}</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {Data.map((user, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>{user.username}</TableCell>
-                                        <TableCell>{user.role}</TableCell>
-                                        <TableCell>{user.company}</TableCell>
-                                        <TableCell>
-                                            <button onClick={() => handleReset(user)}>{formatMessage({ id: 'reset-password' })}</button>
-                                        </TableCell>
-                                        <TableCell>
-                                            <button onClick={() => handleEdit(user)}>{formatMessage({ id: 'edit' })}</button>
-                                        </TableCell>
-
-                                        <TableCell>
-                                            <button onClick={() => handleDeleteClick(user)}>{formatMessage({ id: 'delete' })}</button>
-                                        </TableCell>
+                    <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
+                        <TableContainer
+                            component="div"
+                            style={{
+                                height: "100%",
+                                overflowY: "hidden",
+                                overflowX: "auto",
+                            }}
+                            onWheel={(e) => {
+                                const container = e.currentTarget;
+                                container.scrollTop += e.deltaY;
+                            }}
+                        >
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>{formatMessage({ id: 'account' })}</TableCell>
+                                        <TableCell>{formatMessage({ id: 'role' })}</TableCell>
+                                        <TableCell>{formatMessage({ id: 'company' })}</TableCell>
+                                        <TableCell>{formatMessage({ id: 'reset-password' })}</TableCell>
+                                        <TableCell>{formatMessage({ id: 'edit' })}</TableCell>
+                                        <TableCell>{formatMessage({ id: 'delete' })}</TableCell>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                                </TableHead>
+                                <TableBody>
+                                    {Data.map((user, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell>{user.username}</TableCell>
+                                            <TableCell>{user.role}</TableCell>
+                                            <TableCell>{user.company}</TableCell>
+                                            <TableCell>
+                                                <button onClick={() => handleReset(user)}>{formatMessage({ id: 'reset-password' })}</button>
+                                            </TableCell>
+                                            <TableCell>
+                                                <button onClick={() => handleEdit(user)}>{formatMessage({ id: 'edit' })}</button>
+                                            </TableCell>
+
+                                            <TableCell>
+                                                <button onClick={() => handleDeleteClick(user)}>{formatMessage({ id: 'delete' })}</button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Paper>
                 ) : (
                     <Typography>No users found.</Typography>
                 )

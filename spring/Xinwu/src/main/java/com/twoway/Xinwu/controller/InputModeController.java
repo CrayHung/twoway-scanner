@@ -29,13 +29,19 @@ public class InputModeController {
         if (request.getNumberPerPallet() <= 0) {
             return ResponseEntity.badRequest().body("每棧板機台數不能為空");
         }
-
+        /**根據ACI新增判斷 */
+        if (request.getAciPartNumber() == null || request.getAciPartNumber().isEmpty()) {
+            return ResponseEntity.badRequest().body("ACI料號不能為空");
+        }
+ 
         InputMode inputMode = new InputMode();
         inputMode.setPartNumber(request.getPartNumber());
         inputMode.setInputMode(request.getInputMode());
         inputMode.setNumberPerPallet(request.getNumberPerPallet());
         inputMode.setCreateUser(request.getCreateUser());
         inputMode.setCreateDate(LocalDate.now());
+        inputMode.setAciPartNumber(request.getAciPartNumber());
+        inputMode.setCustomPartNumber(request.getCustomPartNumber());
 
         // 非必要欄位, 若為null則不更新
         if (request.getSummary() != null) {
@@ -86,12 +92,19 @@ public class InputModeController {
         if (request.getNumberPerPallet() <= 0) {
             return ResponseEntity.badRequest().body("每棧板機台數不能為空");
         }
-
+       /**根據ACI新增判斷 */
+       if (request.getAciPartNumber() == null || request.getAciPartNumber().isEmpty()) {
+        return ResponseEntity.badRequest().body("ACI料號不能為空");
+    }
+    
         existingInputMode.setPartNumber(request.getPartNumber());
         existingInputMode.setInputMode(request.getInputMode());
         existingInputMode.setNumberPerPallet(request.getNumberPerPallet());
         existingInputMode.setEditUser(request.getEditUser());
         existingInputMode.setEditDate(LocalDate.now());
+
+        existingInputMode.setAciPartNumber(request.getAciPartNumber());
+        existingInputMode.setCustomPartNumber(request.getCustomPartNumber());
 
         // 非必要欄位, 若為null則不更新
         if (request.getSummary() != null) {
@@ -137,6 +150,25 @@ class InputModeRequest {
     private String createUser;
 
     private String editUser;
+
+    /**ACI */
+    private String aciPartNumber;
+    private String customPartNumber;
+    public String getCustomPartNumber() {
+        return customPartNumber;
+    }
+
+    public void setCustomPartNumber(String customPartNumber) {
+        this.customPartNumber = customPartNumber;
+    }
+
+    public String getAciPartNumber() {
+        return aciPartNumber;
+    }
+
+    public void setAciPartNumber(String aciPartNumber) {
+        this.aciPartNumber = aciPartNumber;
+    }
 
     // Getters and Setters
     public String getPartNumber() {

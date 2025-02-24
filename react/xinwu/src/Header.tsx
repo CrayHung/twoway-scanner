@@ -14,7 +14,7 @@ interface HeaderProps {
 
 const Header = () => {
 
-  const { jwtToken,currentUser, userRole, isLoggedIn, setIsLoggedIn, setToken } = useGlobalContext();
+  const { jwtToken,currentUser, userRole, isLoggedIn, setIsLoggedIn, setToken,palletName } = useGlobalContext();
 
   const { formatMessage } = useIntl();
 
@@ -60,7 +60,21 @@ const Header = () => {
               {currentUser}
             </span>
           )}
-
+          
+           {/* 顯示目前使用的pallet */}
+           {palletName && (
+            <span style={{
+              width: '260px',
+              backgroundColor: 'lightgreen',
+              color: 'white',
+              padding: '5px 10px',
+              borderRadius: '5px',
+              marginRight: '10px',
+              float: 'right'
+            }}>
+              {palletName}
+            </span>
+          )}
 
 
         </>

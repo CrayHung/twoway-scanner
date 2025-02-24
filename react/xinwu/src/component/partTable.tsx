@@ -85,10 +85,75 @@ const PartTable = () => {
     const [summary, setSummary] = useState('');
     const [note, setNote] = useState('');
 
+    const [selectedAciPartNumber, setSelectedAciPartNumber] = useState('');
+    const [selectedCustomPartNumber, setSelectedCustomPartNumber] = useState('');
+
+    //用來記錄表單是否有必填欄位沒有填
+    const [errors, setErrors] = useState<{ partNumber?: string; aciPartNumber?: string; inputMode?: string; numberPerPallet?: string }>({});
     //新增表單
     const [openAddForm, setOpenAddForm] = useState(false);
     const handleAddClose = () => setOpenAddForm(false);
+
+    //必填欄位的紅框判斷
+    const handleInputChange = (field: 'partNumber' | 'aciPartNumber' | 'inputMode' | 'numberPerPallet', value: string) => {
+        if (field === 'partNumber') {
+            setSelectedPartNumber(value);
+            setErrors((prevErrors) => ({
+                ...prevErrors,
+                partNumber: value.trim() ? undefined : '必填', 
+            }));
+        } else if (field === 'aciPartNumber') {
+            setSelectedAciPartNumber(value);
+            setErrors((prevErrors) => ({
+                ...prevErrors,
+                aciPartNumber: value.trim() ? undefined : '必填', 
+            }));
+        } else if (field === 'inputMode') {
+            setselectedInputModel(value)
+            setErrors((prevErrors) => ({
+                ...prevErrors,
+                inputMode: value.trim() ? undefined : '必填' 
+            }));
+        }else if (field === 'numberPerPallet') {
+            setNumberPerPallet(value)
+            setErrors((prevErrors) => ({
+                ...prevErrors,
+                inputMode: value.trim() ? undefined : '必填' 
+            }));
+        }
+    };
+    
+    
+
+
     const handleAddPart = async () => {
+
+        let newErrors: { partNumber?: string; aciPartNumber?: string; selectedInputModel?: string; numberPerPallet?: string } = {};
+
+        if (!selectedPartNumber.trim()) {
+            newErrors.partNumber = formatMessage({ id: 'required-field' });
+        }
+        if (!selectedAciPartNumber.trim()) {
+            newErrors.aciPartNumber = formatMessage({ id: 'required-field' });
+        }
+        if (!selectedInputModel.trim()) {
+            newErrors.selectedInputModel = formatMessage({ id: 'required-field' });
+        }
+        if (!numberPerPallet.trim()) {
+            newErrors.numberPerPallet = formatMessage({ id: 'required-field' });
+        }
+    
+        
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+    
+        // 如果通過驗證，則執行提交邏輯
+        console.log('表單提交', { selectedPartNumber, selectedAciPartNumber });
+        setErrors({});
+
+
 
         const newData = {
             partNumber: selectedPartNumber,
@@ -99,6 +164,8 @@ const PartTable = () => {
             createUser: currentUser,
             createDate: today,
 
+            aciPartNumber: selectedAciPartNumber,
+            customPartNumber: selectedCustomPartNumber,
         };
 
 
@@ -136,6 +203,10 @@ const PartTable = () => {
         numberPerPallet: "",
         summary: "",
         note: "",
+
+
+        aciPartNumber: "",
+        customPartNumber: "",
     });
 
     const handleEdit = (rowData: any) => {
@@ -147,6 +218,9 @@ const PartTable = () => {
             numberPerPallet: rowData.numberPerPallet,
             summary: rowData.summary,
             note: rowData.note,
+
+            aciPartNumber: rowData.aciPartNumber,
+            customPartNumber: rowData.customPartNumber,
         });
 
         setOpenEditForm(true);
@@ -182,6 +256,20 @@ const PartTable = () => {
             note: note
         });
     };
+
+
+    const handleAciPartNmberChange = (selectedAciPartNumber: any) => {
+        setEditPart({
+            ...editPart,
+            aciPartNumber: selectedAciPartNumber
+        });
+    };
+    const handleCustomPartNumberChange = (selectedCustomPartNumber: any) => {
+        setEditPart({
+            ...editPart,
+            customPartNumber: selectedCustomPartNumber
+        });
+    };
     const saveChanges = async () => {
 
 
@@ -200,6 +288,9 @@ const PartTable = () => {
                     note: editPart.note,
                     editUser: currentUser,
                     editDate: today,
+
+                    aciPartNumber: editPart.aciPartNumber,
+                    customPartNumber: editPart.customPartNumber,
                 })
             });
 
@@ -262,8 +353,15 @@ const PartTable = () => {
     return (
 
         // <div style={{ width: '100%', position: 'relative', left: 0, overflow: 'auto' }}>
+        // <div style={{ overflow: "hidden" }}>
+        <div
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                height: "90vh",
+                overflow: "auto",
+            }}>
 
-        <div style={{ overflow: "hidden" }}>
             <Modal open={openAddForm} onClose={handleAddClose}>
                 <Box sx={modalStyle}>
                     <Typography variant="h6" component="h2">
@@ -278,7 +376,40 @@ const PartTable = () => {
                                         <TextField
                                             label={formatMessage({ id: 'part' })}
                                             value={selectedPartNumber}
-                                            onChange={(e) => setSelectedPartNumber(e.target.value)}
+                                            // onChange={(e) => setSelectedPartNumber(e.target.value)}
+                                            onChange={(e) => handleInputChange('partNumber', e.target.value)}
+                                            fullWidth
+                                            error={!!errors.partNumber}
+                                            helperText={errors.partNumber}
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+
+                            {/* ACI */}
+                            <Grid item xs={12}>
+                                <Grid container spacing={1} >
+                                    <Grid item xs={10}>
+                                        <TextField
+                                            label={formatMessage({ id: 'aciPartNumber' })}
+                                            value={selectedAciPartNumber}
+                                            // onChange={(e) => setSelectedAciPartNumber(e.target.value)}
+                                            onChange={(e) => handleInputChange('aciPartNumber', e.target.value)}
+                                            fullWidth
+                                            error={!!errors.aciPartNumber}
+                                            helperText={errors.aciPartNumber}
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+
+                            <Grid item xs={12}>
+                                <Grid container spacing={1} >
+                                    <Grid item xs={10}>
+                                        <TextField
+                                            label={formatMessage({ id: 'customPartNumber' })}
+                                            value={selectedCustomPartNumber}
+                                            onChange={(e) => setSelectedCustomPartNumber(e.target.value)}
                                             fullWidth
                                         />
                                     </Grid>
@@ -290,8 +421,12 @@ const PartTable = () => {
                                     select
                                     label={formatMessage({ id: 'part-shipping-model' })}
                                     value={selectedInputModel}
-                                    onChange={(e) => setselectedInputModel(e.target.value)}
+                                    // onChange={(e) => setselectedInputModel(e.target.value)}
+                                    onChange={(e) => handleInputChange('inputMode', e.target.value)}
+                                    onBlur={() => handleInputChange('inputMode', selectedInputModel)}
                                     fullWidth
+                                    error={!!errors.inputMode}
+                                    helperText={errors.inputMode}
                                 >
 
                                     {Array.from(new Set(partTableData.map((row: any) => row.inputMode))).map((uniqueMode, index) => (
@@ -311,9 +446,12 @@ const PartTable = () => {
                                         <TextField
                                             label={formatMessage({ id: 'number_per_pallet' })}
                                             value={numberPerPallet}
-                                            onChange={(e) => setNumberPerPallet(e.target.value)}
+                                            // onChange={(e) => setNumberPerPallet(e.target.value)}
+                                            onChange={(e) => handleInputChange('numberPerPallet', e.target.value)}
                                             fullWidth
                                             type="number"
+                                            error={!!errors.numberPerPallet}
+                                            helperText={errors.numberPerPallet}
                                         />
                                     </Grid>
                                 </Grid>
@@ -378,12 +516,42 @@ const PartTable = () => {
                             </Grid>
 
 
+                            {/* ACI */}
+                            <Grid item xs={12}>
+                                <Grid container spacing={1} >
+                                    <Grid item xs={10}>
+                                        <TextField
+                                            label={formatMessage({ id: 'aciPartNumber' })}
+                                            value={editPart.aciPartNumber}
+                                            onChange={(e) => handleAciPartNmberChange(e.target.value)}
+                                            fullWidth
+                                            margin="normal"
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+
+                            <Grid item xs={12}>
+                                <Grid container spacing={1} >
+                                    <Grid item xs={10}>
+                                        <TextField
+                                            label={formatMessage({ id: 'customPartNumber' })}
+                                            value={editPart.customPartNumber}
+                                            onChange={(e) => handleCustomPartNumberChange(e.target.value)}
+                                            fullWidth
+                                            margin="normal"
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+
+
 
                             <Grid item xs={10}>
                                 <TextField
                                     select
                                     label={formatMessage({ id: 'part-shipping-model' })}
-                                    value={editPart.inputMode}
+                                    value={editPart.inputMode|| ''}
                                     onChange={(e) => handleSelectInputModeChange(e.target.value)}
                                     fullWidth
                                     margin="normal"
@@ -494,14 +662,28 @@ const PartTable = () => {
 
 
             <Paper sx={{ width: '100%', height: '90%', overflow: 'hidden' }}>
-                 <TableContainer component={Paper} style={{ height: 'calc(100vh - 110px)', overflow: 'auto' }}>
+                {/* <TableContainer component={Paper} style={{ height: 'calc(100vh - 110px)', overflow: 'auto' }}> */}
 
                 {/* <TableContainer component={Paper} style={{ maxHeight: '100%', overflowY: 'scroll' }}> */}
+                <TableContainer
+                    component="div"
+                    style={{
+                        height: "100%",
+                        overflowY: "hidden",
+                        overflowX: "auto",
+                    }}
+                    onWheel={(e) => {
+                        const container = e.currentTarget;
+                        container.scrollTop += e.deltaY;
+                    }}
+                >
                     <Table stickyHeader aria-label="sticky table">
                         <TableHead >
                             <TableRow style={{ border: '1px solid #ccc' }}>
                                 <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
                                 <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'part' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'aciPartNumber' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'customPartNumber' })}</TableCell>
                                 <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'part-shipping-model' })}</TableCell>
 
 
@@ -519,19 +701,33 @@ const PartTable = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {partTableData.map((row: any, rowIndex: number) => (
+                            {/* {partTableData.map((row: any, rowIndex: number) => (
                                 <TableRow key={rowIndex}>
                                     {Object.keys(row).map((colKey) => (
                                         <TableCell key={colKey}>
                                             {colKey === 'inputMode' ? formatInputMode(row.inputMode) : row[colKey]}
                                         </TableCell>
-                                    ))}
+                                    ))} */}
+                            {partTableData.map((row: any, rowIndex: number) => (
+                                <TableRow key={rowIndex} style={{ border: '1px solid #ccc' }}>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.id}</TableCell>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.partNumber}</TableCell>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.aciPartNumber}</TableCell>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.customPartNumber}</TableCell>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>{formatInputMode(row.inputMode)}</TableCell>
 
-                                    <TableCell>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.numberPerPallet}</TableCell>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.summary}</TableCell>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.note}</TableCell>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.createUser}</TableCell>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.createDate}</TableCell>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.edit_user}</TableCell>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.edit_date}</TableCell>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>
                                         <button onClick={() => handleEdit(row)}>{formatMessage({ id: 'edit-part' })}</button>
                                     </TableCell>
 
-                                    <TableCell>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>
                                         <button onClick={() => handleDeleteClick(row)}>{formatMessage({ id: 'delete-part' })}</button>
                                     </TableCell>
                                 </TableRow>

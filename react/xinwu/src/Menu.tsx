@@ -6,7 +6,7 @@ import { useGlobalContext } from './global';
 
 const Menu = () => {
   const { formatMessage } = useIntl();
-  const { currentUser,company,jwtToken,userRole, isLoggedIn, globalUrl } = useGlobalContext();
+  const { currentUser, company, jwtToken, userRole, isLoggedIn, globalUrl } = useGlobalContext();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -55,9 +55,6 @@ const Menu = () => {
             <Link to="/partTable/reload" >{formatMessage({ id: 'input-setting' })}</Link>
           )}
 
-
-
-
           {userRole === 'ADMIN' && (
             // <Link to="/accountPage" >{formatMessage({ id: 'account-page' })}</Link>
             <>
@@ -66,12 +63,22 @@ const Menu = () => {
               <Link to="/register/reload">{formatMessage({ id: 'create_account' })}</Link>
 
 
-              <Link to="/importOracle/reload">{formatMessage({ id: 'oracle import' })}</Link>
-
-              <Link to="/ACI/picking">ACI picking</Link>
-
             </>
           )}
+
+          {(userRole === 'ADMIN' && company === 'ACI') && (
+
+            <>
+
+              <Link to="/ACI/stock/reload">ACI- 入庫</Link>
+              <Link to="/ACI/shipped/reload">ACI- 已出貨清單</Link>
+
+              <Link to="/ACI/palletManagement/reload">ACI- 棧板管理頁面</Link>
+              <Link to="/ACI/repack/reload">ACI- 重工清單</Link>
+            </>
+          )}
+
+
         </>
       ) : (
         <></>

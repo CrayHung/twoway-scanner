@@ -29,6 +29,10 @@ import useGetMessage from "./language/useGetMessage";
 import TwowayScannerImportOracleXlsx from './component/twowayScannerImportOracleXlsx';
 import HomePage from './HomePage';
 import ACIPicking from './component/ACIPicking';
+import ACIStock from './component/ACIStock';
+import ACIShippedPage from './component/ACIShippedPage';
+import ACIPalletManagementPage from './component/ACIPalletManagementPage';
+import ACIRepackPage from './component/ACIRepackPage';
 
 function App() {
   const [locale, setLocale] = useNavigatorLanguage();
@@ -87,14 +91,27 @@ function App() {
             <Route path="/accountPage" Component={AccountPage} /> 
             <Route path="/accountPage/reload" element={<Navigate to="/accountPage" />} />
 
+
+
+            {/* ACI */}
             <Route path="/importOracle" Component={TwowayScannerImportOracleXlsx} /> 
             <Route path="/importOracle/reload" element={<Navigate to="/importOracle" />} />
 
 
+            <Route path="/ACI/stock" Component={ACIStock} /> 
+            <Route path="/ACI/stock/reload" element={<Navigate to="/ACI/stock" />} />
+
             <Route path="/ACI/picking" Component={ACIPicking} /> 
             <Route path="/ACI/picking/reload" element={<Navigate to="/ACI/picking" />} />
 
-            
+            <Route path="/ACI/shipped" Component={ACIShippedPage} /> 
+            <Route path="/ACI/shipped/reload" element={<Navigate to="/ACI/shipped" />} />
+
+            <Route path="/ACI/palletManagement" Component={ACIPalletManagementPage} /> 
+            <Route path="/ACI/palletManagement/reload" element={<Navigate to="/ACI/palletManagement" />} />
+
+            <Route path="/ACI/repack" Component={ACIRepackPage} /> 
+            <Route path="/ACI/repack/reload" element={<Navigate to="/ACI/repack" />} />
 
             </>
              ) : (

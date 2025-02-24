@@ -68,8 +68,8 @@ public class WorkOrderDetail {
     @Column(name = "edit_user")
     private String edit_user;
 
-    @Column(name = "cartonID")
-    private String cartonID;
+    @Column(name = "carton_name")
+    private String cartonName;
 
     // 建立 work_order_number 為關聯第一層與第二層表單的項目
     @ManyToOne(fetch = FetchType.LAZY)
@@ -147,12 +147,12 @@ public class WorkOrderDetail {
     }
 
         
-    public String getCartonID() {
-        return cartonID;
+    public String getCartonName() {
+        return cartonName;
     }
 
-    public void setCartonID(String cartonID) {
-        this.cartonID = cartonID;
+    public void setCartonName(String cartonName) {
+        this.cartonName = cartonName;
     }
     
     

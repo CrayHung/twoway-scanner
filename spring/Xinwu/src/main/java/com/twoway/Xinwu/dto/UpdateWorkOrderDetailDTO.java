@@ -46,7 +46,7 @@ public class UpdateWorkOrderDetailDTO {
 
     private String note;
     private String edit_user;
-    private String cartonID;
+    private String cartonName;
 
     @JsonAnySetter
     public void handleUnknown(String key, Object value) {
@@ -104,13 +104,14 @@ public class UpdateWorkOrderDetailDTO {
   }
 
 
-  public String getCartonID() {
-    return cartonID;
+  public String getCartonName() {
+    return cartonName;
 }
 
-public void setCartonID(String cartonID) {
-    this.cartonID = cartonID;
-    fieldsSet.add("cartonID");
+
+public void setCartonName(String cartonName) {
+    this.cartonName = cartonName;
+    fieldsSet.add("cartonName");
 }
 
 

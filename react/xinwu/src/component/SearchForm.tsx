@@ -82,6 +82,10 @@ const SearchForm = () => {
 
     }, [workNo, quant, part, model])
 
+
+    useEffect(()=>{
+        console.log("table2資料:" ,JSON.stringify(table2Data, null, 2));
+    },[table2Data])
     // 把originalData清空
     // useEffect(() => {
     //     setOriginalData([]);
@@ -331,7 +335,7 @@ const SearchForm = () => {
                 QR_RFTray: '',
                 QR_PS: '',
                 QR_HS: '',
-                cartonID: '',
+                cartonName: '',
                 QR_backup1: '',
                 QR_backup2: '',
                 QR_backup3: '',
@@ -496,7 +500,7 @@ const SearchForm = () => {
             'create_date', 'create_user', 'edit_date', 'edit_user'
         ];
 
-        const alertKeys = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS', 'cartonID'];
+        const alertKeys = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS', 'cartonName'];
 
         if (nonEditableKeys.includes(colKey)) {
             return;
@@ -538,7 +542,7 @@ const SearchForm = () => {
 
             // alert("原本的值:" + originalData[rowIndex][colKey])
 
-            const checkColumn = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS' , 'cartonID'];
+            const checkColumn = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS' , 'cartonName'];
             let isDuplicateInDatabase = false;
             let isDuplicateInUpdatedData = false;
 
@@ -637,7 +641,7 @@ const SearchForm = () => {
                             edit_user: currentUser,
                         };
 
-                        if (checkColumn.includes(colKey) && colKey !== 'SN' && colKey !== 'cartonID') {
+                        if (checkColumn.includes(colKey) && colKey !== 'SN' && colKey !== 'cartonName') {
                             updateData[`${colKey}_BEDID`] = extractID(newValue);
                         }
 
@@ -684,7 +688,7 @@ const SearchForm = () => {
             .filter((key) => key !== 'id')[colIndex];
 
         /*新增防呆機制 */
-        const checkColumn = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS','cartonID'];
+        const checkColumn = ['SN', 'QR_RFTray', 'QR_PS', 'QR_HS','cartonName'];
 
         //newValue 新輸入的值
         const newValue = e.target.value;
@@ -756,7 +760,7 @@ const SearchForm = () => {
                         edit_user: currentUser
                     };
 
-                    if (checkColumn.includes(colKey) && colKey !== 'SN' && colKey !== 'cartonID') {
+                    if (checkColumn.includes(colKey) && colKey !== 'SN' && colKey !== 'cartonName') {
                         updateData[`${colKey}_BEDID`] = extractID(newValue);
                     }
 
@@ -822,7 +826,7 @@ const SearchForm = () => {
                 else if (currentColumn === 3) fieldToCompare = "QR_RFTray";
                 else if (currentColumn === 4) fieldToCompare = "QR_PS";
                 else if (currentColumn === 5) fieldToCompare = "QR_HS";
-                else if (currentColumn === 6) fieldToCompare = "cartonID";
+                else if (currentColumn === 6) fieldToCompare = "cartonName";
 
                 // 比對資料庫 (table2Data) 和已輸入資料 (updatedData)
                 let isDuplicateInDatabase = false;
@@ -950,7 +954,7 @@ const SearchForm = () => {
                     // 移動到下一個欄位或下一行
                     moveToNextColumnOrRow();
                 } 
-                else if (fieldToCompare === "cartonID" ) {
+                else if (fieldToCompare === "cartonName" ) {
                     const newID = extractID(newValue);
 
                     if (newID === null) {
@@ -1322,7 +1326,7 @@ const SearchForm = () => {
                 QR_RFTray: item.QR_RFTray,
                 QR_PS: item.QR_PS,
                 QR_HS: item.QR_HS,
-                cartonID: item.cartonID,
+                cartonName: item.cartonName,
                 QR_backup1: item.QR_backup1,
                 QR_backup2: item.QR_backup2,
                 QR_backup3: item.QR_backup3,
@@ -1598,7 +1602,7 @@ const SearchForm = () => {
                                             <TableCell style={{ width: '500px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'cartonID' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'cartonName' })}</TableCell>
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>
                                             <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
