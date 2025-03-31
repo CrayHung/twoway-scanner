@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -91,6 +92,20 @@ public class PalletController {
         }
     }
 
+    // 更新pallet的quantity為0
+    @PutMapping("/update-quantityToZero")
+    public ResponseEntity<?> updatePalletQuantities(@RequestBody Map<String, List<String>> request) {
+        List<String> palletNames = request.get("pallet_names");
+
+        if (palletNames == null || palletNames.isEmpty()) {
+            return ResponseEntity.badRequest().body("pallet_names 不能為空");
+        }
+
+        int updatedCount = palletRepository.updateQuantityToZero(palletNames);
+        return ResponseEntity.ok("成功更新 " + updatedCount + " 筆 Pallet 的 quantity 為 0");
+    }
+
+
     // 取得單一pallet的資料
     @PostMapping("/get-pallet")
     public ResponseEntity<?> getPallet(@RequestBody Map<String, String> request) {
@@ -128,6 +143,26 @@ public class PalletController {
         List<Pallet> pallets = palletRepository.findAll();
         return ResponseEntity.ok(pallets);
     }
+
+
+    //將複數個pallet資料一次刪除
+    @DeleteMapping("/delete-pallets")
+    public ResponseEntity<?> deletePallets(@RequestBody Map<String, List<String>> requestBody) {
+        List<String> palletNames = requestBody.get("pallet_names");
+
+        if (palletNames == null || palletNames.isEmpty()) {
+            return ResponseEntity.badRequest().body("Error: No pallet names provided.");
+        }
+
+        try {
+            palletRepository.deleteByPalletNameIn(palletNames);
+            return ResponseEntity.ok("Deleted pallets: " + palletNames);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error deleting pallets: " + e.getMessage());
+        }
+    }
+
+
 
     /**
      * 

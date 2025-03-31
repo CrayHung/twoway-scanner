@@ -26,11 +26,37 @@ public class Repack {
     @Column(name = "qr_hs_bedid")
     private String qrHsBedid;
 
+
+    //紀錄是否已完成重新包裝 , 初始狀態為false
     @Column(name = "pack")
-    private Boolean pack;
+    private Boolean pack=false;
+
 
     @Column(name = "repack_time")
     private String repackTime;
+
+    //原紙箱名稱
+    @Column(name = "carton_name")
+    private String cartonName;
+    // 新紙箱名稱
+    @Column(name = "new_carton_name")
+    private String newCartonName;
+
+
+ public String getCartonName() {
+        return this.cartonName;
+    }
+
+    public void setCartonName(String cartonName) {
+        this.cartonName=cartonName;
+    }
+    public String getNewCartonName() {
+        return this.newCartonName;
+    }
+
+    public void setNewCartonName(String newCartonName) {
+        this.newCartonName=newCartonName;
+    }
 
 
     public Integer getId() {

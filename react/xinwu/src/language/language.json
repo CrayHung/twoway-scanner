@@ -1,5 +1,11 @@
 {
         "zh-TW": {
+                "customerPartNumber":"客戶料號",
+                "customerName":"客戶名稱",
+                "add-customer":"新增客戶",
+                "deletePallet":"刪除棧板",
+                "shipPallet":"整個棧板出貨",
+                "addBox":"增加紙箱",
                 "repackTime":"重工時間",
                 "repack":"重工",
                 "transfer":"設備轉移",
@@ -100,6 +106,12 @@
                 "customPartNumber":"客戶料號"
         },
         "en-US": {
+                "customerPartNumber":"customer Part Number",
+                "customerName":"customer Name",
+                "add-customer":"add customer",
+                "deletePallet":"delete Pallet",
+                "shipPallet":"ship Pallet",
+                "addBox":"add Box",
                 "repackTime":"repack Time",
                 "repack":"repack",
                 "transfer":"transfer",

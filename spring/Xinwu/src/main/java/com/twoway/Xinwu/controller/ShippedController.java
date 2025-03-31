@@ -39,7 +39,7 @@ public class ShippedController {
     //獲得所有shipped表的資料
     @GetMapping("/shipped/all")
     public ResponseEntity<List<Shipped>> getAllShipped() {
-        List<Shipped> shippedList = shippedRepository.findAll();
+        List<Shipped> shippedList = shippedRepository.findAllByOrderByIdDesc();
         return ResponseEntity.ok(shippedList);
     }
     

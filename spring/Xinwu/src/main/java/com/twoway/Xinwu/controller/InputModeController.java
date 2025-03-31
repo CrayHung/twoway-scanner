@@ -41,7 +41,7 @@ public class InputModeController {
         inputMode.setCreateUser(request.getCreateUser());
         inputMode.setCreateDate(LocalDate.now());
         inputMode.setAciPartNumber(request.getAciPartNumber());
-        inputMode.setCustomPartNumber(request.getCustomPartNumber());
+        // inputMode.setCustomPartNumber(request.getCustomPartNumber());
 
         // 非必要欄位, 若為null則不更新
         if (request.getSummary() != null) {
@@ -104,7 +104,7 @@ public class InputModeController {
         existingInputMode.setEditDate(LocalDate.now());
 
         existingInputMode.setAciPartNumber(request.getAciPartNumber());
-        existingInputMode.setCustomPartNumber(request.getCustomPartNumber());
+        // existingInputMode.setCustomPartNumber(request.getCustomPartNumber());
 
         // 非必要欄位, 若為null則不更新
         if (request.getSummary() != null) {
@@ -153,14 +153,14 @@ class InputModeRequest {
 
     /**ACI */
     private String aciPartNumber;
-    private String customPartNumber;
-    public String getCustomPartNumber() {
-        return customPartNumber;
-    }
+    // private String customPartNumber;
+    // public String getCustomPartNumber() {
+    //     return customPartNumber;
+    // }
 
-    public void setCustomPartNumber(String customPartNumber) {
-        this.customPartNumber = customPartNumber;
-    }
+    // public void setCustomPartNumber(String customPartNumber) {
+    //     this.customPartNumber = customPartNumber;
+    // }
 
     public String getAciPartNumber() {
         return aciPartNumber;

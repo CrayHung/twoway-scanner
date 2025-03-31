@@ -86,7 +86,7 @@ const PartTable = () => {
     const [note, setNote] = useState('');
 
     const [selectedAciPartNumber, setSelectedAciPartNumber] = useState('');
-    const [selectedCustomPartNumber, setSelectedCustomPartNumber] = useState('');
+    // const [selectedCustomPartNumber, setSelectedCustomPartNumber] = useState('');
 
     //用來記錄表單是否有必填欄位沒有填
     const [errors, setErrors] = useState<{ partNumber?: string; aciPartNumber?: string; inputMode?: string; numberPerPallet?: string }>({});
@@ -118,7 +118,7 @@ const PartTable = () => {
             setNumberPerPallet(value)
             setErrors((prevErrors) => ({
                 ...prevErrors,
-                inputMode: value.trim() ? undefined : '必填' 
+                numberPerPallet: value.trim() ? undefined : '必填' 
             }));
         }
     };
@@ -165,7 +165,7 @@ const PartTable = () => {
             createDate: today,
 
             aciPartNumber: selectedAciPartNumber,
-            customPartNumber: selectedCustomPartNumber,
+            // customPartNumber: selectedCustomPartNumber,
         };
 
 
@@ -196,6 +196,7 @@ const PartTable = () => {
     //編輯單筆料號
     const [openEditForm, setOpenEditForm] = useState(false);
     const handleEditClose = () => setOpenEditForm(false);
+
     const [editPart, setEditPart] = useState({
         id: "",
         partNumber: "",
@@ -206,7 +207,7 @@ const PartTable = () => {
 
 
         aciPartNumber: "",
-        customPartNumber: "",
+        // customPartNumber: "",
     });
 
     const handleEdit = (rowData: any) => {
@@ -220,7 +221,7 @@ const PartTable = () => {
             note: rowData.note,
 
             aciPartNumber: rowData.aciPartNumber,
-            customPartNumber: rowData.customPartNumber,
+            // customPartNumber: rowData.customPartNumber,
         });
 
         setOpenEditForm(true);
@@ -264,12 +265,12 @@ const PartTable = () => {
             aciPartNumber: selectedAciPartNumber
         });
     };
-    const handleCustomPartNumberChange = (selectedCustomPartNumber: any) => {
-        setEditPart({
-            ...editPart,
-            customPartNumber: selectedCustomPartNumber
-        });
-    };
+    // const handleCustomPartNumberChange = (selectedCustomPartNumber: any) => {
+    //     setEditPart({
+    //         ...editPart,
+    //         customPartNumber: selectedCustomPartNumber
+    //     });
+    // };
     const saveChanges = async () => {
 
 
@@ -290,7 +291,7 @@ const PartTable = () => {
                     editDate: today,
 
                     aciPartNumber: editPart.aciPartNumber,
-                    customPartNumber: editPart.customPartNumber,
+                    // customPartNumber: editPart.customPartNumber,
                 })
             });
 
@@ -403,7 +404,7 @@ const PartTable = () => {
                                 </Grid>
                             </Grid>
 
-                            <Grid item xs={12}>
+                            {/* <Grid item xs={12}>
                                 <Grid container spacing={1} >
                                     <Grid item xs={10}>
                                         <TextField
@@ -414,7 +415,7 @@ const PartTable = () => {
                                         />
                                     </Grid>
                                 </Grid>
-                            </Grid>
+                            </Grid> */}
 
                             <Grid item xs={10}>
                                 <TextField
@@ -531,7 +532,7 @@ const PartTable = () => {
                                 </Grid>
                             </Grid>
 
-                            <Grid item xs={12}>
+                            {/* <Grid item xs={12}>
                                 <Grid container spacing={1} >
                                     <Grid item xs={10}>
                                         <TextField
@@ -543,7 +544,7 @@ const PartTable = () => {
                                         />
                                     </Grid>
                                 </Grid>
-                            </Grid>
+                            </Grid> */}
 
 
 
@@ -683,7 +684,7 @@ const PartTable = () => {
                                 <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
                                 <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'part' })}</TableCell>
                                 <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'aciPartNumber' })}</TableCell>
-                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'customPartNumber' })}</TableCell>
+                                {/* <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'customPartNumber' })}</TableCell> */}
                                 <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'part-shipping-model' })}</TableCell>
 
 
@@ -713,7 +714,7 @@ const PartTable = () => {
                                     <TableCell style={{ border: '1px solid #ccc' }}>{row.id}</TableCell>
                                     <TableCell style={{ border: '1px solid #ccc' }}>{row.partNumber}</TableCell>
                                     <TableCell style={{ border: '1px solid #ccc' }}>{row.aciPartNumber}</TableCell>
-                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.customPartNumber}</TableCell>
+                                    {/* <TableCell style={{ border: '1px solid #ccc' }}>{row.customPartNumber}</TableCell> */}
                                     <TableCell style={{ border: '1px solid #ccc' }}>{formatInputMode(row.inputMode)}</TableCell>
 
                                     <TableCell style={{ border: '1px solid #ccc' }}>{row.numberPerPallet}</TableCell>
@@ -721,8 +722,8 @@ const PartTable = () => {
                                     <TableCell style={{ border: '1px solid #ccc' }}>{row.note}</TableCell>
                                     <TableCell style={{ border: '1px solid #ccc' }}>{row.createUser}</TableCell>
                                     <TableCell style={{ border: '1px solid #ccc' }}>{row.createDate}</TableCell>
-                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.edit_user}</TableCell>
-                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.edit_date}</TableCell>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.editUser}</TableCell>
+                                    <TableCell style={{ border: '1px solid #ccc' }}>{row.editDate}</TableCell>
                                     <TableCell style={{ border: '1px solid #ccc' }}>
                                         <button onClick={() => handleEdit(row)}>{formatMessage({ id: 'edit-part' })}</button>
                                     </TableCell>

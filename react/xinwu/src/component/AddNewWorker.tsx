@@ -1226,14 +1226,7 @@ function AddNewWorker() {
                     </>
 
                     <>
-                        <label>Part：</label>
-                        {/* 搜尋輸入框 */}
-                        <input
-                            type="text"
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            placeholder="搜尋 Part Number"
-                        />
+
                         <label>{formatMessage({ id: 'part' })}：</label>
                         {/* <select value={selectedPartNumber} onChange={(e) => setSelectedPartNumber(e.target.value)}>
                             <option value="">{formatMessage({ id: 'part' })}</option>
@@ -1244,6 +1237,12 @@ function AddNewWorker() {
                             ))}
                         </select> */}
                         {/* 下拉選單 */}
+                        <input
+                            type="text"
+                            value={searchText}
+                            onChange={(e) => setSearchText(e.target.value)}
+                            placeholder="搜尋 Part Number"
+                        />
                         <select
                             value={selectedPartNumber}
                             onChange={(e) => {

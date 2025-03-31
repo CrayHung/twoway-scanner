@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import com.twoway.Xinwu.entity.Stock;
 import com.twoway.Xinwu.entity.StockRepository;
 
+import jakarta.transaction.Transactional;
+
 import java.util.List;
 import java.util.Map;
 
@@ -45,4 +47,40 @@ public class StockController {
 
         return ResponseEntity.ok(savedStock);
     }
+
+   // 刪除指定複數個 palletNames 的資料
+   @DeleteMapping("/stock/delete-by-pallet-names")
+   public ResponseEntity<?> deleteStockByPalletNames(@RequestBody Map<String, List<String>> request) {
+       List<String> palletNames = request.get("pallet_names");
+
+       if (palletNames == null || palletNames.isEmpty()) {
+           return ResponseEntity.badRequest().body("Error: No pallet names provided.");
+       }
+
+       try {
+           stockRepository.deleteByPalletNameIn(palletNames);
+           return ResponseEntity.ok("Deleted successfully.");
+       } catch (Exception e) {
+           return ResponseEntity.internalServerError().body("Error deleting stock data: " + e.getMessage());
+       }
+   }
+
+   // 刪除指定複數個 id 的資料
+   @DeleteMapping("/stock/delete-by-ids")
+   public ResponseEntity<?> deleteStockByIds(@RequestBody Map<String, List<Long>> request) {
+       List<Long> ids = request.get("ids");
+       System.out.println("stock ids: " + ids);
+
+       if (ids == null || ids.isEmpty()) {
+           return ResponseEntity.badRequest().body("Error: No IDs provided.");
+       }
+
+       try {
+           stockRepository.deleteByIdIn(ids);
+           return ResponseEntity.ok("Deleted successfully.");
+       } catch (Exception e) {
+           return ResponseEntity.internalServerError().body("Error deleting stock data: " + e.getMessage());
+       }
+   }
+
 }

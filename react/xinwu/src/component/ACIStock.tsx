@@ -29,6 +29,8 @@ const ACIStock = () => {
     const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null); // 保存當前編輯的行索引
 
 
+
+
     const handleLocationClick = (location: string, rowIndex: number) => {
         setEditedLocation(location); // 設定為當前行的 location
         setSelectedRowIndex(rowIndex); // 記錄當前行的索引
@@ -188,6 +190,19 @@ const ACIStock = () => {
         }
     }
 
+    //入庫成功後馬上跳出.可以修改location的Modal
+    useEffect(() => {
+        if (palletData) {
+            setIsEditing(true);
+            setSelectedRowIndex(0);
+        }
+    }, [palletData]);
+
+
+
+
+
+
     return (
         <div
             style={{
@@ -216,6 +231,7 @@ const ACIStock = () => {
                 <p style={{ textAlign: 'center', marginTop: '20px' }}>no data</p>
             ) : (
                 <>
+          
                     <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                         <Paper style={{ flex: 1, overflowX: "auto" }}>
                             <TableContainer

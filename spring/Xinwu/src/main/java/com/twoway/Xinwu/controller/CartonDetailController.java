@@ -28,11 +28,11 @@ public class CartonDetailController {
     @Autowired
     private PalletRepository palletRepository;
 
-/**
- * 
- * ACI
- * 
- */
+    /**
+     * 
+     * ACI
+     * 
+     */
 
     // ACI出貨 , 刪除某棧板中的幾筆carton_details
     @Transactional
@@ -41,7 +41,7 @@ public class CartonDetailController {
         try {
 
             String palletName = (String) requestBody.get("pallet_name");
-            
+
             Object idsObject = requestBody.get("ids");
             if (palletName == null || idsObject == null) {
                 return ResponseEntity.badRequest().body("無效的 pallet_name 或carton ids");
@@ -54,11 +54,10 @@ public class CartonDetailController {
             if (ids.isEmpty()) {
                 return ResponseEntity.badRequest().body("ids 列表不能為空");
             }
- 
 
             cartonDetailRepository.deleteByPalletNameAndIdIn(palletName, ids);
 
-            return ResponseEntity.ok("出貨成功");
+            return ResponseEntity.ok("刪除成功");
         } catch (Exception e) {
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -66,19 +65,41 @@ public class CartonDetailController {
         }
     }
 
-    //ACI設備轉移 (更新pallletName)
-    @PutMapping("/updateCartonsPalletName")
-    public ResponseEntity<String> updatePalletName(@RequestBody List<Map<String, Object>> updateRequests) {
-        for (Map<String, Object> request : updateRequests) {
-            List<Integer> ids = (List<Integer>) request.get("id");
-            String palletName = (String) request.get("pallet_name");
-            cartonDetailRepository.updatePalletName(ids, palletName);
+    // ACI出貨+ACI設備轉移 , 刪除整個棧板內的carton_detail
+    @Transactional
+    @DeleteMapping("/carton-detail/allPalletship")
+    public ResponseEntity<?> shipAllCartonDetails(@RequestBody Map<String, Object> requestBody) {
+        try {
+            List<String> palletNames = (List<String>) requestBody.get("pallet_names");
+
+            if (palletNames == null || palletNames.isEmpty()) {
+                return ResponseEntity.badRequest().body("無效的 pallet_names");
+            }
+
+            // 刪除所有 pallet_names 下的 cartonDetails
+            int deletedCount = cartonDetailRepository.deleteByPalletNames(palletNames);
+
+            if (deletedCount > 0) {
+                return ResponseEntity.ok("成功刪除 " + deletedCount + " 筆資料");
+            } else {
+                return ResponseEntity.ok("沒有找到符合條件的資料");
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("刪除失敗: " + e.getMessage());
         }
+    }
+
+    // ACI設備轉移 (更新pallletName)
+    @PutMapping("/updateCartonsPalletName")
+    public ResponseEntity<String> updatePalletName(@RequestBody Map<String, Object> updateRequest) {
+    List<Integer> ids = (List<Integer>) updateRequest.get("id");
+    String palletName = (String) updateRequest.get("pallet_name");
+    
+    cartonDetailRepository.updatePalletName(ids, palletName);
         return ResponseEntity.ok("更新成功");
     }
-   
-    
-    
 
     // 取得單一個棧板中的carton_details
     @PostMapping("/get-carton-detail")
@@ -91,11 +112,24 @@ public class CartonDetailController {
         return ResponseEntity.ok(cartonDetails);
     }
 
-/**
- * 
- * 達運
- * 
- */
+    // 取得多個palletNames內的cartonDetail資料
+    @PostMapping("/carton-detail/by-pallet-names")
+    public ResponseEntity<?> getCartonDetailsByPalletNames(@RequestBody Map<String, List<String>> request) {
+        List<String> palletNames = request.get("palletNames");
+
+        if (palletNames == null || palletNames.isEmpty()) {
+            return ResponseEntity.badRequest().body("Error: No pallet names provided.");
+        }
+
+        List<CartonDetail> cartonDetails = cartonDetailRepository.findByPalletNames(palletNames);
+        return ResponseEntity.ok(cartonDetails);
+    }
+
+    /**
+     * 
+     * 達運
+     * 
+     */
 
     // 達運出貨(下載棧板條碼) , 將目前的資料新增carton_detail
     @PostMapping("/post-carton-details")

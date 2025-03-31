@@ -46,18 +46,18 @@ public class InputMode {
     @Column(name = "aci_part_number", nullable = false)
     private String aciPartNumber;
 
-    @Column(name = "custom_part_number")
-    private String customPartNumber;
+    // @Column(name = "custom_part_number")
+    // private String customPartNumber;
 
 
     // Getters and Setters
-    public String getCustomPartNumber() {
-        return customPartNumber;
-    }
+    // public String getCustomPartNumber() {
+    //     return customPartNumber;
+    // }
 
-    public void setCustomPartNumber(String customPartNumber) {
-        this.customPartNumber = customPartNumber;
-    }
+    // public void setCustomPartNumber(String customPartNumber) {
+    //     this.customPartNumber = customPartNumber;
+    // }
 
     public String getAciPartNumber() {
         return aciPartNumber;

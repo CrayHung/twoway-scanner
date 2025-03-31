@@ -31,5 +31,19 @@ public class DataLoader implements CommandLineRunner {
         } else {
             System.out.println("Admin user already exists");
         }
+
+        // 使用 findByUsername 檢查 aciadmin 用戶是否存在
+        if (userRepository.findByUsername("aciadmin").isEmpty()) {
+            User adminUser = new User();
+            adminUser.setUsername("aciadmin"); //初始創建帳號admin
+            adminUser.setPassword(passwordEncoder.encode("1234")); 
+            adminUser.setRole(Role.ADMIN); 
+            adminUser.setCompany("ACI"); 
+            userRepository.save(adminUser);
+            System.out.println("aciadmin user created successfully");
+        } else {
+            System.out.println("aciadmin user already exists");
+        }
+
     }
 }

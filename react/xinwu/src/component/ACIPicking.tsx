@@ -1,4 +1,4 @@
-import { Grid, Paper, TableContainer, TableHead, TableRow, TableCell, TableBody, Table, Button, Checkbox, Modal, Box, FormControlLabel, Radio, RadioGroup, TextField } from '@mui/material';
+import { Grid, Paper, TableContainer, TableHead, TableRow, TableCell, TableBody, Table, Button, Checkbox, Modal, Box, FormControlLabel, Radio, RadioGroup, TextField, Autocomplete } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import { useGlobalContext } from '../global';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -35,6 +35,15 @@ const ACIPicking = () => {
     const { formatMessage } = useIntl();
     const [tableView, setTableView] = useState(false);
     const [showModal, setShowModal] = useState(false);
+
+    //增加紙箱
+    const [showAddCartonModal, setShowAddCartonModal] = useState(false);
+    const [inputWorkOrderNumber, setInputWorkOrderNumber] = useState(""); // 文字輸入框的值 (工單)
+    const [inputCartonAmount, setInputCartonAmount] = useState<string | number>("");
+    const [inputACIPartNumber, setInputACIPartNumber] = useState(""); // 文字輸入框的值 (料號)
+    const [ACIPartNumber, setACIPartNumber] = useState<any[]>([])
+
+
     const now = new Date();
     const today = now.toISOString().split('T')[0]; // 當前日期 (YYYY-MM-DD 格式)
     const time = now.toTimeString().split(' ')[0]; // 當前時間 (HH:mm:ss)
@@ -63,6 +72,23 @@ const ACIPicking = () => {
 
     //for 合併設備 將要合併的對象的pallet資料抓出來
     const [selectedPallet, setSelectedPallet] = useState<PalletData | null>(null);
+
+    /**
+     * 點擊”出貨”按鈕後 , 
+     * 要跳一個視窗讓使用者填入幾個欄位的訊息 , 
+     * 訊息的內容要直接加入到下載excel的內容裡面 
+     * (ASN_Number
+     * shipping_date
+     * shipping_company_contractor
+     * )
+     */
+    const [typeASN_Number, setTypeASN_Number] = useState<string>('');
+    const [typeshipping_date, setTypeshipping_date] = useState<string>('');
+    const [typeshipping_company_contractor, setShipping_company_contractor] = useState<string>('');
+    const [customer, setCustomer] = useState<string>('');
+
+    const [showShipModal, setShowShipModal] = useState(false);
+
 
     //如果組件有掛載的參數,則將參數設給tempPalletName
     useEffect(() => {
@@ -268,9 +294,16 @@ const ACIPicking = () => {
      * 1.carton表移除選擇的資料
      * 2.更新pallet表的quantity  
      * 3.選擇的資料存入到"已出貨"表
-     * 4.下載excel
+     * 4.下載excel (將使用者輸入的資料加入到customerExcelData)
      * 5.重新fetch一次後端新資料-->渲染前端
      */
+
+
+    const handleOpenShipModal = () => {
+        setShowShipModal(true);
+    }
+
+
 
     const handleShip = async () => {
         //有被勾選的checkbox 資料
@@ -358,19 +391,19 @@ const ACIPicking = () => {
             alert(`新增失敗: ${resultPost.message}`);
         }
         //////////////////////////////////////////////////////////////////////////////
-        const customerExcelData = selectedData.map((row: { QR_HS: any; QR_PS: any; QR_RFTray: any; create_date: any; }) => ({
-            ASN_Number: "",
-            component_QR_code_syntax: row.QR_RFTray,
+        const customerExcelData = selectedData.map((row: { qrHs: any; qrPs: any; qrRfTray: any; create_date: any; }) => ({
+            ASN_Number: typeASN_Number,
+            component_QR_code_syntax: row.qrRfTray,
             cable_operator_known_material_ID: "",
-            housing_QR_code_syntax: row.QR_HS,
-            QR_RFTray: row.QR_RFTray,
+            housing_QR_code_syntax: row.qrHs,
+            QR_PS: row.qrPs,
             manufacture_batch_number_or_identifier: "",
             manufacture_country: "Taiwan",
             manufacture_date: row.create_date,
             purchase_order_received_date: "",
             purchase_order_number: "",
-            shipping_date: "",
-            shipping_company_contractor: "",
+            shipping_date: typeshipping_date,
+            shipping_company_contractor: typeshipping_company_contractor,
             tracking_number: ""
         }));
 
@@ -387,13 +420,12 @@ const ACIPicking = () => {
         setTempPalletName('');
         setSelectedRows([]);
 
+        //關閉Modal
+        setShowShipModal(false);
+
 
     };
 
-    //for 合併
-    const handleMerge = () => {
-        setShowModal(true);
-    };
 
 
 
@@ -545,6 +577,11 @@ const ACIPicking = () => {
      * 3.更新pallet表的quantity(舊跟新 兩個都要更新)
      * 4.重新fetch一次後端新資料-->渲染前端
      */
+
+    //for 合併
+    const handleMerge = () => {
+        setShowModal(true);
+    };
     const handleMergeConfirm = async () => {
 
         /**
@@ -600,12 +637,11 @@ const ACIPicking = () => {
         //如果棧板空間夠,
         //1. carton表中 選擇到的行的palletName要更新
         //2. 要將pallet表中新舊pallet的quantity更新
-        const requestUpdatePalletNameBody = [
-            {
-                id: selectedRows,
-                pallet_name: selectedPalletName
-            }
-        ];
+        const requestUpdatePalletNameBody =
+        {
+            id: selectedRows,
+            pallet_name: selectedPalletName
+        };
 
         const addNewQuantity = (palletData?.quantity ?? 0) + selectedCount;
         const reduceNewQuantity = (currentPalletData?.quantity ?? 0) - selectedCount;
@@ -697,9 +733,10 @@ const ACIPicking = () => {
             quantity: updatedPallet.quantity,
         };
 
-
-        const postRepackBody = selectedData.map(({ id, palletName, cartonName, ...item }) => ({
+        //將選擇到的資料行內容存到repack表中 , "重工"狀態(pack)為false
+        const postRepackBody = selectedData.map(({ id, palletName, ...item }) => ({
             ...item,
+            pack: false,
             repackTime: dateTime
         }));
 
@@ -783,6 +820,87 @@ const ACIPicking = () => {
 
 
 
+    /**
+     * for 增加箱子 , 做以下事
+     * 1.點擊增加箱子跳出Modal , Modal包含以下欄位 以及 確認按鈕
+     *  - 工單號碼
+     *  - 紙箱數量
+     *  - 料號模式
+     * 2. 按下確認按鈕後產生如同addNewWorkOrder的表格
+     * 
+     */
+
+    //fetch 料號對應表並渲染
+    const fetchACIPartNumber = async () => {
+        try {
+            const response = await fetch(`${globalUrl.url}/api/get-input-modes`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to get 料號對應表');
+            }
+
+            const data: any[] = await response.json();
+            setACIPartNumber(data);
+
+        } catch (error) {
+            console.error('Error fetching token:', error);
+        }
+    };
+    useEffect(() => {
+        fetchACIPartNumber();
+    }, []);
+
+    const handleAddBox = async () => {
+        //跳出Modal
+        setShowAddCartonModal(true);
+    }
+
+    /**
+     * 
+     * 
+     *     //增加紙箱
+     * 
+     */
+
+    const handleSubmitAddCarton = () => {
+        /**
+          * 
+         currentPalletData=目前棧板的資料
+         palletName=目前的棧板名稱(全域變數)
+          * 
+          */
+
+        //判斷目前棧板數量是否足夠(max-quantity-quantity)
+        const checkQuantity = (palletData: any) => {
+            const remainingQuantity = palletData.maxQuantity - palletData.quantity;
+            return remainingQuantity >= inputCartonAmount;
+        };
+        //如果pallet空間不夠則直接跳出 handleSubmitAddCarton
+        if (!checkQuantity(currentPalletData)) {
+            alert("要核定的pallet剩餘空間不足");
+            return;
+        }
+        //如果夠
+        //1.則更新棧版的quantity
+        //pallet的quantity數量更新 (/api/update-quantity)
+        const newQuantity = (currentPalletData?.quantity ?? 0) + Number(inputCartonAmount);
+        const requestUpdateQuantityBody =
+        {
+            pallet_name: palletName,
+            quantity: newQuantity
+        }
+        // 2.新增數筆cartonDetail
+        //1. carton表中 選擇到的行的palletName要更新
+
+        //2. 要將pallet表中新舊pallet的quantity更新
+
+    }
+
 
     return (
 
@@ -793,6 +911,87 @@ const ACIPicking = () => {
                 height: "90vh",
                 overflow: "auto",
             }}>
+
+            {/* 增加紙箱 */}
+            <Modal open={showAddCartonModal} onClose={() => setShowAddCartonModal(false)}>
+                <Box sx={modalStyle}>
+                    <form>
+                        <Grid container spacing={2}>
+                            {/* 工單號碼 */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    fullWidth
+                                    label="輸入 工單號碼"
+                                    variant="outlined"
+                                    value={inputWorkOrderNumber}
+                                    onChange={(event) => setInputWorkOrderNumber(event.target.value)}
+                                />
+                            </Grid>
+                            {/* 紙箱數量 */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    fullWidth
+                                    label="輸入 紙箱數量"
+                                    variant="outlined"
+                                    value={inputCartonAmount}
+                                    onChange={(event) => {
+                                        const value = event.target.value;
+                                        if (/^\d*$/.test(value)) { // 允許空值或純數字
+                                            setInputCartonAmount(value);
+                                        }
+                                    }}
+                                    onBlur={() => {
+                                        // 當輸入框失焦時，轉換成 number，確保 state 一致
+                                        setInputCartonAmount((prev) => prev === "" ? 0 : Number(prev));
+                                    }}
+                                />
+                            </Grid>
+                            {/* 料號模式 */}
+                            <Grid item xs={12}>
+                                {/* <TextField
+                                    fullWidth
+                                    label="輸入 料號"
+                                    variant="outlined"
+                                    value={inputACIPartNumber}
+                                    onChange={(event) => setInputACIPartNumber(event.target.value)}
+                                /> */}
+                                <Autocomplete
+                                    freeSolo  // 允許使用者輸入非選單內的值
+                                    options={ACIPartNumber.filter(item =>
+                                        (item.aciPartNumber ?? item.partNumber) // 如果 aciPartNumber 是 null，就使用 partNumber
+                                            .toLowerCase()
+                                            .includes(inputACIPartNumber.toLowerCase())
+                                    )}
+
+                                    getOptionLabel={(option) => option.aciPartNumber ?? option.partNumber} // 顯示 aciPartNumber，若為 null 則顯示 partNumber
+                                    onInputChange={(event, newInputValue) => setInputACIPartNumber(newInputValue)}  // 更新輸入值
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            fullWidth
+                                            label="輸入 料號"
+                                            variant="outlined"
+                                        />
+                                    )}
+                                />
+                            </Grid>
+                            {/* 確認按鈕 */}
+                            <Grid item xs={12}>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    fullWidth
+                                    onClick={handleSubmitAddCarton}
+                                    disabled={!inputWorkOrderNumber || !inputCartonAmount || !inputACIPartNumber} // 當未輸入時禁用按鈕
+                                >
+                                    {formatMessage({ id: 'confirm' })}
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </form>
+                </Box>
+            </Modal>
+
 
 
             {/* 選擇要將設備合併到某個pallet */}
@@ -865,7 +1064,120 @@ const ACIPicking = () => {
                 </Box>
             </Modal>
 
-            {!tableView &&
+
+            {/* 確認出貨前要讓使用者填入一些必要訊息 , 
+            typeASN_Number 
+            typeshipping_date
+            typeshipping_company_contractor
+            客戶
+            */}
+            <Modal open={showShipModal} onClose={() => setShowShipModal(false)}>
+                <Box sx={modalStyle}>
+                    <form>
+                        <Grid container spacing={2}>
+
+                            {/* ASN_Number */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    fullWidth
+                                    label="輸入 ASN_Number"
+                                    variant="outlined"
+                                    value={typeASN_Number}
+                                    onChange={(event) => setTypeASN_Number(event.target.value)}
+                                />
+                            </Grid>
+
+                            {/* shipping_date */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    fullWidth
+                                    label="輸入 shipping_date"
+                                    variant="outlined"
+                                    type="date"
+                                    value={typeshipping_date}
+                                    onChange={(event) => setTypeshipping_date(event.target.value)}
+                                    InputLabelProps={{ shrink: true }} // 讓 label 不會擋住 placeholder
+                                />
+                            </Grid>
+
+                            {/* shipping_company_contractor */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    fullWidth
+                                    label="輸入 shipping_company_contractor"
+                                    variant="outlined"
+                                    value={typeshipping_company_contractor}
+                                    onChange={(event) => setShipping_company_contractor(event.target.value)}
+                                />
+                            </Grid>
+
+{/* 從這邊開始 要建立ACI 達運 客戶表 */}
+                            {/* 客戶  ,  單選式下拉 + 文字搜尋 */}
+                            {/* <Grid item xs={12}>
+                                <TextField
+                                    fullWidth
+                                    label="輸入客戶名稱"
+                                    variant="outlined"
+                                    value={customer}
+                                    onChange={(event) => setCustomer(event.target.value)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === "Enter") {
+                                            event.preventDefault(); // 防止表單提交
+                                            const foundCustomer = palletData.find(row => row.palletName === inputPalletName);
+                                            if (foundPallet) {
+                                                setSelectedPalletName(inputPalletName); // 設定選取的 Radio
+                                            } else {
+                                                alert("沒有此 客戶");
+                                            }
+                                        }
+                                    }}
+                                    onFocus={() => {
+                                        setInputPalletName(""); // 點擊時清空輸入框
+                                        setSelectedPalletName(""); // 取消選取的 Radio
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <RadioGroup
+                                    value={selectedPalletName}
+                                    onChange={(event) => {
+                                        setSelectedPalletName(event.target.value);
+                                        setInputPalletName(event.target.value); // 設定輸入框為選取的 palletName
+                                    }}
+                                >
+                                    {palletData
+                                        .filter((row) => !selectedRowsPalletName.includes(row.palletName)) // 過濾掉 selectedRowsPalletName 裡的值
+                                        // .filter((row) => row.palletName !== palletName) // 過濾掉相同的 palletName
+                                        .map((row) => (
+                                            <FormControlLabel
+                                                key={row.id}
+                                                value={row.palletName}
+                                                control={<Radio />}
+                                                label={row.palletName}
+                                            />
+                                        ))}
+                                </RadioGroup>
+                            </Grid> */}
+
+
+                            {/* 確認按鈕 */}
+                            <Grid item xs={12}>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    fullWidth
+                                    onClick={handleShip}
+                                    disabled={!typeASN_Number || !typeshipping_date || !typeshipping_company_contractor}
+                                >
+                                    {formatMessage({ id: 'confirm' })}
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </form>
+                </Box>
+            </Modal>
+
+            {/* {!tableView &&
                 <div style={{ marginBottom: '10px' }}>
                     <label htmlFor="palletName">{formatMessage({ id: 'PalletName' })} : </label>
                     <input
@@ -879,7 +1191,7 @@ const ACIPicking = () => {
                     />
 
                 </div>
-            }
+            } */}
 
             {tableView && (cartonDetails.length === 0 ? (
                 <p style={{ textAlign: 'center', marginTop: '20px' }}>no data</p>
@@ -894,15 +1206,23 @@ const ACIPicking = () => {
                     <div style={{ marginBottom: '10px' }}>
                         <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                             <Box>
-                                <Button variant="outlined" color="secondary" onClick={handleShip} >
+                                {/* <Button variant="outlined" color="secondary" onClick={handleShip} >
+                                    {formatMessage({ id: 'ship' })}
+                                </Button> */}
+                                <Button variant="outlined" color="secondary" onClick={handleOpenShipModal} >
                                     {formatMessage({ id: 'ship' })}
                                 </Button>
                                 <Button variant="outlined" color="secondary" onClick={handleMerge} style={{ marginLeft: '10px' }}>
                                     {formatMessage({ id: 'transfer' })}
                                 </Button>
-                                <Button variant="outlined" color="secondary" onClick={handleRepack} style={{ marginLeft: '10px' }}>
-                                    {formatMessage({ id: 'repack' })}
+                                {/* <Button variant="outlined" color="secondary" onClick={handleRepack} style={{ marginLeft: '10px' }}>
+                                    {formatMessage({ id: 'repack' })}...尚未
                                 </Button>
+
+                                <Button variant="outlined" color="secondary" onClick={handleAddBox} style={{ marginLeft: '10px' }}>
+                                    {formatMessage({ id: 'addBox' })}...尚未
+                                </Button> */}
+
                             </Box>
                             <Button variant="contained" sx={{ marginRight: 1 }} onClick={handleExitButtonClick}>
                                 {formatMessage({ id: 'exit' })}
@@ -950,6 +1270,7 @@ const ACIPicking = () => {
                                             />
                                         </TableCell>
                                         <TableCell>{formatMessage({ id: 'id' })}</TableCell>
+                                        <TableCell>{formatMessage({ id: 'PalletName' })}</TableCell>
                                         <TableCell>{formatMessage({ id: 'CartonNames' })}</TableCell>
                                         <TableCell>{formatMessage({ id: 'sn' })}</TableCell>
                                         <TableCell>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
@@ -968,9 +1289,10 @@ const ACIPicking = () => {
                                                 />
                                             </TableCell>
                                             <TableCell>{row.id}</TableCell>
+                                            <TableCell>{row.palletName}</TableCell>
                                             <TableCell>{row.cartonName}</TableCell>
                                             <TableCell>{row.sn}</TableCell>
-                                            <TableCell>{row.qrRftray}</TableCell>
+                                            <TableCell>{row.qrRfTray}</TableCell>
                                             <TableCell>{row.qrPs}</TableCell>
                                             <TableCell>{row.qrHs}</TableCell>
                                         </TableRow>
