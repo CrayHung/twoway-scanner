@@ -34,6 +34,7 @@ import ACIShippedPage from './component/ACIShippedPage';
 import ACIPalletManagementPage from './component/ACIPalletManagementPage';
 import ACIRepackPage from './component/ACIRepackPage';
 import ACICustomerPage from './component/ACICustomerPage';
+import ACIShippingCart from './component/ACIShippingCart';
 
 function App() {
   const [locale, setLocale] = useNavigatorLanguage();
@@ -104,6 +105,11 @@ function App() {
 
             <Route path="/ACI/picking" Component={ACIPicking} /> 
             <Route path="/ACI/picking/reload" element={<Navigate to="/ACI/picking" />} />
+
+
+            <Route path="/ACI/shippingCart" Component={ACIShippingCart} /> 
+            <Route path="/ACI/shippingCart/reload" element={<Navigate to="/ACI/shippingCart" />} />
+
 
             <Route path="/ACI/shipped" Component={ACIShippedPage} /> 
             <Route path="/ACI/shipped/reload" element={<Navigate to="/ACI/shipped" />} />
