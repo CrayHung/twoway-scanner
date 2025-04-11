@@ -21,7 +21,7 @@ public class ACICustomerPartTableController {
     @Autowired
     private ACICustomerPartTableRepository aCICustomerPartTableRepository;
 
-    //ACI頁面顯示目前庫存
+    
     @GetMapping("/get-all-customerTable")
     public ResponseEntity<List<ACICustomerPartTable>> getAllCustomer() {
         List<ACICustomerPartTable> customerTable = aCICustomerPartTableRepository.findAll();

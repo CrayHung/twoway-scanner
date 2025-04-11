@@ -298,6 +298,15 @@ const ACIPicking = () => {
      * 5.重新fetch一次後端新資料-->渲染前端
      */
 
+    /**
+     * 更改為加入購物車 , 做以下事
+     * 1. carton表移除選擇的資料
+     * 2. 更新pallet表的quantity  
+     * 3. 選擇的資料存入到"出貨"(cart)表
+     * 4. 重新fetch一次後端新資料-->渲染前端
+     * 
+     */
+
 
     const handleOpenShipModal = () => {
         setShowShipModal(true);
@@ -358,10 +367,15 @@ const ACIPicking = () => {
             quantity: updatedPallet.quantity,
         };
 
-
+        //加入已出貨(shipped)用這個postShippedBody
+        // const postShippedBody = selectedData.map(item => ({
+        //     ...item,
+        //     shippedTime: dateTime
+        // }));
+        //加入出貨(cart)用這個postShippedBody
         const postShippedBody = selectedData.map(item => ({
             ...item,
-            shippedTime: dateTime
+            addedTime: dateTime
         }));
 
         console.log("postShippedBody :", JSON.stringify(postShippedBody, null, 2))
@@ -383,31 +397,21 @@ const ACIPicking = () => {
         } else {
             alert(`更新失敗: ${resultUpdate.message}`);
         }
-        // //將資料加入到"已出貨"
-        const resultPost = await postRequest("/api/post-shipped", postShippedBody);
+        // //將資料加入到"出貨"(cart)
+        const resultPost = await postRequest("/api/cart/add", postShippedBody);
         if (resultPost.success) {
             // alert("新增成功");
         } else {
             alert(`新增失敗: ${resultPost.message}`);
         }
-        //////////////////////////////////////////////////////////////////////////////
-        const customerExcelData = selectedData.map((row: { qrHs: any; qrPs: any; qrRfTray: any; create_date: any; }) => ({
-            ASN_Number: typeASN_Number,
-            component_QR_code_syntax: row.qrRfTray,
-            cable_operator_known_material_ID: "",
-            housing_QR_code_syntax: row.qrHs,
-            QR_PS: row.qrPs,
-            manufacture_batch_number_or_identifier: "",
-            manufacture_country: "Taiwan",
-            manufacture_date: row.create_date,
-            purchase_order_received_date: "",
-            purchase_order_number: "",
-            shipping_date: typeshipping_date,
-            shipping_company_contractor: typeshipping_company_contractor,
-            tracking_number: ""
-        }));
-
-        await handleDownloadCustomerExcel(customerExcelData);
+        // // //將資料加入到"已出貨"(shipped)
+        // const resultPost = await postRequest("/api/post-shipped", postShippedBody);
+        // if (resultPost.success) {
+        //     // alert("新增成功");
+        // } else {
+        //     alert(`新增失敗: ${resultPost.message}`);
+        // }
+        
 
         //更新cartonDetails , 避免資料不同步
         fetchCartonDetails();
@@ -1065,117 +1069,7 @@ const ACIPicking = () => {
             </Modal>
 
 
-            {/* 確認出貨前要讓使用者填入一些必要訊息 , 
-            typeASN_Number 
-            typeshipping_date
-            typeshipping_company_contractor
-            客戶
-            */}
-            <Modal open={showShipModal} onClose={() => setShowShipModal(false)}>
-                <Box sx={modalStyle}>
-                    <form>
-                        <Grid container spacing={2}>
 
-                            {/* ASN_Number */}
-                            <Grid item xs={12}>
-                                <TextField
-                                    fullWidth
-                                    label="輸入 ASN_Number"
-                                    variant="outlined"
-                                    value={typeASN_Number}
-                                    onChange={(event) => setTypeASN_Number(event.target.value)}
-                                />
-                            </Grid>
-
-                            {/* shipping_date */}
-                            <Grid item xs={12}>
-                                <TextField
-                                    fullWidth
-                                    label="輸入 shipping_date"
-                                    variant="outlined"
-                                    type="date"
-                                    value={typeshipping_date}
-                                    onChange={(event) => setTypeshipping_date(event.target.value)}
-                                    InputLabelProps={{ shrink: true }} // 讓 label 不會擋住 placeholder
-                                />
-                            </Grid>
-
-                            {/* shipping_company_contractor */}
-                            <Grid item xs={12}>
-                                <TextField
-                                    fullWidth
-                                    label="輸入 shipping_company_contractor"
-                                    variant="outlined"
-                                    value={typeshipping_company_contractor}
-                                    onChange={(event) => setShipping_company_contractor(event.target.value)}
-                                />
-                            </Grid>
-
-{/* 從這邊開始 要建立ACI 達運 客戶表 */}
-                            {/* 客戶  ,  單選式下拉 + 文字搜尋 */}
-                            {/* <Grid item xs={12}>
-                                <TextField
-                                    fullWidth
-                                    label="輸入客戶名稱"
-                                    variant="outlined"
-                                    value={customer}
-                                    onChange={(event) => setCustomer(event.target.value)}
-                                    onKeyDown={(event) => {
-                                        if (event.key === "Enter") {
-                                            event.preventDefault(); // 防止表單提交
-                                            const foundCustomer = palletData.find(row => row.palletName === inputPalletName);
-                                            if (foundPallet) {
-                                                setSelectedPalletName(inputPalletName); // 設定選取的 Radio
-                                            } else {
-                                                alert("沒有此 客戶");
-                                            }
-                                        }
-                                    }}
-                                    onFocus={() => {
-                                        setInputPalletName(""); // 點擊時清空輸入框
-                                        setSelectedPalletName(""); // 取消選取的 Radio
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <RadioGroup
-                                    value={selectedPalletName}
-                                    onChange={(event) => {
-                                        setSelectedPalletName(event.target.value);
-                                        setInputPalletName(event.target.value); // 設定輸入框為選取的 palletName
-                                    }}
-                                >
-                                    {palletData
-                                        .filter((row) => !selectedRowsPalletName.includes(row.palletName)) // 過濾掉 selectedRowsPalletName 裡的值
-                                        // .filter((row) => row.palletName !== palletName) // 過濾掉相同的 palletName
-                                        .map((row) => (
-                                            <FormControlLabel
-                                                key={row.id}
-                                                value={row.palletName}
-                                                control={<Radio />}
-                                                label={row.palletName}
-                                            />
-                                        ))}
-                                </RadioGroup>
-                            </Grid> */}
-
-
-                            {/* 確認按鈕 */}
-                            <Grid item xs={12}>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    fullWidth
-                                    onClick={handleShip}
-                                    disabled={!typeASN_Number || !typeshipping_date || !typeshipping_company_contractor}
-                                >
-                                    {formatMessage({ id: 'confirm' })}
-                                </Button>
-                            </Grid>
-                        </Grid>
-                    </form>
-                </Box>
-            </Modal>
 
             {/* {!tableView &&
                 <div style={{ marginBottom: '10px' }}>
@@ -1206,12 +1100,12 @@ const ACIPicking = () => {
                     <div style={{ marginBottom: '10px' }}>
                         <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                             <Box>
-                                {/* <Button variant="outlined" color="secondary" onClick={handleShip} >
-                                    {formatMessage({ id: 'ship' })}
-                                </Button> */}
-                                <Button variant="outlined" color="secondary" onClick={handleOpenShipModal} >
-                                    {formatMessage({ id: 'ship' })}
+                                <Button variant="outlined" color="secondary" onClick={handleShip} >
+                                    加入出貨清單(購物車)
                                 </Button>
+                                {/* <Button variant="outlined" color="secondary" onClick={handleOpenShipModal} >
+                                    加入出貨清單(購物車)
+                                </Button> */}
                                 <Button variant="outlined" color="secondary" onClick={handleMerge} style={{ marginLeft: '10px' }}>
                                     {formatMessage({ id: 'transfer' })}
                                 </Button>

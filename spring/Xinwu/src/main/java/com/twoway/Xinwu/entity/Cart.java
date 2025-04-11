@@ -2,11 +2,17 @@ package com.twoway.Xinwu.entity;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "cart")
 public class Cart {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,8 +27,8 @@ public class Cart {
         @Column(name = "sn")
         private String sn;
     
-        @Column(name = "qr_rftray")
-        private String qrRftray;
+        @Column(name = "qr_rf_tray")
+        private String qrRfTray;
     
         @Column(name = "qr_ps")
         private String qrPs;
@@ -30,8 +36,8 @@ public class Cart {
         @Column(name = "qr_hs")
         private String qrHs;
     
-        @Column(name = "qr_rftray_bedid")
-        private String qrRftrayBedid;
+        @Column(name = "qr_rf_Tray_bedid")
+        private String qrRfTrayBedid;
     
         @Column(name = "qr_ps_bedid")
         private String qrPsBedid;
@@ -40,6 +46,7 @@ public class Cart {
         private String qrHsBedid;
     
         @Column(name = "added_time")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         private String addedTime;
 
 
@@ -75,12 +82,12 @@ public class Cart {
             this.sn = sn;
         }
     
-        public String getQrRftray() {
-            return this.qrRftray;
+        public String getQrRfTray() {
+            return this.qrRfTray;
         }
     
-        public void setQrRftray(String qrRftray) {
-            this.qrRftray = qrRftray;
+        public void setQrRfTray(String qrRfTray) {
+            this.qrRfTray = qrRfTray;
         }
     
         public String getQrPs() {
@@ -99,12 +106,12 @@ public class Cart {
             this.qrHs = qrHs;
         }
     
-        public String getQrRftrayBedid() {
-            return this.qrRftrayBedid;
+        public String getQrRfTrayBedid() {
+            return this.qrRfTrayBedid;
         }
     
-        public void setQrRftrayBedid(String qrRftrayBedid) {
-            this.qrRftrayBedid = qrRftrayBedid;
+        public void setQrRftrayBedid(String qrRfTrayBedid) {
+            this.qrRfTrayBedid = qrRfTrayBedid;
         }
     
         public String getQrPsBedid() {

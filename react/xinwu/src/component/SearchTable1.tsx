@@ -293,11 +293,11 @@ const SearchTable1 = () => {
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to get ');
                     setLoading(false); // Loading結束
+                    throw new Error('Failed to get ');
                 }
                 const data: any[] = await response.json();
-                // console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
+                console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
 
 
                 //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
@@ -328,6 +328,7 @@ const SearchTable1 = () => {
 
                 }));
 
+                console.log('搜尋+重新排序後的結果為:', JSON.stringify(mappedData, null, 2));
                 //用來將不要欄位過濾掉
                 const filteredData = mappedData.map(({
                     partNumber,
@@ -337,7 +338,9 @@ const SearchTable1 = () => {
                     // cartonName,
                     ...rest
                 }) => rest);
-                setDataForDownload(data);
+                console.log('搜尋+重新排序+過濾後的結果為:', JSON.stringify(filteredData, null, 2));
+
+                setDataForDownload(mappedData);
                 setResultData(filteredData);
                 // console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
                 setLoading(false); // Loading結束
@@ -405,6 +408,7 @@ const SearchTable1 = () => {
                     ...rest
                 }) => rest);
 
+                setDataForDownload(mappedData);
                 setResultData(filteredData);
                 setLoading(false); // Loading結束
                 // console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
@@ -469,6 +473,7 @@ const SearchTable1 = () => {
                     ...rest
                 }) => rest);
 
+                setDataForDownload(mappedData);
                 setResultData(filteredData);
                 setLoading(false); // Loading結束
                 // console.log('搜尋的結果為:', JSON.stringify(filteredData, null, 2));
@@ -591,15 +596,17 @@ const SearchTable1 = () => {
                  * 
                  */
                 // for carton details
+                console.log("cartonDetailToSave : ", JSON.stringify(cartonDetailToSave, null, 2));
+
                 sheetData.forEach((item: any) => {
                     cartonDetailToSave.push({
                         palletName: palletName,
                         cartonName: item.cartonName || null,
                         sn: item.SN || null,
-                        qrRftray: item.QR_RFTray || null,
+                        qrRfTray: item.QR_RFTray || null,
                         qrPs: item.QR_PS || null,
                         qrHs: item.QR_HS || null,
-                        qrRftrayBedid: item.QR_RFTray_BEDID || null,
+                        qrRfTrayBedid: item.QR_RFTray_BEDID || null,
                         qrPsBedid: item.QR_PS_BEDID || null,
                         qrHsBedid: item.QR_HS_BEDID || null
                     });

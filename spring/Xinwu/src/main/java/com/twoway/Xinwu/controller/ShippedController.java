@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import com.twoway.Xinwu.entity.Shipped;
 import com.twoway.Xinwu.entity.ShippedRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,7 +22,7 @@ public class ShippedController {
     @Autowired
     private ShippedRepository shippedRepository;
 
-    //已出貨資料 加入到shipped表
+    //將資料加入到shipped表
     @PostMapping("/post-shipped")
     public ResponseEntity<?> addShippedList(@RequestBody List<Shipped> shippedList) {
         if (shippedList == null || shippedList.isEmpty()) {

@@ -105,6 +105,7 @@ const ACIStock = () => {
                     }
                     else {
                         const data: any[] = await response.json();
+                        console.log("即將進庫的資料是 : ", JSON.stringify(data, null, 2))
                         setCartonDetailData(data);
                     }
 
@@ -344,7 +345,7 @@ const ACIStock = () => {
                                             <TableCell>{carton.palletName}</TableCell>
                                             <TableCell>{carton.cartonName}</TableCell>
                                             <TableCell>{carton.sn}</TableCell>
-                                            <TableCell>{carton.qrRftray}</TableCell>
+                                            <TableCell>{carton.qrRfTray}</TableCell>
                                             <TableCell>{carton.qrPs}</TableCell>
                                             <TableCell>{carton.qrHs}</TableCell>
 

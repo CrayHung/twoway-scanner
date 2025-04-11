@@ -346,18 +346,12 @@ const ACIPalletManagementPage = () => {
     }, [selectedRows, selectedRowsToDelete, selectedRowsPalletName, selectedRowsToDeletePalletName])
 
 
-
-
-    //整個棧板出貨 (複數個棧板)
+    //整個棧板加入購物車邏輯 (複數個棧板)
     //做以下的事
     //1. 將checkbox選到的多個pallet的cartonDetail刪掉 (CartonDetailRepositiry)
     //2. 將checkbox選到的多個pallet的quantity數字改為0 (PalletRepositiry)
-    //3. 將資料加入到已出貨清單
+    //3. 將資料加入到出貨清單(購物車Cart)
     //4. 重新fetch一次所有pallet用以更新前端渲染
-
-    const handleOpenShipModal = () => {
-        setShowShipModal(true);
-    }
 
 
     //for整個棧板出貨 , 傳送複數個palletName資料已獲得那些pallet裡面的cartonDetails
@@ -377,17 +371,17 @@ const ACIPalletManagementPage = () => {
             const cartonDetails = await response.json();
 
             // 格式化為 shipped 資料
-            const requestShippedBody = cartonDetails.map((carton: { palletName: any; cartonName: any; sn: any; qrRftray: any; qrPs: any; qrHs: any; qrRftrayBedid: any; qrPsBedid: any; qrHsBedid: any; }) => ({
+            const requestShippedBody = cartonDetails.map((carton: { palletName: any; cartonName: any; sn: any; qrRfTray: any; qrPs: any; qrHs: any; qrRfTrayBedid: any; qrPsBedid: any; qrHsBedid: any; }) => ({
                 palletName: carton.palletName,
                 cartonName: carton.cartonName,
                 sn: carton.sn,
-                qrRftray: carton.qrRftray,
+                qrRfTray: carton.qrRfTray,
                 qrPs: carton.qrPs,
                 qrHs: carton.qrHs,
-                qrRftrayBedid: carton.qrRftrayBedid,
+                qrRfTrayBedid: carton.qrRfTrayBedid,
                 qrPsBedid: carton.qrPsBedid,
-                qrHsBedid: carton.qrHsBedid,
-                shippedTime: dateTime,
+                qrHsBedid: carton.qrHsBedid
+                // shippedTime: dateTime,
             }));
 
             return requestShippedBody;
@@ -395,16 +389,6 @@ const ACIPalletManagementPage = () => {
             console.error("準備 shippedBody 失敗:", error);
             return [];
         }
-    };
-
-    //下載.xlxs
-    const handleDownloadCustomerExcel = (dataForDownload: any[]) => {
-
-        const worksheet = XLSX.utils.json_to_sheet(dataForDownload);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "excel");
-        XLSX.writeFile(workbook, `${dateTime}.xlsx`);
-
     };
 
     //出貨
@@ -430,9 +414,9 @@ const ACIPalletManagementPage = () => {
                 body: JSON.stringify(requestUpdateBody),
             });
 
-            //將資料加入到已出貨清單
+            //將資料加入到出貨清單(購物車)
             if (requestShippedBody.length > 0) {
-                await fetch(`${globalUrl.url}/api/post-shipped`, {
+                await fetch(`${globalUrl.url}/api/cart/add`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(requestShippedBody),
@@ -454,29 +438,154 @@ const ACIPalletManagementPage = () => {
             alert("操作失敗，請稍後再試");
         }
 
-        const customerExcelData = requestShippedBody.map((row: { qrHs: any; qrPs: any; qrRfTray: any; create_date: any; }) => ({
-            ASN_Number: typeASN_Number,
-            component_QR_code_syntax: row.qrRfTray,
-            cable_operator_known_material_ID: "",   //
-            housing_QR_code_syntax: row.qrHs,
-            QR_PS: row.qrPs,
-            manufacture_batch_number_or_identifier: "",
-            manufacture_country: "Taiwan",
-            manufacture_date: row.create_date,
-            purchase_order_received_date: "",
-            purchase_order_number: "",
-            shipping_date: typeshipping_date,
-            shipping_company_contractor: typeshipping_company_contractor,
-            tracking_number: ""
-        }));
-
-        console.log("customerExcelData:", JSON.stringify(customerExcelData, null, 2))
-
-        await handleDownloadCustomerExcel(customerExcelData);
-
         setShowShipModal(false);
 
     };
+
+
+
+
+    // /**
+    //  * 
+    //  * 以下這個出貨邏輯適用於未加入ShippingCart(購物車)邏輯
+    //  * 
+    //  */
+    //     //整個棧板出貨 (複數個棧板)
+    //     //做以下的事
+    //     //1. 將checkbox選到的多個pallet的cartonDetail刪掉 (CartonDetailRepositiry)
+    //     //2. 將checkbox選到的多個pallet的quantity數字改為0 (PalletRepositiry)
+    //     //3. 將資料加入到已出貨清單
+    //     //4. 重新fetch一次所有pallet用以更新前端渲染
+
+    //     const handleOpenShipModal = () => {
+    //         setShowShipModal(true);
+    //     }
+
+
+    //     //for整個棧板出貨 , 傳送複數個palletName資料已獲得那些pallet裡面的cartonDetails
+    //     const prepareShippedData = async () => {
+    //         try {
+    //             // 從後端獲取所有選擇的 pallet 內的 cartonDetail
+    //             const response = await fetch(`${globalUrl.url}/api/carton-detail/by-pallet-names`, {
+    //                 method: "POST",
+    //                 headers: { "Content-Type": "application/json" },
+    //                 body: JSON.stringify({ palletNames: selectedRowsPalletName }),
+    //             });
+
+    //             if (!response.ok) {
+    //                 throw new Error("獲取 CartonDetail 失敗");
+    //             }
+    //             // 取得 pallet 內的 cartonDetail 資料
+    //             const cartonDetails = await response.json();
+
+    //             // 格式化為 shipped 資料
+    //             const requestShippedBody = cartonDetails.map((carton: { palletName: any; cartonName: any; sn: any; qrRftray: any; qrPs: any; qrHs: any; qrRftrayBedid: any; qrPsBedid: any; qrHsBedid: any; }) => ({
+    //                 palletName: carton.palletName,
+    //                 cartonName: carton.cartonName,
+    //                 sn: carton.sn,
+    //                 qrRftray: carton.qrRftray,
+    //                 qrPs: carton.qrPs,
+    //                 qrHs: carton.qrHs,
+    //                 qrRftrayBedid: carton.qrRftrayBedid,
+    //                 qrPsBedid: carton.qrPsBedid,
+    //                 qrHsBedid: carton.qrHsBedid,
+    //                 shippedTime: dateTime,
+    //             }));
+
+    //             return requestShippedBody;
+    //         } catch (error) {
+    //             console.error("準備 shippedBody 失敗:", error);
+    //             return [];
+    //         }
+    //     };
+
+    //     //下載.xlxs
+    //     const handleDownloadCustomerExcel = (dataForDownload: any[]) => {
+
+    //         const worksheet = XLSX.utils.json_to_sheet(dataForDownload);
+    //         const workbook = XLSX.utils.book_new();
+    //         XLSX.utils.book_append_sheet(workbook, worksheet, "excel");
+    //         XLSX.writeFile(workbook, `${dateTime}.xlsx`);
+
+    //     };
+
+    //     //出貨
+    //     const handleShipConfirm = async () => {
+
+    //         const requestDeleteBody = { pallet_names: selectedRowsPalletName };
+    //         const requestUpdateBody = { pallet_names: selectedRowsPalletName };
+    //         const requestShippedBody = await prepareShippedData();
+
+    //         console.log("requestShippedBody:", JSON.stringify(requestShippedBody, null, 2))
+    //         try {
+    //             // 刪除 
+    //             await fetch(`${globalUrl.url}/api/carton-detail/allPalletship`, {
+    //                 method: 'DELETE',
+    //                 headers: { 'Content-Type': 'application/json' },
+    //                 body: JSON.stringify(requestDeleteBody),
+    //             });
+
+    //             // 更新 quantity=0
+    //             await fetch(`${globalUrl.url}/api/update-quantityToZero`, {
+    //                 method: 'PUT',
+    //                 headers: { 'Content-Type': 'application/json' },
+    //                 body: JSON.stringify(requestUpdateBody),
+    //             });
+
+    //             //將資料加入到已出貨清單
+    //             if (requestShippedBody.length > 0) {
+    //                 await fetch(`${globalUrl.url}/api/post-shipped`, {
+    //                     method: "POST",
+    //                     headers: { "Content-Type": "application/json" },
+    //                     body: JSON.stringify(requestShippedBody),
+    //                 });
+    //             }
+
+
+    //             // 清空選擇的 palletName 陣列
+    //             setSelectedRows([]);
+    //             setSelectedRowsPalletName([]);
+
+    //             alert("更新成功");
+    //             // 重新取得 pallet 資料並更新表格
+    //             await fetchPallet();
+
+    //             console.log("操作成功，表格已更新");
+    //         } catch (error) {
+    //             console.error("操作失敗:", error);
+    //             alert("操作失敗，請稍後再試");
+    //         }
+
+    //         const customerExcelData = requestShippedBody.map((row: { qrHs: any; qrPs: any; qrRfTray: any; create_date: any; }) => ({
+    //             ASN_Number: typeASN_Number,
+    //             component_QR_code_syntax: row.qrRfTray,
+    //             cable_operator_known_material_ID: "",   //
+    //             housing_QR_code_syntax: row.qrHs,
+    //             QR_PS: row.qrPs,
+    //             manufacture_batch_number_or_identifier: "",
+    //             manufacture_country: "Taiwan",
+    //             manufacture_date: row.create_date,
+    //             purchase_order_received_date: "",
+    //             purchase_order_number: "",
+    //             shipping_date: typeshipping_date,
+    //             shipping_company_contractor: typeshipping_company_contractor,
+    //             tracking_number: ""
+    //         }));
+
+    //         console.log("customerExcelData:", JSON.stringify(customerExcelData, null, 2))
+
+    //         await handleDownloadCustomerExcel(customerExcelData);
+
+    //         setShowShipModal(false);
+
+    //     };
+
+    //     /**
+    //      * 
+    //      * 以上適用未加入ShippingCart(購物車)時的邏輯
+    //      * 
+    //      */
+
 
     /**
      * 整個棧板設備轉移 (複數個棧板)  做以下的事
@@ -514,15 +623,15 @@ const ACIPalletManagementPage = () => {
             setAllMergeCartonID(idArray);
 
             // 格式化為 merge 資料
-            const requestMergeBody = carton.map((carton: { id: any; palletName: any; cartonName: any; sn: any; qrRftray: any; qrPs: any; qrHs: any; qrRftrayBedid: any; qrPsBedid: any; qrHsBedid: any; }) => ({
+            const requestMergeBody = carton.map((carton: { id: any; palletName: any; cartonName: any; sn: any; qrRfTray: any; qrPs: any; qrHs: any; qrRfTrayBedid: any; qrPsBedid: any; qrHsBedid: any; }) => ({
                 id: carton.id,
                 palletName: carton.palletName,
                 cartonName: carton.cartonName,
                 sn: carton.sn,
-                qrRftray: carton.qrRftray,
+                qrRfTray: carton.qrRfTray,
                 qrPs: carton.qrPs,
                 qrHs: carton.qrHs,
-                qrRftrayBedid: carton.qrRftrayBedid,
+                qrRfTrayBedid: carton.qrRfTrayBedid,
                 qrPsBedid: carton.qrPsBedid,
                 qrHsBedid: carton.qrHsBedid,
             }));
@@ -724,37 +833,37 @@ const ACIPalletManagementPage = () => {
             return;
         }
 
-        alert("dataLength:" + dataLength);
-        // const requestDeleteBody = { ids: selectedRowsToDelete };
-        // try {
-        //     // 刪除stock資料
-        //     await fetch(`${globalUrl.url}/api/stock/delete-by-ids`, {
-        //         method: 'DELETE',
-        //         headers: { 'Content-Type': 'application/json' },
-        //         body: JSON.stringify(requestDeleteBody),
-        //     });
-        //     //刪除pallet資料
-        //     await fetch(`${globalUrl.url}/api/carton-detail/allPalletship`, {
-        //         method: 'DELETE',
-        //         headers: { 'Content-Type': 'application/json' },
-        //         body: JSON.stringify(requestDeleteBody),
-        //     });
+        // alert("dataLength:" + dataLength);
+        const requestDeleteBody = { ids: selectedRowsToDelete };
+        try {
+            // 刪除stock資料
+            await fetch(`${globalUrl.url}/api/stock/delete-by-ids`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestDeleteBody),
+            });
+            //刪除pallet資料
+            await fetch(`${globalUrl.url}/api/carton-detail/allPalletship`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestDeleteBody),
+            });
 
-        //     // 清空選擇的 palletName 陣列
-        //     setSelectedRowsToDelete([]);
-        //     setSelectedRowsToDeletePalletName([]);
+            // 清空選擇的 palletName 陣列
+            setSelectedRowsToDelete([]);
+            setSelectedRowsToDeletePalletName([]);
 
 
-        //     alert("更新成功");
-        //     // 重新取得 pallet 資料並更新表格
-        //     await fetchPallet();
-        //     await fetchStock();
+            alert("更新成功");
+            // 重新取得 pallet 資料並更新表格
+            await fetchPallet();
+            await fetchStock();
 
-        //     console.log("操作成功，表格已更新");
-        // } catch (error) {
-        //     console.error("操作失敗:", error);
-        //     alert("操作失敗，請稍後再試");
-        // }
+            console.log("操作成功，表格已更新");
+        } catch (error) {
+            console.error("操作失敗:", error);
+            alert("操作失敗，請稍後再試");
+        }
     }
 
 
@@ -839,12 +948,12 @@ const ACIPalletManagementPage = () => {
             typeshipping_company_contractor
             客戶
             */}
-            <Modal open={showShipModal} onClose={() => setShowShipModal(false)}>
+            {/* <Modal open={showShipModal} onClose={() => setShowShipModal(false)}>
                 <Box sx={modalStyle}>
                     <form>
                         <Grid container spacing={2}>
 
-                            {/* ASN_Number */}
+                            //ASN_Number 
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
@@ -855,7 +964,7 @@ const ACIPalletManagementPage = () => {
                                 />
                             </Grid>
 
-                            {/* shipping_date */}
+                            //shipping_date
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
@@ -868,7 +977,7 @@ const ACIPalletManagementPage = () => {
                                 />
                             </Grid>
 
-                            {/* shipping_company_contractor */}
+                            shipping_company_contractor
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
@@ -879,9 +988,9 @@ const ACIPalletManagementPage = () => {
                                 />
                             </Grid>
 
-                            {/* 從這邊開始 要建立ACI 達運 客戶表 */}
-                            {/* 客戶  ,  單選式下拉 + 文字搜尋 */}
-                            {/* <Grid item xs={12}>
+                            //從這邊開始 要建立ACI 達運 客戶表
+                            //客戶  ,  單選式下拉 + 文字搜尋
+                            <Grid item xs={12}>
                                 <TextField
                                     fullWidth
                                     label="輸入客戶名稱"
@@ -925,10 +1034,10 @@ const ACIPalletManagementPage = () => {
                                             />
                                         ))}
                                 </RadioGroup>
-                            </Grid> */}
+                            </Grid> 
 
 
-                            {/* 確認按鈕 */}
+                            //確認按鈕 
                             <Grid item xs={12}>
                                 <Button
                                     variant="contained"
@@ -943,7 +1052,7 @@ const ACIPalletManagementPage = () => {
                         </Grid>
                     </form>
                 </Box>
-            </Modal>
+            </Modal> */}
 
             <Backdrop
                 open={isEditing}
@@ -1023,9 +1132,8 @@ const ACIPalletManagementPage = () => {
                         />
 
                         {selectedRows.length > 0 && (
-                            // <Button variant="contained" color="primary" onClick={handleShipConfirm}>
-                            <Button variant="contained" color="primary" onClick={handleOpenShipModal}>
-                                出貨
+                            <Button variant="contained" color="primary" onClick={handleShipConfirm}>
+                                加入出貨清單(購物車)
                             </Button>
 
                         )}
@@ -1038,76 +1146,82 @@ const ACIPalletManagementPage = () => {
                     </div>
                 </>
 
+                <div style={{
+                    maxHeight: "80vh",  
+                    overflowY: "auto",
+                    overflowX: "auto",
+                    border: "1px solid #ccc",
+                }}>
 
+                    <TableContainer component={Paper}>
+                        <Table aria-label="sticky table">
+                            <TableHead>
+                                <TableRow style={{ border: '1px solid #ccc' }}>
+                                    <TableCell>{formatMessage({ id: 'shipPallet' })}</TableCell>
+                                    <TableCell>{formatMessage({ id: 'id' })}</TableCell>
+                                    <TableCell>{formatMessage({ id: 'PalletName' })}</TableCell>
+                                    <TableCell>{formatMessage({ id: 'MaxQuantity' })}</TableCell>
+                                    <TableCell>{formatMessage({ id: 'Quantity' })}</TableCell>
+                                    <TableCell>{formatMessage({ id: 'Location' })}</TableCell>
+                                    <TableCell>{formatMessage({ id: 'operate' })}</TableCell>
 
-                <TableContainer component={Paper}>
-                    <Table aria-label="sticky table">
-                        <TableHead>
-                            <TableRow style={{ border: '1px solid #ccc' }}>
-                                <TableCell>{formatMessage({ id: 'shipPallet' })}</TableCell>
-                                <TableCell>{formatMessage({ id: 'id' })}</TableCell>
-                                <TableCell>{formatMessage({ id: 'PalletName' })}</TableCell>
-                                <TableCell>{formatMessage({ id: 'MaxQuantity' })}</TableCell>
-                                <TableCell>{formatMessage({ id: 'Quantity' })}</TableCell>
-                                <TableCell>{formatMessage({ id: 'Location' })}</TableCell>
-                                <TableCell>{formatMessage({ id: 'operate' })}</TableCell>
-
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {palletData.map((row: any, rowIndex: number) => (
-                                <TableRow key={row.id}>
-                                    <TableCell padding="checkbox">
-                                        <Checkbox
-                                            checked={selectedRows.includes(row.id)}
-                                            onChange={() => handleSelectRow(row.id)}
-                                        />
-                                    </TableCell>
-                                    <TableCell>{row.id}</TableCell>
-                                    <TableCell>{row.palletName}</TableCell>
-                                    <TableCell>{row.maxQuantity}</TableCell>
-                                    <TableCell>{row.quantity}</TableCell>
-                                    <TableCell>
-                                        <span
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => handleLocationClick(row.location, rowIndex)} // 傳遞該行的 location 和索引
-                                        >
-                                            {isEditing && selectedRowIndex === rowIndex ? (
-                                                <input
-                                                    type="text"
-                                                    value={editedLocation}
-                                                    onChange={handleLocationChange}
-                                                    onKeyDown={(event) => handleKeyDown(event, rowIndex)}
-                                                    style={{
-                                                        backgroundColor: 'white',
-                                                        width: '1000px',
-                                                        height: '50px',
-                                                        fontSize: '18px',
-                                                        position: 'absolute',
-                                                        top: '50%',
-                                                        left: '50%',
-                                                        transform: 'translate(-50%, -50%)',
-                                                        zIndex: 1002,
-                                                    }}
-                                                    onBlur={handleSave}
-                                                />
-                                            ) : (
-                                                row.location // 直接使用當前行的 location 值
-                                            )}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Button
-                                            onClick={() => navigate('/ACI/picking', { state: { palletName: row.palletName } })}
-                                        >
-                                            {formatMessage({ id: 'edit' })}
-                                        </Button>
-                                    </TableCell>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                            </TableHead>
+                            <TableBody>
+                                {palletData.map((row: any, rowIndex: number) => (
+                                    <TableRow key={row.id}>
+                                        <TableCell padding="checkbox">
+                                            <Checkbox
+                                                checked={selectedRows.includes(row.id)}
+                                                onChange={() => handleSelectRow(row.id)}
+                                            />
+                                        </TableCell>
+                                        <TableCell>{row.id}</TableCell>
+                                        <TableCell>{row.palletName}</TableCell>
+                                        <TableCell>{row.maxQuantity}</TableCell>
+                                        <TableCell>{row.quantity}</TableCell>
+                                        <TableCell>
+                                            <span
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => handleLocationClick(row.location, rowIndex)} // 傳遞該行的 location 和索引
+                                            >
+                                                {isEditing && selectedRowIndex === rowIndex ? (
+                                                    <input
+                                                        type="text"
+                                                        value={editedLocation}
+                                                        onChange={handleLocationChange}
+                                                        onKeyDown={(event) => handleKeyDown(event, rowIndex)}
+                                                        style={{
+                                                            backgroundColor: 'white',
+                                                            width: '1000px',
+                                                            height: '50px',
+                                                            fontSize: '18px',
+                                                            position: 'absolute',
+                                                            top: '50%',
+                                                            left: '50%',
+                                                            transform: 'translate(-50%, -50%)',
+                                                            zIndex: 1002,
+                                                        }}
+                                                        onBlur={handleSave}
+                                                    />
+                                                ) : (
+                                                    row.location // 直接使用當前行的 location 值
+                                                )}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Button
+                                                onClick={() => navigate('/ACI/picking', { state: { palletName: row.palletName } })}
+                                            >
+                                                {formatMessage({ id: 'edit' })}
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </div>
             </Paper>
 
         </div>
