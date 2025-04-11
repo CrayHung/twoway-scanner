@@ -1133,7 +1133,7 @@ const ACIPalletManagementPage = () => {
 
                         {selectedRows.length > 0 && (
                             <Button variant="contained" color="primary" onClick={handleShipConfirm}>
-                                加入出貨清單(購物車)
+                                加入待出貨清單
                             </Button>
 
                         )}

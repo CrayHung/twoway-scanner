@@ -411,7 +411,7 @@ const ACIPicking = () => {
         // } else {
         //     alert(`新增失敗: ${resultPost.message}`);
         // }
-        
+
 
         //更新cartonDetails , 避免資料不同步
         fetchCartonDetails();
@@ -1097,19 +1097,20 @@ const ACIPicking = () => {
                         height: "90vh",
                         overflow: "auto",
                     }}>
-                    <div style={{ marginBottom: '10px' }}>
-                        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                            <Box>
-                                <Button variant="outlined" color="secondary" onClick={handleShip} >
-                                    加入出貨清單(購物車)
-                                </Button>
-                                {/* <Button variant="outlined" color="secondary" onClick={handleOpenShipModal} >
+                    {selectedRows.length > 0 && (
+                        <div style={{ marginBottom: '10px' }}>
+                            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                                <Box>
+                                    <Button variant="outlined" color="secondary" onClick={handleShip} >
+                                        加入待出貨清單
+                                    </Button>
+                                    {/* <Button variant="outlined" color="secondary" onClick={handleOpenShipModal} >
                                     加入出貨清單(購物車)
                                 </Button> */}
-                                <Button variant="outlined" color="secondary" onClick={handleMerge} style={{ marginLeft: '10px' }}>
-                                    {formatMessage({ id: 'transfer' })}
-                                </Button>
-                                {/* <Button variant="outlined" color="secondary" onClick={handleRepack} style={{ marginLeft: '10px' }}>
+                                    <Button variant="outlined" color="secondary" onClick={handleMerge} style={{ marginLeft: '10px' }}>
+                                        {formatMessage({ id: 'transfer' })}
+                                    </Button>
+                                    {/* <Button variant="outlined" color="secondary" onClick={handleRepack} style={{ marginLeft: '10px' }}>
                                     {formatMessage({ id: 'repack' })}...尚未
                                 </Button>
 
@@ -1117,12 +1118,13 @@ const ACIPicking = () => {
                                     {formatMessage({ id: 'addBox' })}...尚未
                                 </Button> */}
 
+                                </Box>
+                                <Button variant="contained" sx={{ marginRight: 1 }} onClick={handleExitButtonClick}>
+                                    {formatMessage({ id: 'exit' })}
+                                </Button>
                             </Box>
-                            <Button variant="contained" sx={{ marginRight: 1 }} onClick={handleExitButtonClick}>
-                                {formatMessage({ id: 'exit' })}
-                            </Button>
-                        </Box>
-                    </div>
+                        </div>
+                    )}
                     <>
                         <label>{formatMessage({ id: 'CartonNames' })}：</label>
                         <input
