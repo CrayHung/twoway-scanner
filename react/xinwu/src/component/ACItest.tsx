@@ -7,7 +7,7 @@ import './SearchForm.css';
 import { downloadBarcode } from './GenerateBarCode';
 
 
-const partOptions = ['twy1', 'twy2', 'twy3', 'twy4', 'twy5'];
+
 
 
 const generateRandomString = (length = 6) =>
@@ -41,6 +41,7 @@ const ACItest = () => {
     const handleGenerate = () => {
         const workOrderNumber = generateRandomString(6);
         const quantity = generateRandomNumber(1, 10);
+        const partOptions = table3Data.map((item: { partNumber: any; }) => item.partNumber);
         const partNumber = partOptions[Math.floor(Math.random() * partOptions.length)];
         const company = 'aci';
         const createUser = 'aciadmin';
