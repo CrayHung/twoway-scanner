@@ -17,4 +17,8 @@ public interface CartRepository extends JpaRepository<Cart, Integer> {
     List<Cart> findByPalletNames(@Param("palletNames") List<String> palletNames);
 
     List<Cart> findBySn(String sn);
+
+    @Query("SELECT c FROM Cart c WHERE c.id IN :ids")
+    List<Cart> findByPalletID(@Param("ids") List<Integer> ids);
+    
 }

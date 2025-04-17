@@ -216,6 +216,8 @@ const ACItest = () => {
             if (!res4.ok) throw new Error("上傳 cartonDetail 失敗");
 
             alert("新增棧板 : " + palletname);
+            downloadBarcode(palletname);
+
 
         } catch (error) {
             console.error(" 發生錯誤:", error);

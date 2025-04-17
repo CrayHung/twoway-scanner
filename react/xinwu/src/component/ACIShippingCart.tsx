@@ -39,7 +39,7 @@ const ACIShippingCart = () => {
     //使用者用文字框搜尋紙箱
     const [carton, setCarton] = useState('');
 
-    //for 選擇哪幾行的check box (用以整個棧板出貨)
+    //for 選擇哪幾行的check box
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [selectedRowsPalletName, setSelectedRowsPalletName] = useState<string[]>([]);
 
@@ -86,6 +86,10 @@ const ACIShippingCart = () => {
 
     useEffect(() => {
         console.log("🟢 selectedRowsPalletName 更新:", selectedRowsPalletName);
+    }, [selectedRowsPalletName]);
+
+    useEffect(() => {
+        console.log("🟢 selectedRowsPalletID 更新:", selectedRowsPalletName);
     }, [selectedRowsPalletName]);
 
     //當選擇客戶名稱改變 , 就改變selectedCustomerPart , 並將selectedCustomerPart加入倒excel裡面
@@ -318,16 +322,60 @@ const ACIShippingCart = () => {
         setShowShipModal(true);
     }
 
-    //for出貨 傳送複數個palletName資料已獲得那些pallet裡面的cartonDetails
-    const prepareShippedData = async () => {
+    // //for出貨 傳送複數個palletName資料已獲得那些pallet裡面的cartonDetails
+    // const prepareShippedData = async () => {
+    //     try {
+
+    //         const body = JSON.stringify({ palletNames: selectedRowsPalletName });
+    //         console.log("Request body:", body);
+    //         // console.log("selectedRowsPalletName :" + selectedRowsPalletName);
+    //         // console.log("body: " + JSON.stringify({ palletNames: selectedRowsPalletName }));
+    //         // 從後端獲取所有選擇的 pallet 內的 cartonDetail
+    //         const response = await fetch(`${globalUrl.url}/api/cart/by-pallet-names`, {
+    //             method: "POST",
+    //             headers: { "Content-Type": "application/json" },
+    //             body: body,
+    //         });
+
+    //         if (!response.ok) {
+    //             throw new Error("獲取 CartonDetail 失敗");
+    //         }
+    //         // 取得 pallet 內的 cartonDetail 資料
+    //         const cartonDetails = await response.json();
+
+
+    //         console.log("cartonDetails :", JSON.stringify(cartonDetails, null, 2))
+    //         // 格式化為 shipped 資料
+    //         const requestShippedBody = cartonDetails.map((carton: { palletName: any; cartonName: any; sn: any; qrRfTray: any; qrPs: any; qrHs: any; qrRfTrayBedid: any; qrPsBedid: any; qrHsBedid: any; }) => ({
+    //             palletName: carton.palletName,
+    //             cartonName: carton.cartonName,
+    //             sn: carton.sn,
+    //             qrRfTray: carton.qrRfTray,
+    //             qrPs: carton.qrPs,
+    //             qrHs: carton.qrHs,
+    //             qrRfTrayBedid: carton.qrRfTrayBedid,
+    //             qrPsBedid: carton.qrPsBedid,
+    //             qrHsBedid: carton.qrHsBedid,
+    //             shippedTime: dateTime,
+    //         }));
+
+    //         return requestShippedBody;
+    //     } catch (error) {
+    //         console.error("準備 shippedBody 失敗:", error);
+    //         return [];
+    //     }
+    // };
+
+     //for出貨 傳送複數個palletName資料已獲得那些pallet裡面的cartonDetails
+     const prepareShippedData = async () => {
         try {
 
-            const body = JSON.stringify({ palletNames: selectedRowsPalletName });
+            const body = JSON.stringify({ ids: selectedRows });
             console.log("Request body:", body);
             // console.log("selectedRowsPalletName :" + selectedRowsPalletName);
             // console.log("body: " + JSON.stringify({ palletNames: selectedRowsPalletName }));
             // 從後端獲取所有選擇的 pallet 內的 cartonDetail
-            const response = await fetch(`${globalUrl.url}/api/cart/by-pallet-names`, {
+            const response = await fetch(`${globalUrl.url}/api/cart/by-pallet-ID`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: body,
@@ -401,13 +449,13 @@ const ACIShippingCart = () => {
             alert("操作失敗，請稍後再試");
         }
 
-        const customerExcelData = requestShippedBody.map((row: { qrHs: any; qrPs: any; qrRfTray: any; }) => ({
+        const customerExcelData = requestShippedBody.map((row: { palletName:any; qrHs: any; qrPs: any; qrRfTray: any; }) => ({
             ASN_Number: typeASN_Number,
             component_QR_code_syntax: row.qrRfTray,
             housing_QR_code_syntax: row.qrHs,
             cable_operator_known_material_ID: selectedCustomerPart,   //帶入客戶料號
            
-            manufacture_batch_number_or_identifier: "", //工單編號?
+            manufacture_batch_number_or_identifier: row.palletName, //還不確定是什麼  先放棧板名稱
             manufacture_country: "Taiwan",
             manufacture_date: today,    //建立日期?
             purchase_order_received_date: typereceived_date,

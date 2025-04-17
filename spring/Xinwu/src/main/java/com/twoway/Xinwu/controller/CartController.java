@@ -77,7 +77,7 @@ public class CartController {
         List<Integer> idsToDelete = new ArrayList<>();
 
         for (Cart item : itemsToShip) {
-    
+
             List<Cart> matchingCartItems = cartRepository.findBySn(item.getSn());
             for (Cart cartItem : matchingCartItems) {
                 Shipped shipped = new Shipped();
@@ -106,8 +106,6 @@ public class CartController {
         return ResponseEntity.ok().build();
     }
 
-
-
     // 取得多個palletNames內的cart資料
     @PostMapping("/cart/by-pallet-names")
     public ResponseEntity<?> getCartByPalletNames(@RequestBody Map<String, List<String>> request) {
@@ -120,4 +118,18 @@ public class CartController {
         List<Cart> cart = cartRepository.findByPalletNames(palletNames);
         return ResponseEntity.ok(cart);
     }
+
+    // 取得多個pallet內ID的cart資料
+    @PostMapping("/cart/by-pallet-ID")
+    public ResponseEntity<?> getCartByPalletID(@RequestBody Map<String, List<Integer>> request) {
+        List<Integer> palletID = request.get("ids");
+
+        if (palletID == null || palletID.isEmpty()) {
+            return ResponseEntity.badRequest().body("Error: No pallet id provided.");
+        }
+
+        List<Cart> cart = cartRepository.findByPalletID(palletID);
+        return ResponseEntity.ok(cart);
+    }
+
 }
