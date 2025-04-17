@@ -1,5 +1,5 @@
 // App.tsx or RandomGenerator.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as XLSX from 'xlsx';
 import { useGlobalContext } from '../global';
 import { useIntl } from "react-intl";
@@ -35,6 +35,8 @@ const ACItest = () => {
     const [table2, setTable2] = useState<any[]>([]);
     const [pallet, setPallet] = useState<any[]>([]);
     const [cartonDetail, setCartonDetail] = useState<any[]>([]);
+
+
 
 
 
@@ -97,22 +99,29 @@ const ACItest = () => {
                 cartonName: generateUniqueCartonName(),
             };
 
-            if (['twy1', 'twy4'].includes(partNumber)) {
-                const qr = generateQR(qrSet);
-                record.QR_RFTray = qr;
-                record.QR_RFTray_BEDID = qr;
-            }
-            if (['twy1', 'twy2', 'twy3'].includes(partNumber)) {
-                const qr = generateQR(qrSet);
-                record.QR_PS = qr;
-                record.QR_PS_BEDID = qr;
-            }
-            if (['twy1', 'twy2', 'twy5'].includes(partNumber)) {
-                const qr = generateQR(qrSet);
-                record.QR_HS = qr;
-                record.QR_HS_BEDID = qr;
+
+
+            const partData = table3Data.find((item: { partNumber: any; }) => item.partNumber === partNumber);
+            const inputMode = partData?.inputMode;
+            if (inputMode) {
+                if (['A', 'D', 'E'].includes(inputMode)) {
+                    const qr = generateQR(qrSet);
+                    record.QR_HS = qr;
+                    record.QR_HS_BEDID = qr;
+                }
+                if (['C', 'D', 'E'].includes(inputMode)) {
+                    const qr = generateQR(qrSet);
+                    record.QR_PS = qr;
+                    record.QR_PS_BEDID = qr;
+                }
+                if (['B', 'E'].includes(inputMode)) {
+                    const qr = generateQR(qrSet);
+                    record.QR_RFTray = qr;
+                    record.QR_RFTray_BEDID = qr;
+                }
             }
 
+            
             table2Data.push(record);
         }
 
@@ -140,7 +149,7 @@ const ACItest = () => {
             return match ? match.numberPerPallet : 0;
         };
 
-        
+
         const palletname = `${table1.partNumber}_${new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15)}`;
 
         const maxQuantity = getMaxQuantity(table3Data, table1.partNumber);
@@ -188,7 +197,7 @@ const ACItest = () => {
 
             if (!res2.ok) throw new Error("上傳 table2 失敗");
 
-     
+
             //新增到pallet表
             const res3 = await fetch(`${globalUrl.url}/api/post-pallet`, {
                 method: "POST",
