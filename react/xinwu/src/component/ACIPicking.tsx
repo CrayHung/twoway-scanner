@@ -158,8 +158,6 @@ const ACIPicking = () => {
         }
     }
 
-
-
     /**
      * 改成通用型Update API
      */
@@ -186,7 +184,6 @@ const ACIPicking = () => {
             return { success: false, message: error };
         }
     }
-
 
     /**
      * 改成通用型Delete API
@@ -383,13 +380,7 @@ const ACIPicking = () => {
 
         ////////////////////////////////  API call  ////////////////////////////////////
 
-        // //刪除carton的資料
-        const resultDelete = await deleteRequest("/api/carton-detail/ship", requestDeleteBody);
-        if (resultDelete.success) {
-            // alert("出貨成功");
-        } else {
-            alert(`出貨失敗: ${resultDelete.message}`);
-        }
+ 
         // //更新pallet的quantity
         const resultUpdate = await updateRequest("/api/update-quantity", requestUpdateBody);
         if (resultUpdate.success) {
@@ -404,6 +395,14 @@ const ACIPicking = () => {
         } else {
             alert(`新增失敗: ${resultPost.message}`);
         }
+       // //刪除carton的資料
+       const resultDelete = await deleteRequest("/api/carton-detail/ship", requestDeleteBody);
+       if (resultDelete.success) {
+           // alert("出貨成功");
+       } else {
+           alert(`出貨失敗: ${resultDelete.message}`);
+       }
+
         // // //將資料加入到"已出貨"(shipped)
         // const resultPost = await postRequest("/api/post-shipped", postShippedBody);
         // if (resultPost.success) {

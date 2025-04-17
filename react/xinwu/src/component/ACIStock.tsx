@@ -25,7 +25,7 @@ const ACIStock = () => {
 
     //for 編輯時控制BackDrop
     const [isEditing, setIsEditing] = useState(false);
-    const [editedLocation, setEditedLocation] = useState(""); // 編輯的 location
+    const [editedLocation, setEditedLocation] = useState("INSP"); // 編輯的 location
     const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null); // 保存當前編輯的行索引
 
 
@@ -274,6 +274,7 @@ const ACIStock = () => {
                                                 {isEditing && selectedRowIndex === 0 ? (
                                                     <input
                                                         type="text"
+                      
                                                         value={editedLocation}
                                                         onChange={handleLocationChange}
                                                         onKeyDown={(event) => handleKeyDown(event, 0)}
@@ -335,6 +336,9 @@ const ACIStock = () => {
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
                                         <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray_BEDID' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS_BEDID' })}</TableCell>
+                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS_BEDID' })}</TableCell>
 
                                     </TableRow>
                                 </TableHead>
@@ -348,6 +352,9 @@ const ACIStock = () => {
                                             <TableCell>{carton.qrRfTray}</TableCell>
                                             <TableCell>{carton.qrPs}</TableCell>
                                             <TableCell>{carton.qrHs}</TableCell>
+                                            <TableCell>{carton.qrRfTrayBedid}</TableCell>
+                                            <TableCell>{carton.qrPsBedid}</TableCell>
+                                            <TableCell>{carton.qrHsBedid}</TableCell>
 
                                         </TableRow>
                                     ))}

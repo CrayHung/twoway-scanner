@@ -651,6 +651,34 @@ function AddNewWorker() {
         }
     };
 
+    //  如果要跳到cartonName這攔 , 要改成下面這個
+    // const moveToNextColumnOrRow = () => {
+    //     const columnOrderPerMode: { [key in InputMode]: number[] } = {
+    //         'A': [1, 4,5], // SN, QR_HS,cartonName
+    //         'B': [1, 2,5], // SN, QR_RFTray,cartonName
+    //         'C': [1, 3,5], // SN, QR_PS,cartonName
+    //         'D': [1, 3, 4,5], // SN, QR_PS, QR_HS,cartonName
+    //         'E': [1, 2, 3, 4,5], // SN, QR_RFTray, QR_PS, QR_HS,cartonName
+    //     };
+
+    //     const columnOrder = columnOrderPerMode[inputMode]; // 取得當前模式的欄位順序
+    //     const currentColumnIndex = columnOrder.indexOf(currentColumn ?? 1); // 找出目前欄位的索引
+
+    //     if (currentColumnIndex === columnOrder.length - 1) {
+    //         // 如果是最後一個欄位 , 檢查是否超出資料行數 , 如果沒超過則移動到下一行
+    //         if (currentRow !== null && currentRow + 1 >= rows) {
+    //             setIsComplete(true); // 完成輸入
+    //             setCurrentColumn(null); // 重置欄位到 SN
+    //             setCurrentRow(null); // 重置行數
+    //         } else {
+    //             setCurrentRow((prevRow) => (prevRow !== null ? prevRow + 1 : 0)); // 移動到下一行
+    //             setCurrentColumn(columnOrder[0]); // 重設為第一個欄位 (SN)
+    //         }
+    //     } else {
+    //         // 移動到下一個欄位
+    //         setCurrentColumn(columnOrder[currentColumnIndex + 1]);
+    //     }
+    // };
     // 移動到下一個欄位或下一行(這版本移動到下一行或列時,不管該欄位有沒有資料 , 都會停在那格)
     const moveToNextColumnOrRow = () => {
         const columnOrderPerMode: { [key in InputMode]: number[] } = {

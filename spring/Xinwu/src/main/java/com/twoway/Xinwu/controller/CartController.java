@@ -42,7 +42,7 @@ public class CartController {
     @PostMapping("/cart/add")
     public ResponseEntity<?> addToCart(@RequestBody List<Cart> cart) {
         if (cart == null || cart.isEmpty()) {
-            System.out.println("cart ");
+            System.out.println("cart is empty");
             return ResponseEntity.badRequest().body("Error: No cart data provided.");
         }
 
