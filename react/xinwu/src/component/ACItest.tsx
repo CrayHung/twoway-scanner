@@ -28,7 +28,7 @@ const generateQR = (existing: Set<string>): string => {
 const ACItest = () => {
 
     const { formatMessage } = useIntl();
-    const { table3Data, globalUrl } = useGlobalContext();
+    const { table3Data,setTable3Data, globalUrl } = useGlobalContext();
 
 
     const [table1, setTable1] = useState<any>(null);
@@ -36,18 +36,56 @@ const ACItest = () => {
     const [pallet, setPallet] = useState<any[]>([]);
     const [cartonDetail, setCartonDetail] = useState<any[]>([]);
 
+    const fetchAllTable3 = async () => {
+
+        try {
+            const response = await fetch(`${globalUrl.url}/api/get-input-modes`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to get 所有對應表');
+            }
+
+            const data = await response.json();
+            // console.log("table3所有對應 : " + JSON.stringify(data));
+            setTable3Data(data);
+
+        } catch (error) {
+            console.error('Error fetching token:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchAllTable3();
+    }, []);
 
 
-
+    useEffect(() => {
+        console.log("🟢 table3Data :", table3Data);
+    }, [table3Data]);
+    useEffect(() => {
+        console.log("📦 table1 最新資料：", table1);
+    }, [table1]);
 
     const handleGenerate = () => {
         const workOrderNumber = generateRandomString(6);
         const quantity = generateRandomNumber(1, 10);
-        const partOptions = table3Data.map((item: { partNumber: any; }) => item.partNumber);
+        const partOptions = table3Data
+        .map((item: { partNumber: any; }) => item.partNumber)
+        .filter((part: string) => typeof part === 'string' && part.trim() !== '');
         const partNumber = partOptions[Math.floor(Math.random() * partOptions.length)];
         const company = 'aci';
         const createUser = 'aciadmin';
         const editUser = 'aciadmin';
+
+
+        console.log("🔎 隨機選到的 partNumber:", partNumber);
+        console.log("🧩 所有可選擇的 partOptions:", partOptions);
+
 
 
         const table1Data = {

@@ -42,6 +42,7 @@ const ACIShippingCart = () => {
     //for 選擇哪幾行的check box
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [selectedRowsPalletName, setSelectedRowsPalletName] = useState<string[]>([]);
+    const [selectedRowsData, setSelectedRowsData] = useState<any[]>([]);
 
     //一開始渲染Table的資料
     const [allStockData, setAllStockData] = useState<any[]>([]);
@@ -73,6 +74,11 @@ const ACIShippingCart = () => {
     const [autoCompleteValue, setAutoCompleteValue] = useState<string | null>(null);
 
     const [selectedCustomerPart, setSelectedCustomerPart] = useState('');
+
+
+    useEffect(() => {
+        console.log("🟢 selectedRowsData 更新:", selectedRowsData);
+    }, [selectedRowsData]);
 
 
 
@@ -206,7 +212,10 @@ const ACIShippingCart = () => {
 
 
     //checkbox選擇單一行資料時,同時設定selectedRowsPalletName
-    const handleSelectRow = (id: number, palletName: string) => {
+    const handleSelectRow = (rowData :any[] , id: number, palletName: string) => {
+
+        setSelectedRowsData(prevData => [...prevData, rowData]);
+
         setSelectedRows((prevSelected) => {
             const isSelected = prevSelected.includes(id);
             const updatedSelectedRows = isSelected
@@ -233,9 +242,13 @@ const ACIShippingCart = () => {
             const allIds = cartData.map((row) => row.id);
             const allPalletNames = cartData.map((row) => row.palletName);
 
+            setSelectedRowsData(cartData);
+
             setSelectedRows(allIds);
             setSelectedRowsPalletName(allPalletNames);
         } else {
+            setSelectedRowsData([]);
+
             setSelectedRowsPalletName([])
             setSelectedRows([]);
         }
@@ -248,16 +261,20 @@ const ACIShippingCart = () => {
             console.log("此時的setCarton為 : " + carton);
             // console.log("palletData : ", JSON.stringify(palletData, null, 2));
             // console.log("cartData : ", JSON.stringify(cartData, null, 2));
+
+            // 找出符合 cartonName 的 rows
+            const matchingRows = cartData.filter((row: any) => row.cartonName === carton); 
+
+            // 提取 ID 和 palletName
+            const matchingIds = matchingRows.map((row: any) => row.id);
+            const matchingPalletNames = Array.from(new Set(matchingRows.map((row: any) => row.palletName)));
+
+            const currentSelectedIds = selectedRows;
+
+            // 確認是否所有符合的 row 都已被選取
+            const allSelected = matchingIds.every(id => currentSelectedIds.includes(id));
+            
             setSelectedRows((prevSelected) => {
-                // 找出符合 cartonName 的 rows
-                const matchingRows = cartData.filter((row: any) => row.cartonName === carton);
-
-                // 提取 ID 和 palletName
-                const matchingIds = matchingRows.map((row: any) => row.id);
-                const matchingPalletNames = Array.from(new Set(matchingRows.map((row: any) => row.palletName)));
-
-                // 確認是否所有符合的 row 都已被選取
-                const allSelected = matchingIds.every(id => prevSelected.includes(id));
 
                 // 更新選取的 rows ID
                 const updatedSelectedRows = allSelected
@@ -273,6 +290,25 @@ const ACIShippingCart = () => {
 
                 return updatedSelectedRows;
             });
+
+
+
+            setSelectedRowsData(prevData => {
+        
+                if (allSelected) {
+                    // UNSELECT: Filter out the row objects whose IDs match
+                     console.log("Removing data for IDs:", matchingIds);
+                    return prevData.filter(dataRow => !matchingIds.includes(dataRow.id));
+                } else {
+                    const existingDataIds = new Set(prevData.map(d => d.id));
+                    const dataToAdd = matchingRows.filter(matchRow => !existingDataIds.has(matchRow.id));
+                     console.log("Adding data objects:", dataToAdd);
+                    return [...prevData, ...dataToAdd];
+                }
+            });
+    
+
+
             // 清空 input 欄位
             setCarton('');
         }
@@ -436,6 +472,7 @@ const ACIShippingCart = () => {
             }
 
             // 清空選擇的 palletName 陣列
+            setSelectedRowsData([]);
             setSelectedRows([]);
             setSelectedRowsPalletName([]);
 
@@ -475,6 +512,8 @@ const ACIShippingCart = () => {
     };
 
 
+
+
     //渲染下拉式顧客選單
     const handleSelectChange = (event: any) => {
         setSelectedCustomer(event.target.value);
@@ -496,6 +535,12 @@ const ACIShippingCart = () => {
         setInputValue('');
     };
 
+    
+    //取消 , 將待出貨內容返回給pallet和cartonDetail , 並將該幾筆資料從cart中移除
+    // 做以下事
+    // 1. 將資料加回到該pallet
+    // 將選到的內容{ids:[1,7]} 從cart表中移除
+    // 2.
 
 
     return (
@@ -772,7 +817,7 @@ const ACIShippingCart = () => {
                                                 <TableCell padding="checkbox">
                                                     <Checkbox
                                                         checked={selectedRows.includes(row.id)}
-                                                        onChange={() => handleSelectRow(row.id, row.palletName)}
+                                                        onChange={() => {handleSelectRow(row , row.id, row.palletName) }}
                                                     />
                                                 </TableCell>
                                                 <TableCell>{row.id}</TableCell>
