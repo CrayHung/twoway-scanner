@@ -51,6 +51,10 @@ const ACIShippingCart = () => {
     const [customerData, setCustomerData] = useState<any[]>([]);
 
 
+    //設備轉移用
+    const [showModal, setShowModal] = useState(false);
+    const [selectedPalletName, setSelectedPalletName] = useState<string>(''); // Radio 選擇的值
+    const [inputPalletName, setInputPalletName] = useState(""); // 文字輸入框的值
 
 
     const [typeASN_Number, setTypeASN_Number] = useState<string>('');
@@ -63,11 +67,11 @@ const ACIShippingCart = () => {
         return d;
     });
     const [typepurchase_order_number, setTypepurchase_order_number] = useState<string>('');
-    
+
     const [typeshipping_company_contractor, setShipping_company_contractor] = useState<string>('RXO');
     const [typeTracking_Number, seTypeTracking_Number] = useState<string>('');
-    
-    
+
+
     const [showShipModal, setShowShipModal] = useState(false);
     const [selectedCustomer, setSelectedCustomer] = useState('');
     const [inputValue, setInputValue] = useState('');
@@ -212,12 +216,23 @@ const ACIShippingCart = () => {
 
 
     //checkbox選擇單一行資料時,同時設定selectedRowsPalletName
-    const handleSelectRow = (rowData :any[] , id: number, palletName: string) => {
+    const handleSelectRow = (rowData: any, id: number, palletName: string) => {
 
-        setSelectedRowsData(prevData => [...prevData, rowData]);
+
 
         setSelectedRows((prevSelected) => {
             const isSelected = prevSelected.includes(id);
+
+            setSelectedRowsData((prevData) => {
+                if (isSelected) {
+                    // 取消選取：移除對應 id 的資料
+                    return prevData.filter((item) => item.id !== id);
+                } else {
+                    // 新增選取：加入 rowData
+                    return [...prevData, rowData];
+                }
+            });
+
             const updatedSelectedRows = isSelected
                 ? prevSelected.filter((rowId) => rowId !== id)
                 : [...prevSelected, id];
@@ -263,7 +278,7 @@ const ACIShippingCart = () => {
             // console.log("cartData : ", JSON.stringify(cartData, null, 2));
 
             // 找出符合 cartonName 的 rows
-            const matchingRows = cartData.filter((row: any) => row.cartonName === carton); 
+            const matchingRows = cartData.filter((row: any) => row.cartonName === carton);
 
             // 提取 ID 和 palletName
             const matchingIds = matchingRows.map((row: any) => row.id);
@@ -273,7 +288,7 @@ const ACIShippingCart = () => {
 
             // 確認是否所有符合的 row 都已被選取
             const allSelected = matchingIds.every(id => currentSelectedIds.includes(id));
-            
+
             setSelectedRows((prevSelected) => {
 
                 // 更新選取的 rows ID
@@ -294,19 +309,19 @@ const ACIShippingCart = () => {
 
 
             setSelectedRowsData(prevData => {
-        
+
                 if (allSelected) {
                     // UNSELECT: Filter out the row objects whose IDs match
-                     console.log("Removing data for IDs:", matchingIds);
+                    console.log("Removing data for IDs:", matchingIds);
                     return prevData.filter(dataRow => !matchingIds.includes(dataRow.id));
                 } else {
                     const existingDataIds = new Set(prevData.map(d => d.id));
                     const dataToAdd = matchingRows.filter(matchRow => !existingDataIds.has(matchRow.id));
-                     console.log("Adding data objects:", dataToAdd);
+                    console.log("Adding data objects:", dataToAdd);
                     return [...prevData, ...dataToAdd];
                 }
             });
-    
+
 
 
             // 清空 input 欄位
@@ -402,8 +417,8 @@ const ACIShippingCart = () => {
     //     }
     // };
 
-     //for出貨 傳送複數個palletName資料已獲得那些pallet裡面的cartonDetails
-     const prepareShippedData = async () => {
+    //for出貨 傳送複數個palletName資料已獲得那些pallet裡面的cartonDetails
+    const prepareShippedData = async () => {
         try {
 
             const body = JSON.stringify({ ids: selectedRows });
@@ -486,12 +501,12 @@ const ACIShippingCart = () => {
             alert("操作失敗，請稍後再試");
         }
 
-        const customerExcelData = requestShippedBody.map((row: { palletName:any; qrHs: any; qrPs: any; qrRfTray: any; }) => ({
+        const customerExcelData = requestShippedBody.map((row: { palletName: any; qrHs: any; qrPs: any; qrRfTray: any; }) => ({
             ASN_Number: typeASN_Number,
             component_QR_code_syntax: row.qrRfTray,
             housing_QR_code_syntax: row.qrHs,
             cable_operator_known_material_ID: selectedCustomerPart,   //帶入客戶料號
-           
+
             manufacture_batch_number_or_identifier: row.palletName, //還不確定是什麼  先放棧板名稱
             manufacture_country: "Taiwan",
             manufacture_date: today,    //建立日期?
@@ -535,12 +550,111 @@ const ACIShippingCart = () => {
         setInputValue('');
     };
 
-    
-    //取消 , 將待出貨內容返回給pallet和cartonDetail , 並將該幾筆資料從cart中移除
+
+    //將待出貨中的資料作設備轉移
     // 做以下事
-    // 1. 將資料加回到該pallet
-    // 將選到的內容{ids:[1,7]} 從cart表中移除
-    // 2.
+    //  1.  判斷要合併的pallet的maxquantity-quantity是否>=選擇的資料筆數
+    //  2.  將選到的資料加回pallet (update pallet+1)
+    //  3.  將選到的資料加回cartonDetails
+    //  4.  將選到的內容{ids:[1,7]} 從cart表中移除
+    //  5.  重新fetch一次後端新資料-->渲染前端
+
+    const handleMerge = () => {
+        setShowModal(true);
+    };
+
+
+    const handleMergeConfirm = async () => {
+
+
+        const selectedCount = selectedRowsData.length;
+
+
+        alert(selectedRows + "合併到:" + selectedPalletName + "棧板");
+        alert("合併的資料筆數 : "+selectedCount);
+        setShowModal(false);
+
+        console.log("selectedPalletName :" +selectedPalletName) ;
+
+        //  1.  判斷要合併的pallet的maxquantity-quantity是否>=選擇的資料筆數
+        //  1.1 先抓出要選擇合併的pallet資料
+        //  1.2 根據抓出的pallet.maxquantity- pallet.quantity  >=  selectedRows.length 判斷是否可加
+        const responsePallets = await fetch(`${globalUrl.url}/api/get-pallet`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pallet_name : selectedPalletName}),
+        });
+
+        if (!responsePallets.ok) {
+            console.error("Failed to fetch pallets:", responsePallets.status, responsePallets.statusText);
+            return;
+        }
+        const pallets = await responsePallets.json();
+        //  判斷選擇要合併的棧板maxQuantity-quantity>=selectedRowsData.length?
+        const result = pallets.maxQuantity - pallets.quantity;
+        if (result < selectedRowsData.length) {
+            alert("要核定的pallet剩餘空間不足");
+            return;
+        }
+
+        const resultToADD = pallets.quantity + selectedRowsData.length;
+
+        //  將選到的資料長度加回pallet (update pallet+1)
+        await fetch(`${globalUrl.url}/api/update-quantity`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pallet_name: selectedPalletName, quantity: resultToADD }),
+        });
+
+
+        //  將選到的資料加到cartonDetails表中
+        // 要保留的欄位
+        const requiredFields = [
+            "palletName",
+            "cartonName",
+            "sn",
+            "qrRfTray",
+            "qrPs",
+            "qrHs",
+            "qrRfTrayBedid",
+            "qrPsBedid",
+            "qrHsBedid"
+        ];
+        //  cartonDetails需要的格式
+        const transformedData = selectedRowsData.map(item => {
+            const newItem: any = {};
+
+            requiredFields.forEach((field) => {
+                // palletName欄位改成選擇要加入的棧板名稱 selectedPalletName
+                newItem[field] = field === "palletName"
+                    ? selectedPalletName
+                    : item[field] !== undefined
+                        ? item[field]
+                        : null;
+            });
+            return newItem;
+        });
+        // console.log("準備加入倒cartonDetail的資料:" , JSON.stringify(transformedData, null, 2) )
+        await fetch(`${globalUrl.url}/api/post-carton-details`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(transformedData),
+        });
+
+    //    4.  將選到的內容{ids:[1,7]} 從cart表中移除
+
+
+    await fetch(`${globalUrl.url}/api/cart/remove-multiple`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedRows }),
+    });
+
+    //  5.  重新fetch一次後端新資料-->渲染前端
+    fetchCart();
+
+    };
+
 
 
     return (
@@ -577,8 +691,8 @@ const ACIShippingCart = () => {
                                 />
                             </Grid>
 
-                              {/* purchase_order_number */}
-                              <Grid item xs={12}>
+                            {/* purchase_order_number */}
+                            <Grid item xs={12}>
                                 <TextField
                                     fullWidth
                                     label="輸入 purchase_order_number"
@@ -628,8 +742,8 @@ const ACIShippingCart = () => {
                                 />
                             </Grid>
 
-                             {/* Tracking Number */}
-                             <Grid item xs={12}>
+                            {/* Tracking Number */}
+                            <Grid item xs={12}>
                                 <TextField
                                     fullWidth
                                     label="輸入 Tracking Number"
@@ -735,6 +849,76 @@ const ACIShippingCart = () => {
 
 
 
+            {/* 選擇要將設備合併到某個pallet */}
+            <Modal open={showModal} onClose={() => setShowModal(false)}>
+                <Box sx={modalStyle}>
+                    <form>
+                        <Grid container spacing={2}>
+                            {/* 渲染 palletName 與 Radio */}
+                            <Grid item xs={12}>
+                                <TextField
+                                    fullWidth
+                                    label="輸入 Pallet Name"
+                                    variant="outlined"
+                                    value={inputPalletName}
+                                    onChange={(event) => setInputPalletName(event.target.value)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === "Enter") {
+                                            event.preventDefault(); // 防止表單提交
+                                            const foundPallet = palletData.find(row => row.palletName === inputPalletName);
+                                            if (foundPallet) {
+                                                setSelectedPalletName(inputPalletName); // 設定選取的 Radio
+                                            } else {
+                                                alert("沒有此 palletName");
+                                            }
+                                        }
+                                    }}
+                                    onFocus={() => {
+                                        setInputPalletName(""); // 點擊時清空輸入框
+                                        setSelectedPalletName(""); // 取消選取的 Radio
+                                    }}
+                                />
+                            </Grid>
+
+                            {/* 渲染 palletName 與 Radio */}
+                            <Grid item xs={12}>
+                                <RadioGroup
+                                    value={selectedPalletName}
+                                    onChange={(event) => {
+                                        setSelectedPalletName(event.target.value);
+                                        setInputPalletName(event.target.value); // 設定輸入框為選取的 palletName
+                                    }}
+                                >
+                                    {palletData
+                                        .filter((row) => row.palletName !== palletName) // 過濾掉相同的 palletName
+                                        .map((row) => (
+                                            <FormControlLabel
+                                                key={row.id}
+                                                value={row.palletName}
+                                                control={<Radio />}
+                                                label={row.palletName}
+                                            />
+                                        ))}
+                                </RadioGroup>
+                            </Grid>
+
+                            {/* 確認按鈕 */}
+                            <Grid item xs={12}>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    fullWidth
+                                    onClick={handleMergeConfirm}
+                                    disabled={!selectedPalletName} // 當未選擇時禁用按鈕
+                                >
+                                    {formatMessage({ id: 'confirm' })}
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </form>
+                </Box>
+            </Modal>
+
 
             {
                 (cartData.length === 0 ? (
@@ -750,9 +934,14 @@ const ACIShippingCart = () => {
                         <>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 {selectedRows.length > 0 && (
-                                    <Button variant="outlined" color="secondary" onClick={handleOpenShipModal}>
-                                        出貨
-                                    </Button>
+                                    <Box>
+                                        <Button variant="outlined" color="secondary" onClick={handleOpenShipModal}>
+                                            出貨
+                                        </Button>
+                                        <Button variant="outlined" color="secondary" onClick={handleMerge} style={{ marginLeft: '10px' }}>
+                                            {formatMessage({ id: 'transfer' })}
+                                        </Button>
+                                    </Box>
                                 )}
 
                             </div>
@@ -817,7 +1006,7 @@ const ACIShippingCart = () => {
                                                 <TableCell padding="checkbox">
                                                     <Checkbox
                                                         checked={selectedRows.includes(row.id)}
-                                                        onChange={() => {handleSelectRow(row , row.id, row.palletName) }}
+                                                        onChange={() => { handleSelectRow(row, row.id, row.palletName) }}
                                                     />
                                                 </TableCell>
                                                 <TableCell>{row.id}</TableCell>

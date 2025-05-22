@@ -4,7 +4,7 @@
  * 
  */
 import React, { useEffect, useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Button, Box, Typography, Backdrop } from '@mui/material';
+import {  Table, Autocomplete, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Button, Box, Typography, Backdrop } from '@mui/material';
 // import '../App.css';
 import { useNavigate } from 'react-router-dom';
 import { message } from 'antd';
@@ -1243,54 +1243,135 @@ function AddNewWorker() {
             )}
 
             {!hiddenInput &&
-                <div>
-                    <>
+                // <div>
+                //     <>
+                //         <label>{formatMessage({ id: 'workOrderNumber' })}：</label>
+                //         <input
+                //             type="text"
+                //             value={workNumber}
+                //             onChange={(e) => setWorkNumber(e.target.value)}
+                //         />
+                //     </>
+
+                //     <>
+
+                //         <label>{formatMessage({ id: 'part' })}：</label>
+                //         {/* <select value={selectedPartNumber} onChange={(e) => setSelectedPartNumber(e.target.value)}>
+                //             <option value="">{formatMessage({ id: 'part' })}</option>
+                //             {table3Data.map((item: any) => (
+                //                 <option key={item.id} value={item.partNumber}>
+                //                     {item.partNumber}
+                //                 </option>
+                //             ))}
+                //         </select> */}
+                //         {/* 下拉選單 */}
+                //         {/* <input
+                //             type="text"
+                //             value={searchText}
+                //             onChange={(e) => setSearchText(e.target.value)}
+                //             placeholder="搜尋 Part Number"
+                //         />
+                //         <select
+                //             value={selectedPartNumber}
+                //             onChange={(e) => {
+                //                 setSelectedPartNumber(e.target.value);
+                //                 setSearchText(''); // 選擇後清空搜尋框
+                //             }}
+                //         >
+                //             <option value="">請選擇 Part</option>
+                //             {filteredOptions.map((item:any) => (
+                //                 <option key={item.id} value={item.partNumber}>
+                //                     {item.partNumber}
+                //                 </option>
+                //             ))}
+                //         </select> */}
+
+                //         <Autocomplete
+                //             freeSolo
+                //             options={filteredOptions.map((item: any) => item.partNumber)}
+                //             value={selectedPartNumber}
+                //             inputValue={searchText}
+                //             onInputChange={(event, newInputValue) => {
+                //                 setSearchText(newInputValue);
+                //             }}
+                //             onChange={(event, newValue) => {
+                //                 setSelectedPartNumber(newValue || '');
+                //                 setSearchText(''); // 選擇後清空搜尋框
+                //             }}
+                //             renderInput={(params) => (
+                //                 <TextField
+                //                     {...params}
+                //                     label="搜尋 Part Number"
+                //                     placeholder="請輸入或選擇 Part Number"
+                //                     variant="outlined"
+                //                 />
+                //             )}
+                //         />
+                //     </>
+                //     <>
+                //         <label>{formatMessage({ id: 'quantity' })}：</label>
+                //         <input type="number" value={rows} onChange={handleRowChange} />
+                //     </>
+                //     <button onClick={handleGenerateTable}>{formatMessage({ id: 'generate' })}</button>
+                // </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                    {/* 工單號 */}
+                    <Box display="flex" alignItems="center" gap={1}>
                         <label>{formatMessage({ id: 'workOrderNumber' })}：</label>
-                        <input
-                            type="text"
+                        <TextField
+                            variant="outlined"
+                            size="small"
                             value={workNumber}
                             onChange={(e) => setWorkNumber(e.target.value)}
                         />
-                    </>
+                    </Box>
 
-                    <>
-
+                    {/* Part 選擇 */}
+                    <Box display="flex" alignItems="center" gap={1}>
                         <label>{formatMessage({ id: 'part' })}：</label>
-                        {/* <select value={selectedPartNumber} onChange={(e) => setSelectedPartNumber(e.target.value)}>
-                            <option value="">{formatMessage({ id: 'part' })}</option>
-                            {table3Data.map((item: any) => (
-                                <option key={item.id} value={item.partNumber}>
-                                    {item.partNumber}
-                                </option>
-                            ))}
-                        </select> */}
-                        {/* 下拉選單 */}
-                        <input
-                            type="text"
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            placeholder="搜尋 Part Number"
-                        />
-                        <select
+                        <Autocomplete
+                            freeSolo
+                            options={filteredOptions.map((item: any) => item.partNumber)}
                             value={selectedPartNumber}
-                            onChange={(e) => {
-                                setSelectedPartNumber(e.target.value);
-                                setSearchText(''); // 選擇後清空搜尋框
+                            inputValue={searchText}
+                            onInputChange={(event, newInputValue) => {
+                                setSearchText(newInputValue);
                             }}
-                        >
-                            <option value="">請選擇 Part</option>
-                            {filteredOptions.map((item:any) => (
-                                <option key={item.id} value={item.partNumber}>
-                                    {item.partNumber}
-                                </option>
-                            ))}
-                        </select>
-                    </>
-                    <>
+                            onChange={(event, newValue) => {
+                                setSelectedPartNumber(newValue || '');
+                                setSearchText('');
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="搜尋 Part Number"
+                                    placeholder="請輸入或選擇 Part Number"
+                                    variant="outlined"
+                                    size="small"
+                                />
+                            )}
+                            style={{ width: 200 }}
+                        />
+                    </Box>
+
+                    {/* 數量 */}
+                    <Box display="flex" alignItems="center" gap={1}>
                         <label>{formatMessage({ id: 'quantity' })}：</label>
-                        <input type="number" value={rows} onChange={handleRowChange} />
-                    </>
-                    <button onClick={handleGenerateTable}>{formatMessage({ id: 'generate' })}</button>
+                        <TextField
+                            type="number"
+                            variant="outlined"
+                            size="small"
+                            value={rows}
+                            onChange={handleRowChange}
+                        />
+                    </Box>
+
+                    {/* 產生按鈕 */}
+                    <Box>
+                        <button onClick={handleGenerateTable}>
+                            {formatMessage({ id: 'generate' })}
+                        </button>
+                    </Box>
                 </div>
             }
 

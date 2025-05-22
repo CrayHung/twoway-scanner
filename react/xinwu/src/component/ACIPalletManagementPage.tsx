@@ -54,6 +54,9 @@ const ACIPalletManagementPage = () => {
     //for 選擇哪幾行的check box (用以整個棧板出貨)
     const [selectedRows, setSelectedRows] = useState<number[]>([]);
     const [selectedRowsPalletName, setSelectedRowsPalletName] = useState<string[]>([]);
+    const [selectedRowsData, setSelectedRowsData] = useState<any[]>([]);
+
+
     //for Stock用以快速找到棧板要刪除用
     const [selectedRowsToDelete, setSelectedRowsToDelete] = useState<number[]>([]);
     const [selectedRowsToDeletePalletName, setSelectedRowsToDeletePalletName] = useState<string[]>([]);
@@ -226,10 +229,28 @@ const ACIPalletManagementPage = () => {
     // };
 
     //checkbox選擇單一行資料時,同時設定selectedRowsPalletName
-    const handleSelectRow = (id: number) => {
+    const handleSelectRow = (rowData: any, id: number) => {
+
+
+
+
         setSelectedRows((prevSelected) => {
             // 檢查該行是否已經選擇
             const isSelected = prevSelected.includes(id);
+
+
+            // 更新 selectedRowsData
+            setSelectedRowsData((prevData) => {
+                if (isSelected) {
+                    // 取消選取：移除對應 id 的資料
+                    return prevData.filter((item) => item.id !== id);
+                } else {
+                    // 新增選取：加入 rowData
+                    return [...prevData, rowData];
+                }
+            });
+
+
 
             // 更新 selectedRows
             const updatedSelectedRows = isSelected
@@ -308,16 +329,22 @@ const ACIPalletManagementPage = () => {
     /**(pallet)pallet input欄位,按下enter後可以將該筆pallet的checkbox打勾 */
     const handleCheckBoxforPallet = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
+
+            // 找出符合 palletName 的 rows
+            const matchingRows = palletData.filter((row: any) => row.palletName === pal);
+            // 提取 ID 和 palletName
+            const matchingIds = matchingRows.map((row: any) => row.id);
+            const matchingPalletNames = matchingRows.map((row: any) => row.palletName);
+
+            const currentSelectedIds = selectedRows;
+
+            // 確認是否所有符合的 row 都已被選取
+            const allSelected = matchingIds.every(id => currentSelectedIds.includes(id));
+
+
             setSelectedRows((prevSelected) => {
-                // 找出符合 palletName 的 rows
-                const matchingRows = palletData.filter((row: any) => row.palletName === pal);
 
-                // 提取 ID 和 palletName
-                const matchingIds = matchingRows.map((row: any) => row.id);
-                const matchingPalletNames = matchingRows.map((row: any) => row.palletName);
-
-                // 確認是否所有符合的 row 都已被選取
-                const allSelected = matchingIds.every(id => prevSelected.includes(id));
+                // const allSelected = matchingIds.every(id => prevSelected.includes(id));
 
                 // 更新選取的 rows ID
                 const updatedSelectedRows = allSelected
@@ -333,16 +360,37 @@ const ACIPalletManagementPage = () => {
 
                 return updatedSelectedRows;
             });
+
+
+            setSelectedRowsData(prevData => {
+
+                if (allSelected) {
+                    // UNSELECT: Filter out the row objects whose IDs match
+                    console.log("Removing data for IDs:", matchingIds);
+                    return prevData.filter(dataRow => !matchingIds.includes(dataRow.id));
+                } else {
+                    const existingDataIds = new Set(prevData.map(d => d.id));
+                    const dataToAdd = matchingRows.filter(matchRow => !existingDataIds.has(matchRow.id));
+                    console.log("Adding data objects:", dataToAdd);
+                    return [...prevData, ...dataToAdd];
+                }
+
+            });
             // 清空 input 欄位
             setPal('');
         }
     };
+    useEffect(() => {
+        console.log("selectedRowsData:", JSON.stringify(selectedRowsData, null, 2));
+    }, [selectedRowsData])
 
     useEffect(() => {
         console.log("selectedRows:" + selectedRows);
         console.log("selectedRowsToDelete:" + selectedRowsToDelete);
         console.log("selectedRowsPalletName:" + selectedRowsPalletName);
         console.log("selectedRowsToDeletePalletName:" + selectedRowsToDeletePalletName);
+
+
     }, [selectedRows, selectedRowsToDelete, selectedRowsPalletName, selectedRowsToDeletePalletName])
 
 
@@ -425,6 +473,7 @@ const ACIPalletManagementPage = () => {
 
 
             // 清空選擇的 palletName 陣列
+            setSelectedRowsData([]);
             setSelectedRows([]);
             setSelectedRowsPalletName([]);
 
@@ -1116,6 +1165,7 @@ const ACIPalletManagementPage = () => {
                 </TableContainer>
             </Paper>
 
+
             {/* 渲染pallet表 :  pallet_name  max_quantity  quantity  location 編輯按鈕     */}
 
             <Paper style={{ flex: 2, overflowX: "auto" }}>
@@ -1131,23 +1181,24 @@ const ACIPalletManagementPage = () => {
                             style={{ padding: '5px', fontSize: '16px' }}
                         />
 
-                        {selectedRows.length > 0 && (
+                        {selectedRows.length > 0 && selectedRowsData.some(row => row.quantity !== 0) && (
                             <Button variant="contained" color="primary" onClick={handleShipConfirm}>
                                 加入待出貨清單
                             </Button>
 
                         )}
-                        {selectedRows.length > 0 && (
+                        {selectedRows.length > 0 && selectedRowsData.some(row => row.quantity !== 0) && (
                             <Button variant="contained" color="primary" onClick={handleMerge}>
                                 設備轉移
                             </Button>
 
                         )}
+
                     </div>
                 </>
 
                 <div style={{
-                    maxHeight: "80vh",  
+                    maxHeight: "80vh",
                     overflowY: "auto",
                     overflowX: "auto",
                     border: "1px solid #ccc",
@@ -1173,7 +1224,7 @@ const ACIPalletManagementPage = () => {
                                         <TableCell padding="checkbox">
                                             <Checkbox
                                                 checked={selectedRows.includes(row.id)}
-                                                onChange={() => handleSelectRow(row.id)}
+                                                onChange={() => handleSelectRow(row, row.id)}
                                             />
                                         </TableCell>
                                         <TableCell>{row.id}</TableCell>
@@ -1223,6 +1274,8 @@ const ACIPalletManagementPage = () => {
                     </TableContainer>
                 </div>
             </Paper>
+
+
 
         </div>
     );

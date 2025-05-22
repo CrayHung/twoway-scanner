@@ -39,6 +39,7 @@ const ACIPicking = () => {
     //增加紙箱
     const [showAddCartonModal, setShowAddCartonModal] = useState(false);
     const [inputWorkOrderNumber, setInputWorkOrderNumber] = useState(""); // 文字輸入框的值 (工單)
+    const [inputCartonName, setInputCartonName] = useState(""); // 文字輸入框的紙箱名稱值 
     const [inputCartonAmount, setInputCartonAmount] = useState<string | number>("");
     const [inputACIPartNumber, setInputACIPartNumber] = useState(""); // 文字輸入框的值 (料號)
     const [ACIPartNumber, setACIPartNumber] = useState<any[]>([])
@@ -54,6 +55,8 @@ const ACIPicking = () => {
 
     //for pallet
     //掃描初始棧板用
+    //一開始渲染Table的資料
+    const [allStockData, setAllStockData] = useState<any[]>([]);
     const [tempPalletName, setTempPalletName] = useState<string>('');
     const [allPalletData, setAllPalletData] = useState<any[]>([]);
     //for carton
@@ -90,6 +93,69 @@ const ACIPicking = () => {
     const [showShipModal, setShowShipModal] = useState(false);
 
 
+    useEffect(() => {
+        fetchStock();
+    }, []);
+
+    useEffect(() => {
+        if (allStockData.length > 0) {
+            fetchPallet();
+        }
+    }, [allStockData]);
+
+    const fetchStock = async () => {
+        try {
+            const response = await fetch(`${globalUrl.url}/api/get-all-stock`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                //把palletName為null的資料篩掉
+                const filterData = data.filter((item: any) => item.palletName !== null);
+                setAllStockData(filterData);
+                console.log("返回的stock filterData : ", JSON.stringify(filterData, null, 2))
+
+            } else {
+                console.error('無法取得 stock 資料:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error fetching stock details:', error);
+        }
+    };
+    const fetchPallet = async () => {
+        try {
+            const palletNames = allStockData.map(stock => stock.palletName);
+            const uniquePalletNames = Array.from(new Set(palletNames)); // 避免重複請求
+
+            // console.log("palletNames : "+palletNames);
+            console.log("uniquePalletNames : ", JSON.stringify(uniquePalletNames, null, 2));
+
+
+            //取得所有的pallet資料
+            const response = await fetch(`${globalUrl.url}/api/get-multiple-pallets`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(uniquePalletNames),
+            });
+
+            if (!response.ok) {
+                console.error("Failed to fetch pallets:", response.status, response.statusText);
+                return;
+            }
+
+            const pallets = await response.json();
+            setAllPalletData(pallets);
+            console.log("取得的pallets :", JSON.stringify(pallets, null, 2));
+        } catch (error) {
+            console.error('Error fetching pallet details:', error);
+        }
+    };
+
+
     //如果組件有掛載的參數,則將參數設給tempPalletName
     useEffect(() => {
         if (location.state?.palletName) {
@@ -106,30 +172,30 @@ const ACIPicking = () => {
 
 
     //一開始就先取得所有的pallletName , quantity的資料
-    useEffect(() => {
-        fetchAllPalletName();
-    }, []);
-    const fetchAllPalletName = async () => {
-        try {
-            const response = await fetch(`${globalUrl.url}/api/get-all-pallet`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+    // useEffect(() => {
+    //     fetchAllPalletName();
+    // }, []);
+    // const fetchAllPalletName = async () => {
+    //     try {
+    //         const response = await fetch(`${globalUrl.url}/api/get-all-pallet`, {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //         });
 
-            if (response.ok) {
-                const data = await response.json();
-                setAllPalletData(data);
-                // console.log("所有pallet資料:", JSON.stringify(data, null, 2))
+    //         if (response.ok) {
+    //             const data = await response.json();
+    //             setAllPalletData(data);
+    //             // console.log("所有pallet資料:", JSON.stringify(data, null, 2))
 
-            } else {
-                console.error('無法取得 Pallet 資料:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error fetching pallet details:', error);
-        }
-    };
+    //         } else {
+    //             console.error('無法取得 Pallet 資料:', response.statusText);
+    //         }
+    //     } catch (error) {
+    //         console.error('Error fetching pallet details:', error);
+    //     }
+    // };
 
     /**
      * 改成通用型Get API
@@ -380,7 +446,7 @@ const ACIPicking = () => {
 
         ////////////////////////////////  API call  ////////////////////////////////////
 
- 
+
         // //更新pallet的quantity
         const resultUpdate = await updateRequest("/api/update-quantity", requestUpdateBody);
         if (resultUpdate.success) {
@@ -395,13 +461,13 @@ const ACIPicking = () => {
         } else {
             alert(`新增失敗: ${resultPost.message}`);
         }
-       // //刪除carton的資料
-       const resultDelete = await deleteRequest("/api/carton-detail/ship", requestDeleteBody);
-       if (resultDelete.success) {
-           // alert("出貨成功");
-       } else {
-           alert(`出貨失敗: ${resultDelete.message}`);
-       }
+        // //刪除carton的資料
+        const resultDelete = await deleteRequest("/api/carton-detail/ship", requestDeleteBody);
+        if (resultDelete.success) {
+            // alert("出貨成功");
+        } else {
+            alert(`出貨失敗: ${resultDelete.message}`);
+        }
 
         // // //將資料加入到"已出貨"(shipped)
         // const resultPost = await postRequest("/api/post-shipped", postShippedBody);
@@ -416,7 +482,8 @@ const ACIPicking = () => {
         fetchCartonDetails();
         //更新allPalletData , 避免資料不同步
         // setAllPalletData(updatedPalletData);
-        fetchAllPalletName();
+        // fetchAllPalletName();
+        fetchPallet();
 
         //將選擇的欄位清空
         setSelectedPallet(null);
@@ -771,7 +838,8 @@ const ACIPicking = () => {
         //更新cartonDetails , 避免資料不同步
         fetchCartonDetails();
         //更新allPalletData , 避免資料不同步
-        fetchAllPalletName();
+        // fetchAllPalletName();
+        fetchPallet();
         //將選擇的欄位清空
         setSelectedPallet(null);
         setTempPalletName('');
@@ -826,10 +894,10 @@ const ACIPicking = () => {
     /**
      * for 增加箱子 , 做以下事
      * 1.點擊增加箱子跳出Modal , Modal包含以下欄位 以及 確認按鈕
-     *  - 工單號碼
      *  - 紙箱數量
      *  - 料號模式
-     * 2. 按下確認按鈕後產生如同addNewWorkOrder的表格
+     * 2. 點擊確認按鈕後 原Modal關閉 + 重新渲染頁面
+     *      產生如同addNewWorkOrder的表格 (頁面內容如新增工單 , 但要把工單號碼 , 棧板名稱直接填上)
      * 
      */
 
@@ -858,6 +926,7 @@ const ACIPicking = () => {
         fetchACIPartNumber();
     }, []);
 
+
     const handleAddBox = async () => {
         //跳出Modal
         setShowAddCartonModal(true);
@@ -867,16 +936,23 @@ const ACIPicking = () => {
      * 
      * 
      *     //增加紙箱
-     * 
+     *  點擊確認按鈕後做以下 
+     * 1.文字輸入Modal關閉
+     * 2.判斷該站版的maxQuantity是否足夠 , 如夠則update該棧板的quantity
+     * 3.
+     * 重新渲染頁面
+     *      產生如同addNewWorkOrder的表格 (頁面內容如新增工單 , 但要把工單號碼 , 棧板名稱直接填上)
      */
 
-    const handleSubmitAddCarton = () => {
-        /**
-          * 
-         currentPalletData=目前棧板的資料
-         palletName=目前的棧板名稱(全域變數)
-          * 
-          */
+    /**
+         * 
+        currentPalletData=目前棧板的資料
+        palletName=目前的棧板名稱(全域變數)
+         * 
+         */
+    const handleSubmitAddCarton = async () => {
+
+        setShowAddCartonModal(false);
 
         //判斷目前棧板數量是否足夠(max-quantity-quantity)
         const checkQuantity = (palletData: any) => {
@@ -897,10 +973,52 @@ const ACIPicking = () => {
             pallet_name: palletName,
             quantity: newQuantity
         }
-        // 2.新增數筆cartonDetail
-        //1. carton表中 選擇到的行的palletName要更新
+        //將pallet的quantity更新
+        const resultUpdate = await updateRequest("/api/update-quantity", requestUpdateQuantityBody);
+        if (resultUpdate.success) {
+            alert("更新成功");
+        } else {
+            alert(`更新失敗: ${resultUpdate.message}`);
+            return;
+        }
 
-        //2. 要將pallet表中新舊pallet的quantity更新
+
+
+
+        //新增newQuantity筆資料到 cartonDetail
+        function generateData(newQuantity: number, palletName: any) {
+            const template = {
+                palletName: palletName,
+                cartonName: "",
+                sn: "",
+                qrRfTray: "",
+                qrPs: "",
+                qrHs: "",
+                qrRfTrayBedid: "",
+                qrPsBedid: "",
+                qrHsBedid: ""
+            };
+
+            return Array.from({ length: newQuantity }, () => ({ ...template }));
+        }
+
+        const requestAddCartonBody = generateData(newQuantity, palletName);
+
+        const resultPost = await postRequest("/api/post-carton-details", requestAddCartonBody);
+        if (resultPost.success) {
+            alert("新增成功");
+
+            const route=palletName
+            //如果成功更新數量跟新增數筆資料到carton裡面 , 則跳轉到/ACI/ACIAddCarton頁面進行掃描新增
+            navigate(`/ACI/ACIAddCarton/reload?palletName=${route}`);
+
+
+        } else {
+            alert(`新增失敗: ${resultPost.message}`);
+            return;
+        }
+
+
 
     }
 
@@ -920,16 +1038,16 @@ const ACIPicking = () => {
                 <Box sx={modalStyle}>
                     <form>
                         <Grid container spacing={2}>
-                            {/* 工單號碼 */}
-                            <Grid item xs={12}>
+                            {/* 紙箱名稱 */}
+                            {/* <Grid item xs={12}>
                                 <TextField
                                     fullWidth
-                                    label="輸入 工單號碼"
+                                    label="輸入 紙箱名稱"
                                     variant="outlined"
-                                    value={inputWorkOrderNumber}
-                                    onChange={(event) => setInputWorkOrderNumber(event.target.value)}
+                                    value={inputCartonName}
+                                    onChange={(event) => setInputCartonName(event.target.value)}
                                 />
-                            </Grid>
+                            </Grid> */}
                             {/* 紙箱數量 */}
                             <Grid item xs={12}>
                                 <TextField
@@ -985,7 +1103,7 @@ const ACIPicking = () => {
                                     color="primary"
                                     fullWidth
                                     onClick={handleSubmitAddCarton}
-                                    disabled={!inputWorkOrderNumber || !inputCartonAmount || !inputACIPartNumber} // 當未輸入時禁用按鈕
+                                    disabled={ !inputCartonAmount || !inputACIPartNumber} // 當未輸入時禁用按鈕
                                 >
                                     {formatMessage({ id: 'confirm' })}
                                 </Button>
@@ -1085,9 +1203,20 @@ const ACIPicking = () => {
 
                 </div>
             } */}
+            {/* {tableView && (cartonDetails.length === 0 ? ( */}
+            {(cartonDetails.length === 0 ? (
+                <div style={{ marginBottom: '10px' }}>
+                    <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                        <Box>
+                            <Button variant="outlined" color="secondary" onClick={handleAddBox} style={{ marginLeft: '10px' }}>
+                                {formatMessage({ id: 'addBox' })}
+                            </Button>
+                        </Box>
+                    </Box>
+                    <p style={{ textAlign: 'center', marginTop: '20px' }}>no data</p>
+                </div>
 
-            {tableView && (cartonDetails.length === 0 ? (
-                <p style={{ textAlign: 'center', marginTop: '20px' }}>no data</p>
+
             ) : (
                 <div
                     style={{
@@ -1096,7 +1225,8 @@ const ACIPicking = () => {
                         height: "90vh",
                         overflow: "auto",
                     }}>
-                    {selectedRows.length > 0 && (
+                    {/* {selectedRows.length > 0 && ( */}
+                    {selectedRows.length > 0 ? (
                         <div style={{ marginBottom: '10px' }}>
                             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                                 <Box>
@@ -1109,13 +1239,13 @@ const ACIPicking = () => {
                                     <Button variant="outlined" color="secondary" onClick={handleMerge} style={{ marginLeft: '10px' }}>
                                         {formatMessage({ id: 'transfer' })}
                                     </Button>
+
+
                                     {/* <Button variant="outlined" color="secondary" onClick={handleRepack} style={{ marginLeft: '10px' }}>
                                     {formatMessage({ id: 'repack' })}...尚未
-                                </Button>
+                                </Button>*/}
 
-                                <Button variant="outlined" color="secondary" onClick={handleAddBox} style={{ marginLeft: '10px' }}>
-                                    {formatMessage({ id: 'addBox' })}...尚未
-                                </Button> */}
+
 
                                 </Box>
                                 <Button variant="contained" sx={{ marginRight: 1 }} onClick={handleExitButtonClick}>
@@ -1123,7 +1253,19 @@ const ACIPicking = () => {
                                 </Button>
                             </Box>
                         </div>
-                    )}
+                    ) : (
+                        <div style={{ marginBottom: '10px' }}>
+                            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                                <Box>
+                                    <Button variant="outlined" color="secondary" onClick={handleAddBox} style={{ marginLeft: '10px' }}>
+                                        {formatMessage({ id: 'addBox' })}
+                                    </Button>
+                                </Box>
+                            </Box>
+                        </div>
+                    )
+                    }
+
                     <>
                         <label>{formatMessage({ id: 'CartonNames' })}：</label>
                         <input

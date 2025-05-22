@@ -101,6 +101,7 @@
                 "MaxQuantity": "棧板最大箱數",
                 "Quantity": "目前箱數",
                 "Location": "棧板儲位(點擊修改)",
+                "Location1": "棧板儲位",
                 "CartonNames": "紙箱名稱",
                 "aciPartNumber":"aci料號",
                 "customPartNumber":"客戶料號"
@@ -205,6 +206,7 @@
                 "MaxQuantity": "Max Carton Quantity",
                 "Quantity": "Current Carton Quantity",
                 "Location": "Location",
+                "Location1": "Location",
                 "CartonNames": "Carton Name",
                 "aciPartNumber":"aciPartNumber",
                 "customPartNumber":"customPartNumber"

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useGlobalContext } from '../global';
 import { useNavigate } from 'react-router-dom';
 import { useIntl } from "react-intl";
-import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Box, Button, Grid, IconButton, MenuItem, Modal, TextField, Typography, Select, FormControl, InputLabel, FormHelperText } from '@mui/material';
+import { Paper, Autocomplete, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Box, Button, Grid, IconButton, MenuItem, Modal, TextField, Typography, Select, FormControl, InputLabel, FormHelperText } from '@mui/material';
 const modalStyle = {
     position: 'absolute' as 'absolute',
     top: '50%',
@@ -266,7 +266,7 @@ const ACICustomerPage = () => {
         }
 
         // 如果通過驗證，則執行提交邏輯
-        console.log('表單提交', { selectedAciPartNumber,selectedCustomerPartNumber,  selectedCustomerName });
+        console.log('表單提交', { selectedAciPartNumber, selectedCustomerPartNumber, selectedCustomerName });
         setErrors({});
 
 
@@ -300,7 +300,17 @@ const ACICustomerPage = () => {
             console.error('Error fetching :', error);
         }
 
+
+
+
     }
+
+    // 過濾選項
+    const filteredOptions = partTableData.filter(item =>
+        (item.aciPartNumber ?? item.partNumber)
+            .toLowerCase()
+            .includes(selectedAciPartNumber.toLowerCase())
+    );
 
     return (
         <div
@@ -324,17 +334,34 @@ const ACICustomerPage = () => {
                                 <Grid container spacing={1} >
                                     <Grid item xs={10}>
                                         <FormControl fullWidth margin="normal" error={!!errors.aciPartNumber}>
-                                            <InputLabel>{formatMessage({ id: 'aciPartNumber' })}</InputLabel>
-                                            <Select
-                                                value={selectedAciPartNumber || ''} // 確保初始值存在
-                                                onChange={(e) => handleInputChange('aciPartNumber', e.target.value)}
-                                            >
-                                                {partTableData.map((part) => (
-                                                    <MenuItem key={part.aciPartNumber} value={part.aciPartNumber}>
-                                                        {part.aciPartNumber}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
+
+                                            <Autocomplete
+                                                freeSolo
+                                                options={filteredOptions}
+                                                value={
+                                                    partTableData.find(
+                                                        (part) => part.aciPartNumber === selectedAciPartNumber
+                                                    ) || null
+                                                }
+                                                getOptionLabel={(option) =>
+                                                    typeof option === 'string'
+                                                        ? option
+                                                        : option.aciPartNumber ?? option.partNumber
+                                                }
+                                                onInputChange={(event, newInputValue) => setSelectedAciPartNumber(newInputValue)}
+                                                onChange={(event, newValue) =>
+                                                    handleInputChange('aciPartNumber', newValue?.aciPartNumber ?? newValue ?? '')
+                                                }
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        fullWidth
+                                                        label="輸入料號"
+                                                        variant="outlined"
+                                                    />
+                                                )}
+                                            />
+
                                             {errors.aciPartNumber && <FormHelperText>{errors.aciPartNumber}</FormHelperText>}
                                         </FormControl>
                                     </Grid>
@@ -390,10 +417,39 @@ const ACICustomerPage = () => {
                     <form>
                         <Grid container spacing={2}>
 
+
+
                             <Grid item xs={12}>
                                 <Grid container spacing={1} >
-                                    <FormControl fullWidth margin="normal">
-                                        <InputLabel>{formatMessage({ id: 'aciPartNumber' })}</InputLabel>
+                                    <Grid item xs={10}>
+
+                                        <Autocomplete
+                                            freeSolo
+                                            options={filteredOptions.map(part => part.aciPartNumber)} // 字串陣列
+                                            inputValue={editPart.aciPartNumber || ''}
+                                            onInputChange={(event, newInputValue) => {
+                                                handleAciPartNmberChange(newInputValue); // 用你原本的邏輯更新
+                                            }}
+                                            onChange={(event, newValue) => {
+                                                handleAciPartNmberChange(newValue || ''); // 選取項目時也更新
+                                            }}
+                                            getOptionLabel={(option) => {
+                                                // 如果 option 是 null 或 undefined，回傳空字串
+                                                if (!option) return '';
+                                                return typeof option === 'string' ? option : '';
+                                              }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    fullWidth
+                                                    label="輸入料號"
+                                                    variant="outlined"
+                                                />
+                                            )}
+                                        />
+
+
+                                        {/* <InputLabel>{formatMessage({ id: 'aciPartNumber' })}</InputLabel>
                                         <Select
                                             // value={editPart.aciPartNumber}
                                             value={editPart.aciPartNumber || ''} // 確保初始值存在
@@ -404,13 +460,13 @@ const ACICustomerPage = () => {
                                                     {part.aciPartNumber}
                                                 </MenuItem>
                                             ))}
-                                        </Select>
-                                    </FormControl>
+                                        </Select> */}
+
+
+
+                                    </Grid>
                                 </Grid>
                             </Grid>
-
-
-
 
                             {/* ACI */}
 

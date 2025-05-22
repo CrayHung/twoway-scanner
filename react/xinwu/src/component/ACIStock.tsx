@@ -17,6 +17,14 @@ const ACIStock = () => {
     //掃描棧板上的條碼 , 取得該棧板的資訊
     // const [palletData, setPalletData] = useState<any[]>([]);
     const [palletData, setPalletData] = useState<any | null>(null);
+    //測試用
+        // const [palletData, setPalletData] = useState<any | null>({
+        //     "id": 26,
+        //     "palletName": "twy1_20250411T060841_0",
+        //     "maxQuantity": 3,
+        //     "quantity": 0,
+        //     "location": "INSP"
+        // });
 
     //該棧板上的carton資訊
     const [cartonDetailData, setCartonDetailData] = useState<any>([]);
@@ -362,6 +370,8 @@ const ACIStock = () => {
                             </Table>
                         </TableContainer>
                     </Paper>
+
+                    <Button>123</Button>
                 </>
             )}
 

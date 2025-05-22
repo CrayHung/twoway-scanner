@@ -132,4 +132,16 @@ public class CartController {
         return ResponseEntity.ok(cart);
     }
 
+    // 依次移除多筆資料 { ids: [1, 7] }
+    @DeleteMapping("/cart/remove-multiple")
+    public ResponseEntity<Void> removeMultipleFromCart(@RequestBody Map<String, List<Integer>> payload) {
+        List<Integer> ids = payload.get("ids");
+        if (ids == null || ids.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        cartRepository.deleteAllById(ids);
+        return ResponseEntity.ok().build();
+    }
+
 }
