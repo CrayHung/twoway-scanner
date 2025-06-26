@@ -1,8 +1,37 @@
-import { Grid, Paper, TableContainer, TableHead, TableRow, TableCell, TableBody, Table, Button, Checkbox, Modal, Box, FormControlLabel, Radio, RadioGroup, Backdrop, TextField } from '@mui/material';
+// 保持 import 區域不變
+import {
+    Grid, Paper, TableContainer, TableHead, TableRow, TableCell, TableBody, Table, Backdrop, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useIntl } from "react-intl";
 import { useGlobalContext } from '../global';
 
+type StockInput = {
+    palletNames: string[];
+    shipId: string | null;
+  };
+
+
+type CartonData = {
+    id: number;
+    palletName: string;
+    cartonName: string;
+    sn: string;
+    qrRfTray: string;
+    qrPs: string;
+    qrHs: string;
+    qrRfTrayBedid: string;
+    qrPsBedid: string;
+    qrHsBedid: string;
+};
+
+type PalletData = {
+    id: number;
+    palletName: string;
+    maxQuantity: number;
+    quantity: number;
+    location: string;
+};
 
 const ACIStock = () => {
     const { formatMessage } = useIntl();
@@ -12,306 +41,446 @@ const ACIStock = () => {
     const time = now.toTimeString().split(' ')[0]; // 當前時間 (HH:mm:ss)
     const dateTime = `${today} ${time}`; // 合併日期和時間
 
-    //掃描棧板上的條碼
     const [palletname, setPalletname] = useState('');
-    //掃描棧板上的條碼 , 取得該棧板的資訊
-    // const [palletData, setPalletData] = useState<any[]>([]);
-    const [palletData, setPalletData] = useState<any | null>(null);
-    //測試用
-        // const [palletData, setPalletData] = useState<any | null>({
-        //     "id": 26,
-        //     "palletName": "twy1_20250411T060841_0",
-        //     "maxQuantity": 3,
-        //     "quantity": 0,
-        //     "location": "INSP"
-        // });
+    const [palletDataList, setPalletDataList] = useState<PalletData[]>([]);
 
-    //該棧板上的carton資訊
-    const [cartonDetailData, setCartonDetailData] = useState<any>([]);
+    const [selectedPalletNames, setSelectedPalletNames] = useState<string[]>([]);
 
-
-
-    //for 編輯時控制BackDrop
+    const [cartonDetailData, setCartonDetailData] = useState<CartonData[]>([]);
+    const [selectedPallet, setSelectedPallet] = useState<string | null>(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [editedLocation, setEditedLocation] = useState("INSP"); // 編輯的 location
-    const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null); // 保存當前編輯的行索引
+    const [editingPalletName, setEditingPalletName] = useState<string | null>(null);
+    const [editedLocation, setEditedLocation] = useState("INSP");
+    const [openModal, setOpenModal] = useState(false);
+
+
+    const [afterStockInData, setAfterStockInData] = useState<any[]>([]);
+    const [showPalletData, setShowPalletData] = useState(false);
+
+    //ship入庫
+    const [shipName, setShipName] = useState('');
+
+    //使用ship入庫要多生成一個欄位shipId 並傳給後端
+    const generateShipId = () => {
+        const now = new Date();
+        return `SHIP_${now.toISOString().replace(/[-:T.Z]/g, '').slice(0, 14)}`;
+      };
 
 
 
+    //入庫共用邏輯
+    const loadPalletAndCarton = async (palletName: string) => {
+        const trimmed = palletName.trim();
+        if (!trimmed) return;
 
-    const handleLocationClick = (location: string, rowIndex: number) => {
-        setEditedLocation(location); // 設定為當前行的 location
-        setSelectedRowIndex(rowIndex); // 記錄當前行的索引
-        setIsEditing(true); // 顯示 Backdrop 和輸入框
+        const isDuplicate = palletDataList.some(p => p.palletName === trimmed);
+        if (isDuplicate) {
+            console.warn(`Pallet "${trimmed}" 已經存在，略過`);
+            return;
+        }
+
+        // 查詢 pallet 資訊
+        const palletRes = await fetch(`${globalUrl.url}/api/get-pallet`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pallet_name: trimmed }),
+        });
+        if (!palletRes.ok) {
+            console.error(`無法取得 pallet 資訊 (${trimmed})`);
+            return;
+        }
+        const palletData = await palletRes.json();
+        const newPallet: PalletData = {
+            id: palletData.id,
+            palletName: palletData.palletName,
+            maxQuantity: palletData.maxQuantity,
+            quantity: palletData.quantity,
+            location: 'INSP'
+        };
+        setPalletDataList(prev => [...prev, newPallet]);
+
+        // 查詢 carton detail 資訊
+        const cartonRes = await fetch(`${globalUrl.url}/api/get-carton-detail`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pallet_name: trimmed }),
+        });
+        if (!cartonRes.ok) {
+            console.error(`無法取得 carton 資訊 (${trimmed})`);
+            return;
+        }
+        const cartonData: CartonData[] = await cartonRes.json();
+        setCartonDetailData(prev => {
+            const newData = cartonData.filter(newItem =>
+                !prev.some(prevItem => prevItem.id === newItem.id)
+            );
+            return [...prev, ...newData];
+        });
+
+        setSelectedPalletNames(prev => [...prev, trimmed]);
+    };
+    //單一pallet入庫
+    const handleStockInput = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            await loadPalletAndCarton(palletname);
+            setPalletname('');
+        }
+    };
+    //ship入庫
+    const handleShipInput = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+
+
+            const entries = shipName
+                .split(/[\n\r,，\s]+/) // 支援逗號、換行、空格作為分隔符
+                .map(p => p.trim())
+                .filter(p => p.length > 0);
+
+            for (const pallet of entries) {
+                await loadPalletAndCarton(pallet);
+            }
+
+            setShipName('');
+        }
     };
 
-    // 隱藏 Backdrop 和輸入框
-    const handleBackgroundClick = () => {
-        setIsEditing(false);
-        setEditedLocation("");
+
+
+
+    //單一pallet入庫
+    // const handleStockInput = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    //     if (e.key === 'Enter') {
+    //         const trimmed = palletname.trim();
+    //         if (!trimmed) return;
+
+
+    //         const isDuplicate = palletDataList.some(p => p.palletName === trimmed);
+    //         if (isDuplicate) {
+    //             alert(`Pallet "${trimmed}" 已經存在，請勿重複輸入`);
+    //             setPalletname('');
+    //             return;
+    //         }
+
+
+    //         // 查詢 pallet 資訊
+    //         const getPalletData = async () => {
+    //             const response = await fetch(`${globalUrl.url}/api/get-pallet`, {
+    //                 method: 'POST',
+    //                 headers: { 'Content-Type': 'application/json' },
+    //                 body: JSON.stringify({ pallet_name: trimmed }),
+    //             });
+    //             if (!response.ok) {
+    //                 alert("無法取得 pallet 資訊");
+    //                 return;
+    //             }
+
+    //             const data = await response.json();
+    //             const newPallet: PalletData = {
+    //                 id: data.id,
+    //                 palletName: data.palletName,
+    //                 maxQuantity: data.maxQuantity,
+    //                 quantity: data.quantity,
+    //                 location: 'INSP'
+    //             };
+    //             setPalletDataList(prev => [...prev, newPallet]);
+    //         };
+
+    //         // 查詢 cartonDetail 資訊
+    //         const getCartonDetailData = async () => {
+    //             const response = await fetch(`${globalUrl.url}/api/get-carton-detail`, {
+    //                 method: 'POST',
+    //                 headers: { 'Content-Type': 'application/json' },
+    //                 body: JSON.stringify({ pallet_name: trimmed }),
+    //             });
+    //             if (!response.ok) {
+    //                 alert("無法取得 carton detail 資訊");
+    //                 return;
+    //             }
+    //             const data: CartonData[] = await response.json();
+    //             setCartonDetailData(prev => {
+    //                 const newData = data.filter(newItem =>
+    //                     !prev.some(prevItem => prevItem.id === newItem.id)
+    //                 );
+    //                 return [...prev, ...newData];
+    //             });
+    //         };
+
+    //         await getPalletData();
+    //         await getCartonDetailData();
+
+    //         setSelectedPalletNames(prev => [...prev, trimmed]);
+    //         setPalletname('');
+    //     }
+    // };
+
+    const handleLocationClick = (palletName: string) => {
+        const current = palletDataList.find(p => p.palletName === palletName);
+        if (current) {
+            setEditedLocation(current.location);
+            setEditingPalletName(palletName);
+            setIsEditing(true);
+        }
     };
 
-    // 更新輸入框的內容
     const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setEditedLocation(e.target.value);
     };
 
-    const handleSave = () => {
-        if (selectedRowIndex !== null) {
-            if (!palletData) {
-                console.error("palletData is null or undefined");
-                return;
-            }
-            // 更新前端資料
-            const newPalletData = { ...palletData, location: editedLocation };
-            setPalletData(newPalletData);
-            setIsEditing(false);
+    const handleSave = async () => {
+        if (!editingPalletName) return;
 
+        setPalletDataList(prev =>
+            prev.map(p => p.palletName === editingPalletName ? { ...p, location: editedLocation } : p)
+        );
 
-            // 更新後端資料
-            const updatedLocation = editedLocation;
-            const palletId = palletData.id;
-
-            fetch(`${globalUrl.url}/api/update-pallet-location/${palletId}`, {
+        const target = palletDataList.find(p => p.palletName === editingPalletName);
+        if (target) {
+            await fetch(`${globalUrl.url}/api/update-pallet-location/${target.id}`, {
                 method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ location: editedLocation }),
+            });
+        }
+
+        setIsEditing(false);
+        setEditingPalletName(null);
+    };
+
+    const filteredData = cartonDetailData.filter(item => item.palletName === selectedPallet);
+    const uniquePallets: string[] = Array.from(new Set(cartonDetailData.map(item => item.palletName)));
+
+    //入庫後 , 取得該palletName的所有carton Detail資訊
+    const getCartonDetailData = async () => {
+        try {
+            const response = await fetch(`${globalUrl.url}/api/get-carton-detail`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ location: updatedLocation })
-            })
-                .then(response => response.json())
-                .then(updatedPallet => {
-                    console.log('Updated pallet:', updatedPallet);
-                    setIsEditing(false); // 隱藏編輯框
-                })
-                .catch(error => {
-                    console.error('Error updating pallet:', error);
-                    setIsEditing(false); // 隱藏編輯框
-                });
-        }
-    };
+                body: JSON.stringify({ pallet_name: palletname }),
+            });
 
-
-    const handleStockInput = async (e: any) => {
-        if (e.key === 'Enter') {
-
-
-            //入庫後 , 取得該palletName的所有carton Detail資訊
-            const getCartonDetailData = async () => {
-                try {
-                    const response = await fetch(`${globalUrl.url}/api/get-carton-detail`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ pallet_name: palletname }),
-                    });
-
-                    if (!response.ok) {
-                        alert("無法取得carton Detail資訊");
-                        throw new Error('Failed to get carton');
-                    }
-                    else {
-                        const data: any[] = await response.json();
-                        console.log("即將進庫的資料是 : ", JSON.stringify(data, null, 2))
-                        setCartonDetailData(data);
-                    }
-
-
-
-                } catch (error) {
-                    console.error('Error fetching token:', error);
-                }
+            if (!response.ok) {
+                alert("無法取得carton Detail資訊");
+                throw new Error('Failed to get carton');
             }
-            //將pallet加入stcok裡面完成入庫作業
-            const stockIn = async () => {
-                try {
-                    const response = await fetch(`${globalUrl.url}/api/post-stock`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            pallet_name: palletname,
-                            stock_time: dateTime
-                        }),
-                    });
-                    if (!response.ok) {
-                        alert("無法入庫");
-                        throw new Error('Failed to stock in');
-                    }
-                    else {
-                        const data: any[] = await response.json();
-                        console.log("stock data : ", JSON.stringify(data, null, 2));
-                        await getCartonDetailData();
-                    }
-                } catch (error) {
-                    console.error('Error fetching:', error);
-                }
+            else {
+                const data: any[] = await response.json();
+                console.log("即將進庫的資料是 : ", JSON.stringify(data, null, 2))
+                setCartonDetailData(data);
             }
-            //先透過palletname字串 取得該棧板的所有資訊
-            const getPalletData = async () => {
-                try {
-                    const response = await fetch(`${globalUrl.url}/api/get-pallet`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ pallet_name: palletname }),
-                    });
-
-                    if (!response.ok) {
-                        alert("無法取得pallet Name資訊");
-                        throw new Error('Failed to get pallet');
-                    }
-                    else {
-                        const data: any[] = await response.json();
-                        console.log("返回的pallet data : ", JSON.stringify(data, null, 2));
-
-                        // setPalletData(data);
-                        if (data && typeof data === "object") {
-                            setPalletData(data);
-                        } else {
-                            console.error("API 返回的 palletData 不是物件:", data);
-                            setPalletData(null);
-                        }
-
-                        await stockIn();
-
-                    }
-
-
-
-                } catch (error) {
-                    console.error('Error fetching token:', error);
-                }
-            }
-            getPalletData();
-            await alert("入庫成功")
+        } catch (error) {
+            console.error('Error fetching token:', error);
         }
     }
 
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>, rowIndex: number) => {
 
-        if (event.key === "Enter") {
-            handleSave(); // 儲存變更
-            setIsEditing(false); // 隱藏輸入框
+
+
+    //將palletDataList中的pallet加入到stock
+    const confirmPostInStock = async () => {
+
+        //判斷是不是使用ship入庫 , 如果是則產生shipId , 不是的話就保留shipId=null
+        const isShipMode = selectedPalletNames.length > 1;
+        const shipId = isShipMode ? generateShipId() : null;
+
+        const payload: StockInput = {
+            palletNames: selectedPalletNames,
+            shipId,
+          };
+
+        console.log("新增的stock資料 : ", JSON.stringify(selectedPalletNames, null, 2))
+
+        try {
+            const response = await fetch(`${globalUrl.url}/api/post-multiple-stocks`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                alert("無法入庫");
+                throw new Error("Failed to post stock");
+            }
+
+            const result = await response.json();
+            console.log("stock data : ", JSON.stringify(result, null, 2));
+            alert("入庫成功");
+     
+            setAfterStockInData(result);
+
+            setShowPalletData(true);
+
+        } catch (error) {
+            console.error("Error:", error);
         }
+        //將pallet加入stcok裡面完成入庫作業 (只能post單一pallet..已不用)
+        // const stockIn = async () => {
+        //     try {
+        //         const response = await fetch(`${globalUrl.url}/api/post-stock`, {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json',
+        //             },
+        //             body: JSON.stringify({
+        //                 pallet_name: palletname,
+        //                 stock_time: dateTime
+        //             }),
+        //         });
+        //         if (!response.ok) {
+        //             alert("無法入庫");
+        //             throw new Error('Failed to stock in');
+        //         }
+        //         else {
+        //             const data: any[] = await response.json();
+        //             console.log("stock data : ", JSON.stringify(data, null, 2));
+
+        //         }
+        //     } catch (error) {
+        //         console.error('Error fetching:', error);
+        //     }
+        // }
+        // await stockIn();
     }
-
-    //入庫成功後馬上跳出.可以修改location的Modal
-    useEffect(() => {
-        if (palletData) {
-            setIsEditing(true);
-            setSelectedRowIndex(0);
-        }
-    }, [palletData]);
-
 
 
 
 
 
     return (
-        <div
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                height: "90vh",
-                overflow: "auto",
-            }}>
-            <div>
-                <label>{formatMessage({ id: 'stock' })}：</label>
-                <input
-                    type="text"
-                    value={palletname}
-                    placeholder="輸入 Pallet Name"
-                    onChange={(e) => setPalletname(e.target.value)}
-                    onKeyDown={handleStockInput}
-                />
+        <div style={{ display: "flex", flexDirection: "column", height: "90vh", overflow: "auto" }}>
+            <div style={{ display: "flex", flexDirection: "row", overflow: "auto" }}>
+                <div>
+                    <label>{formatMessage({ id: 'PalletName' })}：</label>
+                    <input
+                        type="text"
+                        value={palletname}
+                        placeholder="輸入 Pallet Name"
+                        onChange={(e) => setPalletname(e.target.value)}
+                        onKeyDown={handleStockInput}
+                    />
+                </div>
+                <div>
+                    <label>TWY ：</label>
+                    <input
+                        type="text"
+                        value={shipName}
+                        placeholder="輸入 Ship Name"
+                        onChange={(e) => setShipName(e.target.value)}
+                        onKeyDown={handleShipInput}
+                    />
+                </div>
             </div>
-            <Backdrop
-                open={isEditing}
-                onClick={handleBackgroundClick}
-                style={{ zIndex: 10, backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-            />
+            <Backdrop open={isEditing} onClick={() => setIsEditing(false)} style={{ zIndex: 10, backgroundColor: "rgba(0,0,0,0.4)" }}>
+                <div onClick={(e) => e.stopPropagation()}>
+                    <TextField
+                        value={editedLocation}
+                        onChange={handleLocationChange}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSave();
+                        }}
+                        autoFocus
+                        label="編輯 Location"
+                        variant="filled"
+                        style={{ backgroundColor: "white" }}
+                    />
+                </div>
+            </Backdrop>
 
-            {!palletData ? (
-                <p style={{ textAlign: 'center', marginTop: '20px' }}>no data</p>
-            ) : (
-                <>
-          
-                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                        <Paper style={{ flex: 1, overflowX: "auto" }}>
-                            <TableContainer
-                                component="div"
-                                style={{
-                                    height: "100%",
-                                    overflowY: "hidden",
-                                    overflowX: "auto",
-                                }}
-                                onWheel={(e) => {
-                                    const container = e.currentTarget;
-                                    container.scrollTop += e.deltaY;
-                                }}
-                            >
-                                <Table
-                                    stickyHeader
-                                    aria-label="sticky table"
-                                    style={{
-                                        minWidth: '800px',
-                                        tableLayout: 'auto',
-                                    }}
-                                >
-                                    <TableHead>
-                                        <TableRow style={{ border: '1px solid #ccc' }}>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'PalletName' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'MaxQuantity' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'Quantity' })}</TableCell>
-                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'Location' })}</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        <TableRow key={palletData?.id}>
-                                            <TableCell>{palletData?.id}</TableCell>
-                                            <TableCell>{palletData.palletName}</TableCell>
-                                            <TableCell>{palletData.maxQuantity}</TableCell>
-                                            <TableCell>{palletData.quantity}</TableCell>
-                                            <TableCell onClick={() => handleLocationClick(palletData.location, 0)} style={{ cursor: 'pointer' }}>
-                                                {isEditing && selectedRowIndex === 0 ? (
-                                                    <input
-                                                        type="text"
-                      
-                                                        value={editedLocation}
-                                                        onChange={handleLocationChange}
-                                                        onKeyDown={(event) => handleKeyDown(event, 0)}
-                                                        style={{
-                                                            backgroundColor: 'white',
-                                                            width: '1000px',
-                                                            height: '50px',
-                                                            fontSize: '18px',
-                                                            position: 'absolute',
-                                                            top: '50%',
-                                                            left: '50%',
-                                                            transform: 'translate(-50%, -50%)',
-                                                            zIndex: 1002,
-                                                        }}
-                                                        onBlur={handleSave}
-                                                    />
-                                                ) : (
-                                                    palletData.location
-                                                )}
-                                            </TableCell>
-                                        </TableRow>
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        </Paper>
-                    </div>
+            {/* Modal 顯示 pallet 明細 */}
+            <Dialog open={openModal} onClose={() => setOpenModal(false)} maxWidth="md" fullWidth>
+                <DialogTitle>詳細資料 - {selectedPallet}</DialogTitle>
+                <DialogContent>
+                    <Table>
+                        <TableHead>
+                            <TableRow style={{ border: '1px solid #ccc' }}>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'PalletName' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'CartonNames' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray_BEDID' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS_BEDID' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS_BEDID' })}</TableCell>
+                                <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'Location1' })}</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {filteredData.map((item, idx) => (
+                                <TableRow key={idx}>
+                                    <TableCell>{item.id}</TableCell>
+                                    <TableCell>{item.palletName}</TableCell>
+                                    <TableCell>{item.cartonName}</TableCell>
+                                    <TableCell>{item.sn}</TableCell>
+                                    <TableCell>{item.qrRfTray}</TableCell>
+                                    <TableCell>{item.qrPs}</TableCell>
+                                    <TableCell>{item.qrHs}</TableCell>
+                                    <TableCell>{item.qrRfTrayBedid}</TableCell>
+                                    <TableCell>{item.qrPsBedid}</TableCell>
+                                    <TableCell>{item.qrHsBedid}</TableCell>
+                                    <TableCell>
+                                        {
+                                            palletDataList.find(p => p.palletName === selectedPallet)?.location || "INSP"
+                                        }
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenModal(false)}>關閉</Button>
+                </DialogActions>
+            </Dialog>
 
+            {palletDataList.length > 0 && (
+                <div>
+                    <TableContainer component={Paper} style={{ marginTop: 16 }}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Pallet Name</TableCell>
+                                    <TableCell>maxQuantity</TableCell>
+                                    <TableCell>quantity</TableCell>
+                                    <TableCell>Location</TableCell>
+                                    <TableCell>變更location</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {palletDataList.map((p, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell
+                                            style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
+                                            onClick={() => {
+                                                setSelectedPallet(p.palletName);
+                                                setOpenModal(true);
+                                            }}
+                                        >
+                                            {p.palletName}
+                                        </TableCell>
+                                        <TableCell>{p.maxQuantity}</TableCell>
+                                        <TableCell>{p.quantity}</TableCell>
+                                        <TableCell>{p.location}</TableCell>
+                                        <TableCell>
+                                            <Button onClick={() => handleLocationClick(p.palletName)}>編輯</Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                    <Button variant="contained"
+                        color="primary"
+                        onClick={confirmPostInStock}>入庫</Button>
+                </div>
+            )}
 
-
+            {showPalletData && (
+                <div>
                     <h1 style={{ margin: 0 }}>{formatMessage({ id: 'palletContent' })}</h1>
 
 
@@ -351,6 +520,7 @@ const ACIStock = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
+                                    {/* {afterStockInData.map((carton: any, rowIndex: number) => ( */}
                                     {cartonDetailData.map((carton: any, rowIndex: number) => (
                                         <TableRow key={carton.id}>
                                             <TableCell>{carton.id}</TableCell>
@@ -370,13 +540,12 @@ const ACIStock = () => {
                             </Table>
                         </TableContainer>
                     </Paper>
-
-                    <Button>123</Button>
-                </>
+                </div>
             )}
 
-        </div>
+
+        </div >
     );
-}
+};
 
 export default ACIStock;

@@ -28,7 +28,7 @@ const generateQR = (existing: Set<string>): string => {
 const ACItest = () => {
 
     const { formatMessage } = useIntl();
-    const { table3Data,setTable3Data, globalUrl } = useGlobalContext();
+    const { table3Data, setTable3Data, globalUrl } = useGlobalContext();
 
 
     const [table1, setTable1] = useState<any>(null);
@@ -73,20 +73,33 @@ const ACItest = () => {
 
     const handleGenerate = () => {
         const workOrderNumber = generateRandomString(6);
-        const quantity = generateRandomNumber(1, 10);
         const partOptions = table3Data
-        .map((item: { partNumber: any; }) => item.partNumber)
-        .filter((part: string) => typeof part === 'string' && part.trim() !== '');
+            .map((item: { partNumber: any; }) => item.partNumber)
+            .filter((part: string) => typeof part === 'string' && part.trim() !== '');
         const partNumber = partOptions[Math.floor(Math.random() * partOptions.length)];
         const company = 'aci';
         const createUser = 'aciadmin';
         const editUser = 'aciadmin';
 
 
-        console.log("🔎 隨機選到的 partNumber:", partNumber);
-        console.log("🧩 所有可選擇的 partOptions:", partOptions);
+        // 根據 partNumber 從 table3Data 中找出 maxQuantity
+        const getMaxQuantity = (table3Data: any[], partNumber: string): number => {
+            const match = table3Data.find(item => item.partNumber === partNumber);
+            return match ? match.numberPerPallet : 0;
+        };
+        const maxQuantity = getMaxQuantity(table3Data, partNumber);
+
+        if (maxQuantity === 0) {
+            alert("無法取得該料號的最大數量");
+            return;
+        }
+
+        const quantity = generateRandomNumber(1, maxQuantity);
+        // const quantity = generateRandomNumber(1, 10);
 
 
+        console.log(" 隨機選到的 partNumber:", partNumber);
+        console.log(" 所有可選擇的 partOptions:", partOptions);
 
         const table1Data = {
             workOrderNumber,
@@ -159,7 +172,7 @@ const ACItest = () => {
                 }
             }
 
-            
+
             table2Data.push(record);
         }
 

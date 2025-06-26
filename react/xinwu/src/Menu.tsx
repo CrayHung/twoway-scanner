@@ -76,10 +76,12 @@ const Menu = () => {
               <Link to="/ACI/shippingCart/reload">ACI- 待出貨清單 </Link>
               <Link to="/ACI/shipped/reload">ACI- 已出貨的歷史清單</Link>
 
-              <Link to="/ACI/test/reload">ACI- 產生測試資料</Link>
+
 
               <Link to="/ACI/createPallet/reload">ACI- 加入棧板</Link>
-
+            
+              <Link to="/ACI/shipHistoryPage/reload">ACI- 入庫歷史清單</Link>
+              <Link to="/ACI/test/reload">ACI- 產生測試資料</Link>
       
               {/* <Link to="/ACI/repack/reload">ACI- 重工清單</Link> */}
 

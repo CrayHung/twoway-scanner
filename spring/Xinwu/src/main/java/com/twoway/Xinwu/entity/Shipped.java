@@ -43,6 +43,136 @@ public class Shipped {
     @Column(name = "shipped_time")
     private String shippedTime;
 
+    //////////////////////////////////////////
+    // 新增欄位 : 
+    // asn_number
+    // cable_operator_known_material_id
+    // manufacture_batch_number_or_identifier
+    // manufacture_date
+    // purchase_order_received_date
+    // purchase_order_number
+    // shipping_date
+    // shipping_company_contractor
+    // tracking_number
+
+    @Column(name = "asn_number")
+    private String asn_number;
+    @Column(name = "cable_operator_known_material_id")
+    private String cable_operator_known_material_id;
+    @Column(name = "manufacture_batch_number_or_identifier")
+    private String manufacture_batch_number_or_identifier;
+    @Column(name = "manufacture_country")
+    private String manufacture_country;
+    @Column(name = "manufacture_date")
+    private String manufacture_date;
+    @Column(name = "purchase_order_received_date")
+    private String purchase_order_received_date;
+    @Column(name = "purchase_order_number")
+    private String purchase_order_number;
+    @Column(name = "shipping_date")
+    private String shipping_date;
+    @Column(name = "shipping_company_contractor")
+    private String shipping_company_contractor;
+    @Column(name = "tracking_number")
+    private String tracking_number;
+
+    @Column(name = "customer")
+    private String customer;
+
+
+
+    public String getAsnNumber() {
+        return this.asn_number;
+    }
+
+    public void setAsnNumber(String asn_number) {
+        this.asn_number = asn_number;
+    }
+    public String getcable_operator_known_material_id() {
+        return this.cable_operator_known_material_id;
+    }
+
+    public void setcable_operator_known_material_id(String cable_operator_known_material_id) {
+        this.cable_operator_known_material_id = cable_operator_known_material_id;
+    }
+    public String getmanufacture_batch_number_or_identifier() {
+        return this.manufacture_batch_number_or_identifier;
+    }
+
+    public void setmanufacture_batch_number_or_identifier(String manufacture_batch_number_or_identifier) {
+        this.manufacture_batch_number_or_identifier = manufacture_batch_number_or_identifier;
+    }
+
+    public String getmanufacture_country() {
+        return this.manufacture_country;
+    }
+
+    public void setmanufacture_country(String manufacture_country) {
+        this.manufacture_country = manufacture_country;
+    }
+
+
+    public String getmanufacture_date() {
+        return this.palletName;
+    }
+
+    public void setmanufacture_date(String manufacture_date) {
+        this.manufacture_date = manufacture_date;
+    }
+
+    public String getpurchase_order_received_date() {
+        return this.purchase_order_received_date;
+    }
+
+    public void setpurchase_order_received_date(String purchase_order_received_date) {
+        this.purchase_order_received_date = purchase_order_received_date;
+    }
+    
+    public String getpurchase_order_number() {
+        return this.purchase_order_number;
+    }
+
+    public void setpurchase_order_number(String purchase_order_number) {
+        this.purchase_order_number = purchase_order_number;
+    }
+    
+    public String getshipping_date() {
+        return this.palletName;
+    }
+
+    public void setshipping_date(String shipping_date) {
+        this.shipping_date = shipping_date;
+    }
+    
+    public String getshipping_company_contractor() {
+        return this.shipping_company_contractor;
+    }
+
+    public void setshipping_company_contractor(String shipping_company_contractor) {
+        this.shipping_company_contractor = shipping_company_contractor;
+    }
+    
+    public String gettracking_number() {
+        return this.tracking_number;
+    }
+
+    public void settracking_number(String tracking_number) {
+        this.tracking_number = tracking_number;
+    }
+
+    public String getcustomer() {
+        return this.customer;
+    }
+
+    public void setcustomer(String customer) {
+        this.customer = customer;
+    }
+
+
+
+  ////////////////////////////////////////////
+
+
     public Integer getId() {
         return this.id;
     }

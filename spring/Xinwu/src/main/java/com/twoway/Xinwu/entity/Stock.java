@@ -18,6 +18,22 @@ public class Stock {
     @Column(name = "stock_time")
     private String stockTime;
 
+    // 如果單一pallet入庫 , 則此欄位為null ;  
+    // 如果為ship入庫 , 則記錄pallet是屬於哪個ship
+    @Column(name = "ship_id")
+    private String shipId; 
+
+
+    public String getShipId() {
+        return this.shipId;
+    }
+
+    public void setShipId(String shipId) {
+        this.shipId=shipId;
+    }
+
+
+
     public Long getId() {
         return this.id;
     }

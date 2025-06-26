@@ -305,15 +305,6 @@ const ACIPicking = () => {
         }
     }
 
-    //下載.xlxs
-    const handleDownloadCustomerExcel = (dataForDownload: any[]) => {
-
-        const worksheet = XLSX.utils.json_to_sheet(dataForDownload);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "excel");
-        XLSX.writeFile(workbook, `${dateTime}.xlsx`);
-
-    };
 
     //重新fetch cartonDetails的資料
     const fetchCartonDetails = async () => {

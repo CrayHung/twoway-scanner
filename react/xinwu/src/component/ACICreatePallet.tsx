@@ -24,7 +24,40 @@ const ACICreatePallet = () => {
     const now = new Date();
     const today = now.toISOString().split('T')[0]; // 當前日期 (YYYY-MM-DD 格式)
     const time = now.toTimeString().split(' ')[0]; // 當前時間 (HH:mm:ss)
-    const dateTime = `${today} ${time}`; // 合併日期和時間
+    const dateTime = getFormattedDateTime('TW'); // 合併日期和時間
+    const USdateTime = getFormattedDateTime('US');
+
+    // 通用時間格式 , 傳入TW或US 可以得到該地區時間字串
+    function getFormattedDateTime(region: 'TW' | 'US'): string {
+        const now = new Date();
+      
+        const timeZone = region === 'TW' ? 'Asia/Taipei' : 'America/Los_Angeles';
+      
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false, // 24小時制
+        });
+      
+        const parts = formatter.formatToParts(now);
+        const getPart = (type: string) => parts.find(p => p.type === type)?.value.padStart(2, '0');
+      
+        const year = getPart('year');
+        const month = getPart('month');
+        const day = getPart('day');
+        const hour = getPart('hour');
+        const minute = getPart('minute');
+        const second = getPart('second');
+      
+        return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+      }
+      
+
 
     //渲染Table的資料
     const [allStockData, setAllStockData] = useState<any[]>([]);
@@ -111,8 +144,9 @@ const ACICreatePallet = () => {
         console.log("最大箱數:", maxBoxes);
         setOpen(false);
 
+  
         // stock表要傳的
-        const requestPostBody = { pallet_name: palletName, stock_time: dateTime };
+        const requestPostBody = { pallet_name: palletName, stock_time: USdateTime };
         // pallet表 建立pallet資料
         // const palletData : any[] = [];
         // palletData.push({

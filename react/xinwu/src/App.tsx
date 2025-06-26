@@ -38,6 +38,7 @@ import ACIShippingCart from './component/ACIShippingCart';
 import ACItest from './component/ACItest';
 import ACICreatePallet from './component/ACICreatePallet';
 import ACIAddCarton from './component/ACIAddCarton';
+import ACIShipHistoryPage from './component/ACIShipHistoryPage';
 
 function App() {
   const [locale, setLocale] = useNavigatorLanguage();
@@ -113,7 +114,11 @@ function App() {
                     <Route path="/ACI/shippingCart" Component={ACIShippingCart} />
                     <Route path="/ACI/shippingCart/reload" element={<Navigate to="/ACI/shippingCart" />} />
 
+                    {/* 入庫檢視 */}
+                    <Route path="/ACI/shipHistoryPage" Component={ACIShipHistoryPage} />
+                    <Route path="/ACI/shipHistoryPage/reload" element={<Navigate to="/ACI/shipHistoryPage" />} />
 
+                    {/* 出貨檢視 */}
                     <Route path="/ACI/shipped" Component={ACIShippedPage} />
                     <Route path="/ACI/shipped/reload" element={<Navigate to="/ACI/shipped" />} />
 

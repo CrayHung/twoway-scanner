@@ -31,9 +31,14 @@ const ACIShippedPage = () => {
     const [allShippedData, setAllShippedData] = useState<any[]>([]);
 
 
+    // const [DateStart, setDateStart] = useState<Date | null>(null);
+    // const [DateEnd, setDateEnd] = useState<Date | null>(null);
 
-    const [DateStart, setDateStart] = useState<Date | null>(null);
-    const [DateEnd, setDateEnd] = useState<Date | null>(null);
+    //不用起始和結束的範圍 , 直接選擇一個日期做篩選資料
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [delivery, setDelivery] = useState("");
+    const [customer, setCustomer] = useState("");
+
 
     //如果沒篩選日期,直接用點選的話
     const [selectedShippedDate, setSelectedShippedDate] = useState<string | null>(null);
@@ -163,64 +168,162 @@ const ACIShippedPage = () => {
         const group = groupedData[shippedTime] || [];
         setModalShippedData(group);
 
+        console.log("modalShippedData : ", JSON.stringify(modalShippedData, null, 2))
+
         setShowModal(true);
     };
 
 
-    //篩選日期符合的資料
-    useEffect(() => {
+    //篩選日期符合的資料 (此為使用起始和結束的版本...現在只選擇單一日期故不使用)
+    // useEffect(() => {
 
-        //取得當天最後時刻
+    //     //取得當天最後時刻
+    //     const getEndOfDay = (date: Date) => {
+    //         const end = new Date(date);
+    //         end.setHours(23, 59, 59, 999);
+    //         return end;
+    //     };
+
+    //     let filteredData = originalShippedData;
+
+    //     // 若無 DateStart 和 DateEnd，但有點選 row，則顯示該row當天的資料
+    //     if (!DateStart && !DateEnd && selectedShippedDate) {
+    //         filteredData = originalShippedData.filter((item) =>
+    //             item.shippedTime.startsWith(selectedShippedDate)
+    //         );
+    //         setFilteredShippedData(filteredData);
+    //         setAllShippedData(filteredData);
+    //         return;
+    //     }
+
+
+    //     // 當兩者都有選時，篩選 DateStart ~ DateEnd
+
+    //     if (DateStart && DateEnd) {
+    //         const endOfDay = getEndOfDay(DateEnd);
+    //         filteredData = filteredData.filter((item) => {
+    //             const shippedTime = new Date(item.shippedTime);
+    //             return shippedTime >= DateStart && shippedTime <= endOfDay;
+    //         });
+    //         //只有選DateStart時，篩選 DateStart ~ 今天
+    //     } else if (DateStart) {
+    //         filteredData = filteredData.filter((item) => {
+    //             const shippedTime = new Date(item.shippedTime);
+    //             return shippedTime >= DateStart && shippedTime <= new Date();
+    //         });
+    //         //只有選DateEnd時，篩選 過往資料 ~ DateEnd
+    //     } else if (DateEnd) {
+    //         const endOfDay = getEndOfDay(DateEnd);
+    //         filteredData = filteredData.filter((item) => {
+    //             const shippedTime = new Date(item.shippedTime);
+    //             return shippedTime <= endOfDay;
+    //         });
+    //     }
+
+    //     setFilteredShippedData(filteredData);
+    //     setAllShippedData(filteredData);
+
+
+    // }, [DateStart, DateEnd, selectedShippedDate, originalShippedData]);
+
+
+    const handleApply = () => {
+        const getStartOfDay = (date: Date) => {
+            const start = new Date(date);
+            start.setHours(0, 0, 0, 0);
+            return start;
+        };
         const getEndOfDay = (date: Date) => {
             const end = new Date(date);
             end.setHours(23, 59, 59, 999);
             return end;
         };
 
-        let filteredData = originalShippedData;
+        let filteredData = [...originalShippedData];
 
-        // 若無 DateStart 和 DateEnd，但有點選 row，則顯示該row當天的資料
-        if (!DateStart && !DateEnd && selectedShippedDate) {
-            filteredData = originalShippedData.filter((item) =>
-                item.shippedTime.startsWith(selectedShippedDate)
-            );
-            setFilteredShippedData(filteredData);
-            setAllShippedData(filteredData);
-            return;
+        // 日期篩選...比對shippedTime
+        if (selectedDate) {
+            const start = getStartOfDay(selectedDate);
+            const end = getEndOfDay(selectedDate);
+
+            filteredData = filteredData.filter((item) => {
+                const shippedTime = new Date(item.shippedTime);
+                return shippedTime >= start && shippedTime <= end;
+            });
         }
 
+        // Delivery 篩選,以逗號分隔...比對asnNumber
+        if (delivery.trim() !== "") {
 
-        // 當兩者都有選時，篩選 DateStart ~ DateEnd
+            const deliveryList = delivery
+            .split(",")
+            .map((c) => c.trim())
+            .filter((c) => c !== "");
 
-        if (DateStart && DateEnd) {
-            const endOfDay = getEndOfDay(DateEnd);
-            filteredData = filteredData.filter((item) => {
-                const shippedTime = new Date(item.shippedTime);
-                return shippedTime >= DateStart && shippedTime <= endOfDay;
-            });
-            //只有選DateStart時，篩選 DateStart ~ 今天
-        } else if (DateStart) {
-            filteredData = filteredData.filter((item) => {
-                const shippedTime = new Date(item.shippedTime);
-                return shippedTime >= DateStart && shippedTime <= new Date();
-            });
-            //只有選DateEnd時，篩選 過往資料 ~ DateEnd
-        } else if (DateEnd) {
-            const endOfDay = getEndOfDay(DateEnd);
-            filteredData = filteredData.filter((item) => {
-                const shippedTime = new Date(item.shippedTime);
-                return shippedTime <= endOfDay;
-            });
+       
+            filteredData = filteredData.filter((item) =>
+            deliveryList.includes(item.asnNumber)
+        );
+
+        }
+
+        // Customer 篩選,以逗號分隔...比對cable_operator_known_material_id
+        if (customer.trim() !== "") {
+            const customerList = customer
+                .split(",")
+                .map((c) => c.trim())
+                .filter((c) => c !== "");
+
+            filteredData = filteredData.filter((item) =>
+                customerList.includes(item.cable_operator_known_material_id)
+            );
         }
 
         setFilteredShippedData(filteredData);
         setAllShippedData(filteredData);
+    };
+
+    //改為按下Apply才進行渲染..故把這段註解調
+    // useEffect(() => {
+    //     if (!selectedDate && !selectedShippedDate) {
+    //         setFilteredShippedData(originalShippedData);
+    //         setAllShippedData(originalShippedData);
+    //         return;
+    //     }
+
+    //     const getStartOfDay = (date: Date) => {
+    //         const start = new Date(date);
+    //         start.setHours(0, 0, 0, 0);
+    //         return start;
+    //     };
+
+    //     const getEndOfDay = (date: Date) => {
+    //         const end = new Date(date);
+    //         end.setHours(23, 59, 59, 999);
+    //         return end;
+    //     };
+
+    //     const dateToUse = selectedDate || (selectedShippedDate ? new Date(selectedShippedDate) : null);
+
+    //     if (dateToUse) {
+    //         const start = getStartOfDay(dateToUse);
+    //         const end = getEndOfDay(dateToUse);
+
+    //         const filteredData = originalShippedData.filter((item) => {
+    //             const shippedTime = new Date(item.shippedTime);
+    //             return shippedTime >= start && shippedTime <= end;
+    //         });
+
+    //         setFilteredShippedData(filteredData);
+    //         setAllShippedData(filteredData);
+    //     }
+
+    // }, [selectedDate, selectedShippedDate, originalShippedData]);
 
 
-    }, [DateStart, DateEnd, selectedShippedDate, originalShippedData]);
-
-
-
+    useEffect(() => {
+        console.log("allShippedData : ", JSON.stringify(allShippedData, null, 2))
+    }, [allShippedData])
 
 
     const routeBack = () => {
@@ -237,36 +340,80 @@ const ACIShippedPage = () => {
 
     };
 
+    //改為直接導入ship表的資料來下載
     const downloadShip = async (data: any) => {
 
 
 
-        if (!typeASN_Number || !typereceived_date || !selectedCustomerPart) {
-            alert("請填寫所有必要欄位再下載");
-            return;
-        }
+        const customerExcelData = data.map((row: {
+            asnNumber: any;
+            cable_operator_known_material_id: any;
+            manufacture_batch_number_or_identifier: any;
+            manufacture_country: any;
+            manufacture_date: any;
+            purchase_order_received_date: any;
+            purchase_order_number: any;
+            shipping_date: any;
+            shipping_company_contractor: any;
+            tracking_number: any;
+            palletName: any; qrHs: any; qrPs: any; qrRftray: any;
+        }) => ({
 
-
-        const customerExcelData = data.map((row: { palletName: any; qrHs: any; qrPs: any; qrRftray: any; }) => ({
-            ASN_Number: typeASN_Number,
+            ASN_Number: row.asnNumber,
             component_QR_code_syntax: row.qrRftray,
             housing_QR_code_syntax: row.qrHs,
-            cable_operator_known_material_ID: selectedCustomerPart,   //帶入客戶料號
+            cable_operator_known_material_ID: row.cable_operator_known_material_id,
 
-            manufacture_batch_number_or_identifier: row.palletName, //還不確定是什麼  先放棧板名稱
-            manufacture_country: "Taiwan",
-            manufacture_date: today,    //建立日期?
-            purchase_order_received_date: typereceived_date,
-            purchase_order_number: typepurchase_order_number,
-            shipping_date: typeshipping_date,
-            shipping_company_contractor: typeshipping_company_contractor,
-            tracking_number: typeTracking_Number
+            manufacture_batch_number_or_identifier: row.manufacture_batch_number_or_identifier,
+            manufacture_country: row.manufacture_country,
+            manufacture_date: row.manufacture_date,
+            purchase_order_received_date: row.purchase_order_received_date,
+            purchase_order_number: row.purchase_order_number,
+            shipping_date: row.shipping_date,
+            shipping_company_contractor: row.shipping_company_contractor,
+            tracking_number: row.tracking_number
+
         }));
 
         // console.log("要下載的檔案 customerExcelData :", JSON.stringify(customerExcelData, null, 2) );
         await handleDownloadCustomerExcel(customerExcelData ?? []);
 
     }
+
+
+
+    // const downloadShip = async (data: any) => {
+
+
+
+    //     if (!typeASN_Number || !typereceived_date || !selectedCustomerPart) {
+    //         alert("請填寫所有必要欄位再下載");
+    //         return;
+    //     }
+
+
+    //     const customerExcelData = data.map((row: { palletName: any; qrHs: any; qrPs: any; qrRftray: any; }) => ({
+    //         ASN_Number: typeASN_Number,
+    //         component_QR_code_syntax: row.qrRftray,
+    //         housing_QR_code_syntax: row.qrHs,
+    //         cable_operator_known_material_ID: selectedCustomerPart,   //帶入客戶料號
+
+    //         manufacture_batch_number_or_identifier: row.palletName, //還不確定是什麼  先放棧板名稱
+    //         manufacture_country: "Taiwan",
+    //         manufacture_date: today,    //建立日期?
+    //         purchase_order_received_date: typereceived_date,
+    //         purchase_order_number: typepurchase_order_number,
+    //         shipping_date: typeshipping_date,
+    //         shipping_company_contractor: typeshipping_company_contractor,
+    //         tracking_number: typeTracking_Number
+    //     }));
+
+    //     // console.log("要下載的檔案 customerExcelData :", JSON.stringify(customerExcelData, null, 2) );
+    //     await handleDownloadCustomerExcel(customerExcelData ?? []);
+
+    // }
+
+
 
 
     //渲染下拉式顧客選單
@@ -336,10 +483,9 @@ const ACIShippedPage = () => {
                 </>
             ) : (
 
-                <>
+                <div className="max-w-md mx-auto mt-8 p-4 border rounded-lg shadow-md text-center">
                     {/* 確認出貨前要讓使用者填入一些必要訊息 , 
             typeASN_Number 
-
             received Date
             selectedCustomer
             typeshipping_date
@@ -347,12 +493,20 @@ const ACIShippedPage = () => {
             **Tracking Number
   
             */}
-                    <Modal open={showShipModal} onClose={() => setShowShipModal(false)}>
+
+                    {/* 原本下載要再輸入一次typeASN_Number 
+                        received Date
+                        selectedCustomer
+                        typeshipping_date
+                        typeshipping_company_contractor
+                        **Tracking Number...等欄位 , 現在改用直接帶入ship表的資料 
+                    */}
+                    {/* <Modal open={showShipModal} onClose={() => setShowShipModal(false)}>
                         <Box sx={modalStyle}>
                             <form>
                                 <Grid container spacing={2}>
 
-                                    {/* ASN_Number */}
+                        
                                     <Grid item xs={12}>
                                         <TextField
                                             fullWidth
@@ -363,7 +517,7 @@ const ACIShippedPage = () => {
                                         />
                                     </Grid>
 
-                                    {/* purchase_order_number */}
+                             
                                     <Grid item xs={12}>
                                         <TextField
                                             fullWidth
@@ -374,7 +528,7 @@ const ACIShippedPage = () => {
                                         />
                                     </Grid>
 
-                                    {/* received_date */}
+                             
                                     <Grid item xs={12}>
                                         <TextField
                                             fullWidth
@@ -383,13 +537,13 @@ const ACIShippedPage = () => {
                                             type="date"
                                             value={typereceived_date}
                                             onChange={(event) => setTypereceived_date(event.target.value)}
-                                            InputLabelProps={{ shrink: true }} // 讓 label 不會擋住 placeholder
+                                            InputLabelProps={{ shrink: true }} 
                                         />
                                     </Grid>
 
 
 
-                                    {/* shipping_date */}
+                                 
                                     <Grid item xs={12}>
                                         <TextField
                                             fullWidth
@@ -398,11 +552,11 @@ const ACIShippedPage = () => {
                                             type="date"
                                             value={typeshipping_date}
                                             onChange={(event) => setTypeshipping_date(event.target.value)}
-                                            InputLabelProps={{ shrink: true }} // 讓 label 不會擋住 placeholder
+                                            InputLabelProps={{ shrink: true }} 
                                         />
                                     </Grid>
 
-                                    {/* shipping_company_contractor */}
+                            
                                     <Grid item xs={12}>
                                         <TextField
                                             fullWidth
@@ -414,7 +568,7 @@ const ACIShippedPage = () => {
                                         />
                                     </Grid>
 
-                                    {/* Tracking Number */}
+                                
                                     <Grid item xs={12}>
                                         <TextField
                                             fullWidth
@@ -427,10 +581,10 @@ const ACIShippedPage = () => {
                                     </Grid>
 
 
-                                    {/* 客戶料號  ,  使用單選式下拉 + 文字搜尋 */}
+                  
                                     <Grid item xs={12}>
                                         <Box display="flex" alignItems="center" gap={2}>
-                                            {/* 下拉式單選選單 */}
+                                     
                                             <FormControl style={{ minWidth: 200 }}>
                                                 <InputLabel id="customer-select-label">選擇客戶</InputLabel>
                                                 <Select
@@ -447,7 +601,7 @@ const ACIShippedPage = () => {
                                                 </Select>
                                             </FormControl>
 
-                                            {/* 自動完成輸入框 + 確認按鈕 */}
+                             
                                             <Box display="flex" alignItems="center" gap={1}>
                                                 <Autocomplete
                                                     freeSolo
@@ -502,7 +656,7 @@ const ACIShippedPage = () => {
                                     </Grid>
 
 
-                                    {/* 確認按鈕 */}
+                       
                                     <Grid item xs={12}>
                                         <Button
                                             variant="contained"
@@ -517,7 +671,7 @@ const ACIShippedPage = () => {
                                 </Grid>
                             </form>
                         </Box>
-                    </Modal>
+                    </Modal> */}
 
                     <Modal open={showModal} onClose={() => setShowModal(false)}>
 
@@ -529,7 +683,9 @@ const ACIShippedPage = () => {
                                 <Button
                                     variant="contained"
                                     color="primary"
-                                    onClick={() => setShowShipModal(true)}
+                                    // onClick={() => setShowShipModal(true)}  
+                                    onClick={() => downloadShip(modalShippedData)}
+
                                 >
                                     Download excel
                                 </Button>
@@ -564,6 +720,11 @@ const ACIShippedPage = () => {
                                             <TableCell>{formatMessage({ id: 'QR_PS' })}</TableCell>
                                             <TableCell>{formatMessage({ id: 'QR_HS' })}</TableCell>
                                             <TableCell>{formatMessage({ id: 'shippedTime' })}</TableCell>
+
+                                            <TableCell>ASN_Number</TableCell>
+
+
+
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -579,7 +740,7 @@ const ACIShippedPage = () => {
                                                 <TableCell>{row.shippedTime}</TableCell>
                                             </TableRow> */}
 
-                                            {modalShippedData.map((row: any) => (
+                                        {modalShippedData.map((row: any) => (
                                             <TableRow key={row.id} onClick={() => handleOpenModal(row.shippedTime)} style={{ cursor: 'pointer' }}>
                                                 <TableCell>{row.id}</TableCell>
                                                 <TableCell>{row.palletName}</TableCell>
@@ -589,6 +750,10 @@ const ACIShippedPage = () => {
                                                 <TableCell>{row.qrPs}</TableCell>
                                                 <TableCell>{row.qrHs}</TableCell>
                                                 <TableCell>{row.shippedTime}</TableCell>
+
+                                                <TableCell>{row.asnNumber}</TableCell>
+
+
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -599,14 +764,15 @@ const ACIShippedPage = () => {
                         </Box>
                     </Modal>
 
-
-                    <label>{formatMessage({ id: 'startdate' })}：</label>
+                    {/* 不用起始和結束的範圍 , 直接選擇一個日期做篩選資料 */}
+                    {/* <label>{formatMessage({ id: 'startdate' })}：</label>
                     <DatePicker
                         selectsStart
                         selected={DateStart}
                         onChange={(date) => setDateStart(date)}
                         startDate={DateStart}
                         portalId="root"
+                        inline
                     />
                     <label>{formatMessage({ id: 'enddate' })}：</label>
                     <DatePicker
@@ -617,8 +783,52 @@ const ACIShippedPage = () => {
                         startDate={DateStart}
                         minDate={DateStart}
                         portalId="root"
+                        inline                          
+                    /> */}
 
-                    />
+
+
+                    <h2 className="text-xl font-semibold mb-4">已出貨的歷史清單</h2>
+
+                    <div className="mb-4">
+                        <label className="block font-medium mb-1">Date</label>
+                        <DatePicker
+                            selected={selectedDate}
+                            onChange={(date) => setSelectedDate(date)}
+                        // inline
+                        />
+                    </div>
+                    <div className="flex justify-between gap-4 mb-4">
+                        <div className="flex-1">
+                            <label className="block font-medium mb-1">Delivery(比對asnNumber)</label>
+                            <input
+                                type="text"
+                                value={delivery}
+                                onChange={(e) => setDelivery(e.target.value)}
+                                className="w-full border rounded px-2 py-1"
+                            />
+                        </div>
+
+
+                        <div className="flex-1">
+                            <label className="block font-medium mb-1">Customer(比對cable_operator_known_material_id)</label>
+                            <input
+                                type="text"
+                                value={customer}
+                                onChange={(e) => setCustomer(e.target.value)}
+                                className="w-full border rounded px-2 py-1"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <button className="bg-green-300 hover:bg-green-400 text-green-900 font-semibold py-2 rounded" onClick={handleApply}>
+                            Apply
+                        </button>
+                        <button className="bg-blue-300 hover:bg-blue-400 text-blue-900 font-semibold py-2 rounded"  onClick={() => downloadShip(filteredShippedData)}>
+                            Download
+                        </button>
+                    </div>
 
                     <div
                         style={{
@@ -675,7 +885,7 @@ const ACIShippedPage = () => {
                             </TableContainer>
                         </Paper>
                     </div>
-                </>
+                </div>
             ))}
         </div>
 

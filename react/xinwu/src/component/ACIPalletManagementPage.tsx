@@ -439,7 +439,7 @@ const ACIPalletManagementPage = () => {
         }
     };
 
-    //出貨
+    //加入到待出貨清單
     const handleShipConfirm = async () => {
 
         const requestDeleteBody = { pallet_names: selectedRowsPalletName };
@@ -1256,7 +1256,9 @@ const ACIPalletManagementPage = () => {
                                                         onBlur={handleSave}
                                                     />
                                                 ) : (
-                                                    row.location // 直接使用當前行的 location 值
+                                                    <span style={{ color: 'blue', fontWeight: 'bold' }}>
+                                                        {row.location}
+                                                    </span>
                                                 )}
                                             </span>
                                         </TableCell>

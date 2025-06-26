@@ -4,7 +4,6 @@ import { useGlobalContext } from '../global';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useIntl } from "react-intl";
 import * as XLSX from 'xlsx';
-
 const modalStyle = {
     position: 'absolute' as 'absolute',
     top: '50%',
@@ -21,6 +20,16 @@ const modalStyle = {
 };
 
 
+type ExcelRow = {
+    deliveryNumber: number;
+    asnNumber: string;
+    customerName: string;
+    customerPart: string;
+    aciPart: number;
+    amount: number;
+    shippedTime: number;
+};
+
 const ACIShippingCart = () => {
 
 
@@ -29,7 +38,63 @@ const ACIShippingCart = () => {
     const now = new Date();
     const today = now.toISOString().split('T')[0]; // 當前日期 (YYYY-MM-DD 格式)
     const time = now.toTimeString().split(' ')[0]; // 當前時間 (HH:mm:ss)
-    const dateTime = `${today} ${time}`; // 合併日期和時間
+    const dateTime = getFormattedDateTime('TW'); // 合併日期和時間
+    const USdateTime = getFormattedDateTime('US');
+
+    
+    // 通用時間格式 , 傳入TW或US 可以得到該地區時間字串
+    function getFormattedDateTime(region: 'TW' | 'US'): string {
+        const now = new Date();
+      
+        const timeZone = region === 'TW' ? 'Asia/Taipei' : 'America/Los_Angeles';
+      
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false, // 24小時制
+        });
+      
+        const parts = formatter.formatToParts(now);
+        const getPart = (type: string) => parts.find(p => p.type === type)?.value.padStart(2, '0');
+      
+        const year = getPart('year');
+        const month = getPart('month');
+        const day = getPart('day');
+        const hour = getPart('hour');
+        const minute = getPart('minute');
+        const second = getPart('second');
+      
+        return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+      }
+
+
+      //獲得美國日期 (YYYY-MM-DD 格式)
+      function getUSDate(): string {
+        const now = new Date();
+      
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'America/Los_Angeles',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        });
+      
+        const parts = formatter.formatToParts(now);
+        const getPart = (type: string) => parts.find(p => p.type === type)?.value.padStart(2, '0');
+      
+        const year = getPart('year');
+        const month = getPart('month');
+        const day = getPart('day');
+      
+        return `${year}-${month}-${day}`;
+      }
+
+
 
     const navigate = useNavigate();
     const { formatMessage } = useIntl();
@@ -78,6 +143,9 @@ const ACIShippingCart = () => {
     const [autoCompleteValue, setAutoCompleteValue] = useState<string | null>(null);
 
     const [selectedCustomerPart, setSelectedCustomerPart] = useState('');
+
+
+    //用來設定是否有選擇excel了 , 
 
 
     useEffect(() => {
@@ -359,7 +427,7 @@ const ACIShippingCart = () => {
         const worksheet = XLSX.utils.json_to_sheet(dataForDownload);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "excel");
-        XLSX.writeFile(workbook, `${dateTime}.xlsx`);
+        XLSX.writeFile(workbook, `${USdateTime}.xlsx`);
 
     };
 
@@ -422,7 +490,7 @@ const ACIShippingCart = () => {
         try {
 
             const body = JSON.stringify({ ids: selectedRows });
-            console.log("Request body:", body);
+            console.log("選擇到的rows :", body);
             // console.log("selectedRowsPalletName :" + selectedRowsPalletName);
             // console.log("body: " + JSON.stringify({ palletNames: selectedRowsPalletName }));
             // 從後端獲取所有選擇的 pallet 內的 cartonDetail
@@ -437,11 +505,12 @@ const ACIShippingCart = () => {
             }
             // 取得 pallet 內的 cartonDetail 資料
             const cartonDetails = await response.json();
+            const USDate =  getUSDate();
 
-
-            console.log("cartonDetails :", JSON.stringify(cartonDetails, null, 2))
+            // console.log("cartonDetails :", JSON.stringify(cartonDetails, null, 2))
             // 格式化為 shipped 資料
-            const requestShippedBody = cartonDetails.map((carton: { palletName: any; cartonName: any; sn: any; qrRfTray: any; qrPs: any; qrHs: any; qrRfTrayBedid: any; qrPsBedid: any; qrHsBedid: any; }) => ({
+            const requestShippedBody = cartonDetails.map((carton: { id: any; palletName: any; cartonName: any; sn: any; qrRfTray: any; qrPs: any; qrHs: any; qrRfTrayBedid: any; qrPsBedid: any; qrHsBedid: any; }) => ({
+                id: carton.id,
                 palletName: carton.palletName,
                 cartonName: carton.cartonName,
                 sn: carton.sn,
@@ -451,7 +520,25 @@ const ACIShippingCart = () => {
                 qrRfTrayBedid: carton.qrRfTrayBedid,
                 qrPsBedid: carton.qrPsBedid,
                 qrHsBedid: carton.qrHsBedid,
-                shippedTime: dateTime,
+                shippedTime: USdateTime,
+
+                asn_number: typeASN_Number,
+                cable_operator_known_material_id: selectedCustomerPart, //帶入客戶料號
+                manufacture_batch_number_or_identifier: carton.palletName, //還不確定是什麼  先放棧板名稱
+                manufacture_country: "Taiwan",
+                manufacture_date: USDate,  //建立日期?  先放上美國當日時間
+                purchase_order_received_date: typereceived_date,
+                purchase_order_number: typepurchase_order_number,
+                shipping_date: typeshipping_date,
+                shipping_company_contractor: typeshipping_company_contractor,
+                tracking_number: typeTracking_Number,
+
+
+                customer: selectedCustomer
+
+
+
+
             }));
 
             return requestShippedBody;
@@ -464,6 +551,7 @@ const ACIShippingCart = () => {
     //出貨
     //將購物車內容加入到以出貨清單 , 使用/cart/checkout API
     //可以將傳入的資料新增近shipped+移出cart
+    //正常要加資料加入到ship表中(/post-shipped) , 但這邊的/cart/checkout已經有包含將資料加入到ship了,故不用再call一次加入到ship表的API(/post-shipped)
     //重新fetch一次所有cartData用以更新前端渲染
     const handleShipConfirm = async () => {
 
@@ -501,6 +589,9 @@ const ACIShippingCart = () => {
             alert("操作失敗，請稍後再試");
         }
 
+
+        const USDate =  getUSDate();
+
         const customerExcelData = requestShippedBody.map((row: { palletName: any; qrHs: any; qrPs: any; qrRfTray: any; }) => ({
             ASN_Number: typeASN_Number,
             component_QR_code_syntax: row.qrRfTray,
@@ -509,7 +600,7 @@ const ACIShippingCart = () => {
 
             manufacture_batch_number_or_identifier: row.palletName, //還不確定是什麼  先放棧板名稱
             manufacture_country: "Taiwan",
-            manufacture_date: today,    //建立日期?
+            manufacture_date: USDate,    //建立日期?
             purchase_order_received_date: typereceived_date,
             purchase_order_number: typepurchase_order_number,
             shipping_date: typeshipping_date,
@@ -517,9 +608,9 @@ const ACIShippingCart = () => {
             tracking_number: typeTracking_Number
         }));
 
-        console.log("excel的資料是 :", JSON.stringify(customerExcelData, null, 2))
+        // console.log("excel的資料是 :", JSON.stringify(customerExcelData, null, 2))
 
-        await handleDownloadCustomerExcel(customerExcelData);
+        // await handleDownloadCustomerExcel(customerExcelData);
 
 
         setShowShipModal(false);
@@ -571,10 +662,10 @@ const ACIShippingCart = () => {
 
 
         alert(selectedRows + "合併到:" + selectedPalletName + "棧板");
-        alert("合併的資料筆數 : "+selectedCount);
+        alert("合併的資料筆數 : " + selectedCount);
         setShowModal(false);
 
-        console.log("selectedPalletName :" +selectedPalletName) ;
+        console.log("selectedPalletName :" + selectedPalletName);
 
         //  1.  判斷要合併的pallet的maxquantity-quantity是否>=選擇的資料筆數
         //  1.1 先抓出要選擇合併的pallet資料
@@ -582,7 +673,7 @@ const ACIShippingCart = () => {
         const responsePallets = await fetch(`${globalUrl.url}/api/get-pallet`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pallet_name : selectedPalletName}),
+            body: JSON.stringify({ pallet_name: selectedPalletName }),
         });
 
         if (!responsePallets.ok) {
@@ -641,19 +732,129 @@ const ACIShippingCart = () => {
             body: JSON.stringify(transformedData),
         });
 
-    //    4.  將選到的內容{ids:[1,7]} 從cart表中移除
+        //    4.  將選到的內容{ids:[1,7]} 從cart表中移除
 
 
-    await fetch(`${globalUrl.url}/api/cart/remove-multiple`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: selectedRows }),
-    });
+        await fetch(`${globalUrl.url}/api/cart/remove-multiple`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: selectedRows }),
+        });
 
-    //  5.  重新fetch一次後端新資料-->渲染前端
-    fetchCart();
+        //  5.  重新fetch一次後端新資料-->渲染前端
+        fetchCart();
 
     };
+
+
+
+    /************************************************
+     * 渲染改為先渲染上傳檔案button後才開放checkbox可選狀態
+     * 以下是excelData讀入後以
+[
+  [
+    "deliveryNumber",
+    "asnNumber",
+    "customerName",
+    "customerPart",
+    "aciPart",
+    "amount",
+    "shippedTime"
+  ],
+  [
+    1,
+    "test1",
+    "cray2",
+    "custome12",
+    77,
+    5,
+    45810.58332175926
+  ]
+]
+儲存
+     * 
+     ************************************************/
+    // const [excelData, setExcelData] = useState<(string | number)[][]>([]);
+    // const [columns, setColumns] = useState([]);
+
+    // const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const file = e.target.files?.[0];
+    //     if (!file) return;
+
+    //     const reader = new FileReader();
+
+    //     reader.onload = (event) => {
+    //         const data = new Uint8Array(event.target?.result as ArrayBuffer);
+    //         const workbook = XLSX.read(data, { type: 'array' });
+
+    //         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    //         const jsonData: (string | number)[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    //         setExcelData(jsonData);
+    //     };
+
+    //     reader.readAsArrayBuffer(file);
+    // };
+
+
+    /***********************************************/
+
+    const [excelData, setExcelData] = useState<Record<string, string | number>[]>([]);
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            const data = new Uint8Array(event.target?.result as ArrayBuffer);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+
+            const jsonData = XLSX.utils.sheet_to_json<Record<string, string | number>>(worksheet, {
+                defval: "", // 填補空白欄位為空字串
+                raw: false,
+            });
+
+            // 檢查每一列的每個欄位是否為空或 null
+            const hasEmptyCell = jsonData.some(row =>
+                Object.values(row).some(value => value === null || value === "")
+            );
+
+            if (hasEmptyCell) {
+                alert("Excel 檔案中存在空值，請確認內容並重新上傳。");
+                setExcelData([]); // 清空資料
+                return;
+            }
+
+
+            setExcelData(jsonData);
+        };
+
+        reader.readAsArrayBuffer(file);
+    };
+
+
+    /***********************************************/
+
+
+
+    const handleUpload = () => {
+        console.log('Send to backend:', excelData);
+
+        // TODO: 用 fetch/axios POST 至後端 API 儲存進 MySQL
+        // fetch('/api/save-excel', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(excelData),
+        // });
+    };
+
+    useEffect(() => {
+        console.log("excelData : ", JSON.stringify(excelData, null, 2))
+    }, [excelData])
+
 
 
 
@@ -663,7 +864,7 @@ const ACIShippingCart = () => {
                 display: "flex",
                 flexDirection: "column",
                 height: "90vh",
-                overflow: "auto",
+                // overflow: "auto",
             }}>
             {/* 確認出貨前要讓使用者填入一些必要訊息 , 
             typeASN_Number 
@@ -919,33 +1120,190 @@ const ACIShippingCart = () => {
                 </Box>
             </Modal>
 
+            {/* ******************************************************************************* */}
+            {/* /***********************************************
+     * 以下是excelData讀入後以
+[
+  [
+    "deliveryNumber",
+    "asnNumber",
+    "customerName",
+    "customerPart",
+    "aciPart",
+    "amount",
+    "shippedTime"
+  ],
+  [
+    1,
+    "test1",
+    "cray2",
+    "custome12",
+    77,
+    5,
+    45810.58332175926
+  ]
+]
+儲存
+     * 
+     ************************************************/ }
+            {/* < input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
+            {excelData && excelData.length > 0 && (
+                <div style={{ maxHeight: '30%', overflow: 'auto', marginBottom: '10px' }}>
+                    <h3>excel 內容</h3>
+                    <Paper sx={{ width: '100%', overflow: 'auto' }}>
+                        <TableContainer component={Paper}>
+                            <Table stickyHeader>
+                                <TableHead>
+                                    <TableRow>
+                                        {excelData[0].map((cell, index) => (
+                                            <TableCell key={index}>{cell}</TableCell>
+                                        ))}
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {excelData.slice(1).map((row, rowIndex) => (
+                                        <TableRow key={rowIndex}>
+                                            {row.map((cell, cellIndex) => (
+                                                <TableCell key={cellIndex}>{cell}</TableCell>
+                                            ))}
 
-            {
-                (cartData.length === 0 ? (
-                    <p style={{ textAlign: 'center', marginTop: '20px' }}>no data</p>
-                ) : (
-                    <div
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            height: "90vh",
-                            overflow: "auto",
-                        }}>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Paper>
+                </div>
+            )} */}
+            {/* ******************************************************************************* */}
+
+            {/* Cart 資料區塊 */}
+            {/* <Paper sx={{ width: '100%', flex: 1, overflow: 'auto' }}>
+                <h3>待出貨清單</h3>
+
+                {/* 動態按鈕 */}
+            {/* <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                    {(cartData.length > 0 || excelData.length > 0) && (
                         <>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                {selectedRows.length > 0 && (
-                                    <Box>
-                                        <Button variant="outlined" color="secondary" onClick={handleOpenShipModal}>
+                            {excelData.length > 1 &&
+                                (() => {
+                                    const headers = excelData[0];
+                                    const dataRow = excelData[1];
+                                    const amountIndex = headers.indexOf("amount");
+                                    const expectedCount = amountIndex !== -1 ? Number(dataRow[amountIndex]) : 0;
+                                    const shouldShowShipButton = cartData.length === expectedCount;
+
+                                    return shouldShowShipButton ? (
+                                        <Button
+                                            variant="outlined"
+                                            color="secondary"
+                                            onClick={handleOpenShipModal}
+                                        >
                                             出貨
                                         </Button>
-                                        <Button variant="outlined" color="secondary" onClick={handleMerge} style={{ marginLeft: '10px' }}>
-                                            {formatMessage({ id: 'transfer' })}
-                                        </Button>
-                                    </Box>
-                                )}
+                                    ) : (
+                                        <span style={{ color: 'red' }}>
+                                            選取的excel 的 amount {expectedCount} 不符合，待出貨清單為 {cartData.length} 筆，需資料相符才可出貨
+                                        </span>
+                                    );
+                                })()}
+                            <Button variant="outlined" color="secondary" onClick={handleMerge}>
+                                設備轉移
+                            </Button>
+                        </>
+                    )}
+                </div> */}
+            {/* ******************************************************************************* */}
+            {/* /***********************************************
+     * 以下是excelData讀入後以
+[
+  {
+    deliveryNumber: 1,
+    asnNumber: "test1",
+    customerName: "cray2",
+    customerPart: "custome12",
+    aciPart: 77,
+    amount: 5,
+    shippedTime: 45810.58332175926
+  },
+  ...
+]
+儲存
+     * 
+     ************************************************/ }
+            {/* Excel 資料區塊 */}
+            <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} />
 
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {excelData.length > 0 && (
+                <div style={{ maxHeight: '30%', overflow: 'auto', marginBottom: '10px' }}>
+                    <h3>excel 內容</h3>
+                    <Paper sx={{ width: '100%', overflow: 'auto' }}>
+                        <TableContainer component={Paper}>
+                            <Table stickyHeader>
+                                <TableHead>
+                                    <TableRow>
+                                        {Object.keys(excelData[0]).map((key) => (
+                                            <TableCell key={key}>{key}</TableCell>
+                                        ))}
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {excelData.map((row, rowIndex) => (
+                                        <TableRow key={rowIndex}>
+                                            {Object.keys(excelData[0]).map((key) => (
+                                                <TableCell key={key}>{row[key]}</TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Paper>
+                </div>
+            )}
+            {/* Cart 資料區塊 */}
+            <Paper sx={{ width: '100%', flex: 1, overflow: 'auto' }}>
+                <h3>待出貨清單</h3>
+       
+                        {excelData.length > 0 && !excelData.some(row => Object.values(row).some(v => v === "" || v === null)) && 
+                            (() => {
+                                const amountValue = excelData[0]?.amount;
+                                const expectedCount = typeof amountValue === "number" ? amountValue : Number(amountValue);
+                                const shouldShowShipButton = cartData.length === expectedCount;
+
+                                return shouldShowShipButton ? (
+                                    <Button
+                                        variant="outlined"
+                                        color="secondary"
+                                        onClick={handleOpenShipModal}
+                                    >
+                                        出貨
+                                    </Button>
+                                ) : (
+                                    <span style={{ color: 'red' }}>
+                                        選取的 excel 的 amount : {expectedCount} ; 待出貨清單的數量 : {cartData.length} ，需數量相符才可出貨
+                                    </span>
+                                );
+                            })()
+                        }
+                        <br></br>
+                        {cartData.length > 0 && (
+                        <Button variant="outlined" color="secondary" onClick={handleMerge}>
+                            設備轉移
+                        </Button>)}
+
+     
+
+
+
+                {/* 空資料處理 */}
+                <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+                    {cartData.length === 0 ? (
+                        <p style={{ textAlign: 'center' }}>no data</p>
+                    ) : (
+                        <>
+
+                            <div style={{ marginBottom: '10px' }}>
                                 <label>{formatMessage({ id: 'CartonNames' })}：</label>
                                 <input
                                     type="text"
@@ -954,38 +1312,14 @@ const ACIShippingCart = () => {
                                     onKeyDown={handleCheckBoxforCarton}
                                 />
                             </div>
-                        </>
-                        <Paper style={{ flex: 1, overflowX: "auto" }}>
 
-
-
-
-                            <TableContainer
-                                component="div"
-                                style={{
-                                    height: "100%",
-                                    overflowY: "hidden",
-                                    overflowX: "auto",
-                                }}
-                                onWheel={(e) => {
-                                    const container = e.currentTarget;
-                                    container.scrollTop += e.deltaY;
-                                }}
-                            >
-                                <Table stickyHeader aria-label="sticky table"
-                                    style={{
-                                        minWidth: '800px', // 最小寬度，確保資料過多時滾動
-                                        tableLayout: 'auto',
-                                    }}>
+                            <TableContainer component="div" style={{ maxHeight: '400px', overflow: 'auto' }}>
+                                <Table stickyHeader aria-label="sticky table">
                                     <TableHead>
-                                        <TableRow style={{ border: '1px solid #ccc' }}>
-
+                                        <TableRow>
                                             <TableCell padding="checkbox">
                                                 <Checkbox
-                                                    indeterminate={
-                                                        selectedRows.length > 0 &&
-                                                        selectedRows.length < cartData.length
-                                                    }
+                                                    indeterminate={selectedRows.length > 0 && selectedRows.length < cartData.length}
                                                     checked={selectedRows.length === cartData.length}
                                                     onChange={handleSelectAll}
                                                 />
@@ -1002,11 +1336,10 @@ const ACIShippingCart = () => {
                                     <TableBody>
                                         {cartData.map((row: any) => (
                                             <TableRow key={row.id}>
-
                                                 <TableCell padding="checkbox">
                                                     <Checkbox
                                                         checked={selectedRows.includes(row.id)}
-                                                        onChange={() => { handleSelectRow(row, row.id, row.palletName) }}
+                                                        onChange={() => handleSelectRow(row, row.id, row.palletName)}
                                                     />
                                                 </TableCell>
                                                 <TableCell>{row.id}</TableCell>
@@ -1021,10 +1354,11 @@ const ACIShippingCart = () => {
                                     </TableBody>
                                 </Table>
                             </TableContainer>
-                        </Paper>
-                    </div>
-                ))
-            }
+                        </>
+                    )}
+                </div>
+            </Paper>
+
         </div >
     );
 }
