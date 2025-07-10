@@ -9,7 +9,7 @@ import { useGlobalContext } from '../global';
 type StockInput = {
     palletNames: string[];
     shipId: string | null;
-  };
+};
 
 
 type CartonData = {
@@ -58,15 +58,59 @@ const ACIStock = () => {
     const [showPalletData, setShowPalletData] = useState(false);
 
     //ship入庫
-    const [shipName, setShipName] = useState('');
+    const [palletOrShipName, setPalletOrShipName] = useState('');
+
 
     //使用ship入庫要多生成一個欄位shipId 並傳給後端
     const generateShipId = () => {
         const now = new Date();
         return `SHIP_${now.toISOString().replace(/[-:T.Z]/g, '').slice(0, 14)}`;
-      };
+    };
 
 
+
+    // 單一入庫（Ship 或 Pallet 條碼皆可）
+    const handleStockOrShipInput = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            const input = palletOrShipName.trim();
+            if (!input) return;
+
+            // 判斷是 Ship 還是 Pallet
+            if (input.startsWith('SHIP_')) {
+                // Ship 條碼 → 查 Ship 對應 Pallet Names
+                const shipRes = await fetch(`${globalUrl.url}/api/get-ship-pallets`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ shipId: input }),
+                });
+
+                if (!shipRes.ok) {
+                    alert(`查無 Ship: ${input}`);
+                    setPalletOrShipName('');
+                    return;
+                }
+
+                const shipData = await shipRes.json();  // 假設回傳 { palletNames: ["Pallet1", "Pallet2"] }
+
+                if (!shipData.palletNames || shipData.palletNames.length === 0) {
+                    alert(`Ship: ${input} 內沒有 Pallet 資料`);
+                    setPalletOrShipName('');
+                    return;
+                }
+
+                // 載入所有 Pallet
+                for (const pallet of shipData.palletNames) {
+                    await loadPalletAndCarton(pallet);
+                }
+
+            } else {
+                // Pallet 條碼
+                await loadPalletAndCarton(input);
+            }
+
+            setPalletOrShipName('');
+        }
+    };
 
     //入庫共用邏輯
     const loadPalletAndCarton = async (palletName: string) => {
@@ -127,22 +171,22 @@ const ACIStock = () => {
         }
     };
     //ship入庫
-    const handleShipInput = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
+    // const handleShipInput = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    //     if (e.key === 'Enter') {
 
 
-            const entries = shipName
-                .split(/[\n\r,，\s]+/) // 支援逗號、換行、空格作為分隔符
-                .map(p => p.trim())
-                .filter(p => p.length > 0);
+    //         const entries = shipName
+    //             .split(/[\n\r,，\s]+/) // 支援逗號、換行、空格作為分隔符
+    //             .map(p => p.trim())
+    //             .filter(p => p.length > 0);
 
-            for (const pallet of entries) {
-                await loadPalletAndCarton(pallet);
-            }
+    //         for (const pallet of entries) {
+    //             await loadPalletAndCarton(pallet);
+    //         }
 
-            setShipName('');
-        }
-    };
+    //         setShipName('');
+    //     }
+    // };
 
 
 
@@ -281,13 +325,13 @@ const ACIStock = () => {
     const confirmPostInStock = async () => {
 
         //判斷是不是使用ship入庫 , 如果是則產生shipId , 不是的話就保留shipId=null
-        const isShipMode = selectedPalletNames.length > 1;
-        const shipId = isShipMode ? generateShipId() : null;
+        // const isShipMode = selectedPalletNames.length > 1;
+        // const shipId = isShipMode ? generateShipId() : null;
 
         const payload: StockInput = {
             palletNames: selectedPalletNames,
-            shipId,
-          };
+            shipId: palletOrShipName,
+        };
 
         console.log("新增的stock資料 : ", JSON.stringify(selectedPalletNames, null, 2))
 
@@ -308,7 +352,7 @@ const ACIStock = () => {
             const result = await response.json();
             console.log("stock data : ", JSON.stringify(result, null, 2));
             alert("入庫成功");
-     
+
             setAfterStockInData(result);
 
             setShowPalletData(true);
@@ -366,10 +410,10 @@ const ACIStock = () => {
                     <label>TWY ：</label>
                     <input
                         type="text"
-                        value={shipName}
-                        placeholder="輸入 Ship Name"
-                        onChange={(e) => setShipName(e.target.value)}
-                        onKeyDown={handleShipInput}
+                        value={palletOrShipName}
+                        placeholder="掃描/輸入 Pallet 或 Ship 條碼"
+                        onChange={(e) => setPalletOrShipName(e.target.value)}
+                        onKeyDown={handleStockOrShipInput}
                     />
                 </div>
             </div>

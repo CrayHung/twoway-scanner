@@ -34,8 +34,21 @@ public class Pallet {
     @Column(name = "location")
     private String location= "INSP";
 
+    // 新增ship欄位,可null
+    @Column(name = "ship_id")  
+    private String shipId;
+
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
+
+    public String getShipId() {
+        return shipId;
+    }
+
+    public void setShipId(String shipId) {
+        this.shipId = shipId;
+    }
 
     public Long getId() {
         return this.id;

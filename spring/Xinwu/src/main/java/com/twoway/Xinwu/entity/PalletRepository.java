@@ -29,4 +29,7 @@ public interface PalletRepository extends JpaRepository<Pallet, Long> {
     @Transactional
     void deleteByPalletNameIn(List<String> palletNames);
 
+    //shipId查詢
+    List<Pallet> findByShipId(String shipId);
+
 }

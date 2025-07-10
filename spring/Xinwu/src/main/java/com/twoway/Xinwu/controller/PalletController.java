@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.twoway.Xinwu.entity.CartonDetailRepository;
 import com.twoway.Xinwu.entity.Pallet;
+import com.twoway.Xinwu.entity.PalletAndShipTable;
+import com.twoway.Xinwu.entity.PalletAndShipTableRepository;
 import com.twoway.Xinwu.entity.PalletRepository;
 
 import jakarta.persistence.EntityManager;
@@ -37,6 +39,47 @@ public class PalletController {
 
     @Autowired
     private CartonDetailRepository cartonDetailRepository;
+
+    @Autowired
+    private PalletAndShipTableRepository palletAndShipTableRepository;
+
+    /* 新增for ship */
+    @PostMapping("/create-ship")
+    @Transactional
+    public ResponseEntity<?> createShip(@RequestBody Map<String, Object> request) {
+        List<String> palletNames = (List<String>) request.get("palletNames");
+        String shipId = (String) request.get("shipId");
+
+        if (palletNames == null || palletNames.isEmpty() || shipId == null) {
+            return ResponseEntity.badRequest().body("palletNames 和 shipId 不能為空");
+        }
+
+        // Save Ship
+        PalletAndShipTable shipRecord = new PalletAndShipTable();
+        shipRecord.setShipId(shipId);
+        shipRecord.setPalletNames(String.join(",", palletNames));
+        palletAndShipTableRepository.save(shipRecord);
+
+        // Update each Pallet's shipId
+        List<Pallet> pallets = palletRepository.findByPalletNameIn(palletNames);
+        for (Pallet pallet : pallets) {
+            pallet.setShipId(shipId);
+        }
+        palletRepository.saveAll(pallets);
+
+        return ResponseEntity.ok("Ship created with ID: " + shipId);
+    }
+
+    // 查詢shipId內涵的palletNames
+    @PostMapping("/get-pallets-by-ship")
+    public ResponseEntity<?> getPalletsByShip(@RequestBody Map<String, String> request) {
+        String shipId = request.get("shipId");
+        if (shipId == null) {
+            return ResponseEntity.badRequest().body("shipId 不能為空");
+        }
+        Optional<PalletAndShipTable> shipOpt = palletAndShipTableRepository.findByShipId(shipId);
+        return shipOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
     /**
      * 
@@ -70,7 +113,7 @@ public class PalletController {
             String palletName = (String) requestBody.get("pallet_name");
             Integer quantity = (Integer) requestBody.get("quantity");
 
-            System.out.println("quantity的數量是 : "+quantity);
+            System.out.println("quantity的數量是 : " + quantity);
 
             if (palletName == null || quantity == null || quantity < 0) {
                 return ResponseEntity.badRequest().body("無效的 pallet_name 或 quantity");
@@ -104,7 +147,6 @@ public class PalletController {
         int updatedCount = palletRepository.updateQuantityToZero(palletNames);
         return ResponseEntity.ok("成功更新 " + updatedCount + " 筆 Pallet 的 quantity 為 0");
     }
-
 
     // 取得單一pallet的資料
     @PostMapping("/get-pallet")
@@ -144,8 +186,7 @@ public class PalletController {
         return ResponseEntity.ok(pallets);
     }
 
-
-    //將複數個pallet資料一次刪除
+    // 將複數個pallet資料一次刪除
     @DeleteMapping("/delete-pallets")
     public ResponseEntity<?> deletePallets(@RequestBody Map<String, List<String>> requestBody) {
         List<String> palletNames = requestBody.get("pallet_names");
@@ -161,8 +202,6 @@ public class PalletController {
             return ResponseEntity.internalServerError().body("Error deleting pallets: " + e.getMessage());
         }
     }
-
-
 
     /**
      * 

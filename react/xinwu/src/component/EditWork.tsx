@@ -290,7 +290,7 @@ const EditWork = () => {
             createDateEnd: productionDateEnd ? [formatDate(productionDateEnd)].filter(Boolean) as string[] : [],
         };
 
-        // console.log("requestBody : " + JSON.stringify(requestBody, null, 2));
+        console.log("requestBody : " + JSON.stringify(requestBody, null, 2));
 
 
         // 判斷是否所有欄位都是空陣列
@@ -335,7 +335,7 @@ const EditWork = () => {
         // 如果都是空陣列,則取得所有table1Data
         if (isRequestBodyEmpty) {
             // 呼叫 Get all
-            fetchAllTable1();
+            await fetchAllTable1();
             setShowTableData(table1Data);
         } else {
             // 如果任一欄不是空陣列,則用模糊搜尋

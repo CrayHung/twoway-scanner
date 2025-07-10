@@ -78,6 +78,7 @@ public class StockController {
     //     return ResponseEntity.ok(savedStocks); // 回傳儲存後的所有資料
     // }
 
+    
      // ACI入庫-陣列 {palletNames:["twy3_20250522T075157","2AAA"] , shipId:"string"}
     @PostMapping("/post-multiple-stocks")
     public ResponseEntity<?> saveMultipleStocks(@RequestBody Map<String, Object> payload) {

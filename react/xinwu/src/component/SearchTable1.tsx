@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, IconButton, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Typography } from '@mui/material';
+import { ListItem, Checkbox, List, TextField, Button, Grid, MenuItem, Modal, Box, Table, TableBody, TableCell, TableHead, TableRow, Paper, TableContainer, TablePagination, IconButton, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Typography } from '@mui/material';
+
 import * as XLSX from 'xlsx';
 import { useGlobalContext } from '../global';
 import { useIntl } from "react-intl";
@@ -54,6 +55,13 @@ const SearchTable1 = () => {
 
     //為了要在下拉選單中可以渲染 , 一進頁面就先取得所有工單
     const [tmpData, setTmpData] = useState<any[]>(table1Data);
+
+
+    //for ship
+    const [generatedPalletNames, setGeneratedPalletNames] = useState<string[]>([]);
+    const [isShipModalVisible, setIsShipModalVisible] = useState<boolean>(false);
+    const [selectedPallets, setSelectedPallets] = useState<string[]>([]);
+
 
     //搜尋表單,這樣可以對欄位的多組搜尋(workOrderNumbers , SNs , QR_Trays)
     // const [formData, setFormData] = useState({
@@ -367,8 +375,8 @@ const SearchTable1 = () => {
                     setLoading(false); // Loading結束
                 }
                 const data: any[] = await response.json();
-                // console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
-                setDataForDownload(data);
+                console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
+                // setDataForDownload(data);
 
                 //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
                 //並且重新排序順序
@@ -433,8 +441,8 @@ const SearchTable1 = () => {
                     setLoading(false); // Loading結束
                 }
                 const data: any[] = await response.json();
-                // console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
-                setDataForDownload(data);
+                console.log('搜尋的結果為:', JSON.stringify(data, null, 2));
+                // setDataForDownload(data);
 
                 //資料映射 將不一致的欄位名稱轉換為需要的欄位名稱
                 //並且重新排序順序
@@ -499,6 +507,15 @@ const SearchTable1 = () => {
     const handleDownloadTwowayExcel = async () => {
 
         //根據原始資料(dataForDownload)的partNumber做資料分組
+        //分組資料長這樣
+        /**
+          {
+            "PartNumber123": [ { item1 }, { item2 }, ... ],
+            "PartNumber456": [ { item3 }, { item4 }, ... ],
+            ...
+            }
+         * 
+         */
         const groupedData = dataForDownload.reduce((acc: any, item: any) => {
             const { partNumber } = item;
             if (partNumber) {  // 確保資料中有 partNumber
@@ -514,6 +531,8 @@ const SearchTable1 = () => {
         //for ACI
         const palletDataToSave: any[] = [];
         const cartonDetailToSave: any[] = [];
+        // 收集當次所有 palletName
+        const newPalletNames: string[] = [];
 
         //避免產生相同的palletName
         let palletCounter = 0;
@@ -532,7 +551,7 @@ const SearchTable1 = () => {
                 QR_RFTray: item.QR_RFTray,
                 QR_PS: item.QR_PS,
                 QR_HS: item.QR_HS,
-                QR_RFTray_BEDID: item.QR_RFTray_BEDID, 
+                QR_RFTray_BEDID: item.QR_RFTray_BEDID,
                 QR_PS_BEDID: item.QR_PS_BEDID,
                 QR_HS_BEDID: item.QR_HS_BEDID
             }));
@@ -573,6 +592,7 @@ const SearchTable1 = () => {
                 const palletName = `${partNumber}_${new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15)}_${palletCounter++}`;
                 //直接下載條碼 for貼在棧板上的
                 downloadBarcode(palletName);
+                newPalletNames.push(palletName);
                 /**
                  * 
                  * pallet表格儲存的是(palletDataToSave)
@@ -612,14 +632,20 @@ const SearchTable1 = () => {
                     });
                 });
 
-                alert("新增棧板 : "+palletName);
+                alert("新增棧板 : " + palletName);
             }
 
 
-            // XLSX.writeFile(workbook, `${partNumber}.xlsx`);
+            XLSX.writeFile(workbook, `${partNumber}.xlsx`);
         });
+
         console.log("palletDataToSave:", JSON.stringify(palletDataToSave, null, 2));
         console.log("cartonDetailToSave:", JSON.stringify(cartonDetailToSave, null, 2));
+
+        //產生ship
+        setGeneratedPalletNames(prev => Array.from(new Set([...prev, ...newPalletNames])));
+
+
 
 
         //ACI 新增pallet API
@@ -660,12 +686,28 @@ const SearchTable1 = () => {
         } catch (error) {
             console.error('Error while saving pallet details:', error);
         }
-
-
-
-
-
     }
+
+    const handleGenerateShip = async () => {
+        if (selectedPallets.length === 0) {
+            alert('請選擇至少一個 Pallet');
+            return;
+        }
+
+        const shipId = `SHIP_${new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15)}`;
+        downloadBarcode(shipId);
+
+        await fetch(`${globalUrl.url}/api/create-ship`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ palletNames: selectedPallets, shipId })
+        });
+
+        alert(`成功建立 Ship: ${shipId}`);
+        setIsShipModalVisible(false);
+        setSelectedPallets([]);
+    };
+
 
 
     /********************************************************* */
@@ -973,93 +1015,137 @@ const SearchTable1 = () => {
                     </form>
                 </Box>
             </Modal>
-            {loading && (
-                <div className="loading-overlay">
-                    <div className="loading-spinner">Loading...</div>
-                </div>
-            )}
-            {resultData.length != 0 ? (
-                <>
 
-                    <div>
-                        <button onClick={handleDownloadTwowayExcel}>{formatMessage({ id: 'twowayexcel' })}</button>
+
+            {/* ship */}
+            <Modal
+                open={isShipModalVisible}
+                onClose={() => setIsShipModalVisible(false)}
+            >
+                <Box sx={{ p: 4, backgroundColor: '#fff', margin: '10% auto', width: 400, borderRadius: 2 }}>
+                    <Typography variant="h6" gutterBottom>選擇Pallet組成Ship</Typography>
+                    <List>
+                        {generatedPalletNames.map(item => (
+                            <ListItem key={item} disablePadding>
+                                <Checkbox
+                                    checked={selectedPallets.includes(item)}
+                                    onChange={e => {
+                                        const checked = e.target.checked;
+                                        setSelectedPallets(prev =>
+                                            checked ? [...prev, item] : prev.filter(p => p !== item)
+                                        );
+                                    }}
+                                />
+                                <Typography sx={{ ml: 1 }}>{item}</Typography>
+                            </ListItem>
+                        ))}
+                    </List>
+                    <Button variant="contained" fullWidth sx={{ mt: 2 }} onClick={handleGenerateShip}>確定ship出貨</Button>
+                </Box>
+            </Modal>
+
+
+            {
+                loading && (
+                    <div className="loading-overlay">
+                        <div className="loading-spinner">Loading...</div>
                     </div>
-                    <div>
-                        <button onClick={handleDownloadCustomerExcel}>{formatMessage({ id: 'customexcel' })}</button>
-                    </div>
-                    <div>
-                        <button onClick={handleDownloadAllExcel}>{formatMessage({ id: 'Allexcel' })}</button>
-                    </div>
-                    <Paper style={{ flex: 1, overflowX: "auto", overflowY: "auto", }}>
-                        <TableContainer
-                            component="div"
-                            style={{
-                                height: "100%",
-                                overflowY: "auto",
-                                overflowX: "auto",
-                            }}
-                            onWheel={(e) => {
-                                const container = e.currentTarget;
-                                container.scrollTop += e.deltaY;
-                            }}
-                        >
-                            <Table stickyHeader aria-label="sticky table"
+                )
+            }
+            {
+                resultData.length != 0 ? (
+                    <>
+
+                        <div>
+                            {generatedPalletNames.length > 0 ? (
+                                <Button variant="outlined" color="secondary" onClick={() => setIsShipModalVisible(true)}> {formatMessage({ id: 'shipexcel' })}</Button>
+                            ) :
+                                <div>
+                                    <div>
+                                        <Button variant="outlined" color="secondary" onClick={handleDownloadTwowayExcel}>{formatMessage({ id: 'twowayexcel' })}</Button>
+                                    </div>
+                                    <div>
+                                        <Button variant="outlined" color="secondary" onClick={handleDownloadCustomerExcel}>{formatMessage({ id: 'customexcel' })}</Button>
+                                    </div>
+                                    <div>
+                                        <Button variant="outlined" color="secondary" onClick={handleDownloadAllExcel}>{formatMessage({ id: 'Allexcel' })}</Button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+
+                        <Paper style={{ flex: 1, overflowX: "auto", overflowY: "auto", }}>
+                            <TableContainer
+                                component="div"
                                 style={{
-                                    minWidth: '800px',
-                                    tableLayout: 'auto',
-                                }}>
-                                <TableHead >
-                                    <TableRow style={{ border: '1px solid #ccc' }}>
+                                    height: "100%",
+                                    overflowY: "auto",
+                                    overflowX: "auto",
+                                }}
+                                onWheel={(e) => {
+                                    const container = e.currentTarget;
+                                    container.scrollTop += e.deltaY;
+                                }}
+                            >
+                                <Table stickyHeader aria-label="sticky table"
+                                    style={{
+                                        minWidth: '800px',
+                                        tableLayout: 'auto',
+                                    }}>
+                                    <TableHead >
+                                        <TableRow style={{ border: '1px solid #ccc' }}>
 
-        
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray_BEDID' })}</TableCell>
 
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS_BEDID' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'id' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'workOrderNumber' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'detailId' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'SN' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_RFTray_BEDID' })}</TableCell>
 
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS_BEDID' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_PS_BEDID' })}</TableCell>
 
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'CartonName' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_HS_BEDID' })}</TableCell>
 
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup4' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'note' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'produce_date' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
-                                        <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'CartonName' })}</TableCell>
 
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {resultData.map((row: any, rowIndex: number) => (
-                                        <TableRow key={rowIndex} >
-                                            {Object.keys(row).map((colKey) => (
-                                                <TableCell >
-                                                    {row[colKey]}
-                                                </TableCell>
-                                            ))}
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup1' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup2' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup3' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'QR_backup4' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'note' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'produce_date' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'create_user' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_date' })}</TableCell>
+                                            <TableCell style={{ width: '100px', height: '30px', border: '1px solid #ccc' }}>{formatMessage({ id: 'edit_user' })}</TableCell>
+
                                         </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {resultData.map((row: any, rowIndex: number) => (
+                                            <TableRow key={rowIndex} >
+                                                {Object.keys(row).map((colKey) => (
+                                                    <TableCell >
+                                                        {row[colKey]}
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
 
 
 
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Paper>
-                </>
-            ) : (
-                <p>NO DATA</p>
-            )}
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </Paper>
+                    </>
+                ) : (
+                    <p>NO DATA</p>
+                )
+            }
         </div >
 
     );
