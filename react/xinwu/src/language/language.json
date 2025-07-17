@@ -105,7 +105,8 @@
                 "Location1": "棧板儲位",
                 "CartonNames": "紙箱名稱",
                 "aciPartNumber":"aci料號",
-                "customPartNumber":"客戶料號"
+                "customPartNumber":"客戶料號",
+                "palletAndShip":"達運出貨管理"
         },
         "en-US": {
                 "customerPartNumber":"customer Part Number",
@@ -211,6 +212,7 @@
                 "Location1": "Location",
                 "CartonNames": "Carton Name",
                 "aciPartNumber":"aciPartNumber",
-                "customPartNumber":"customPartNumber"
+                "customPartNumber":"customPartNumber",
+                "palletAndShip":"palle tAnd Ship History"
         }
 }

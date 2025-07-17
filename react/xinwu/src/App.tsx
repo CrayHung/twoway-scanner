@@ -39,6 +39,7 @@ import ACItest from './component/ACItest';
 import ACICreatePallet from './component/ACICreatePallet';
 import ACIAddCarton from './component/ACIAddCarton';
 import ACIShipHistoryPage from './component/ACIShipHistoryPage';
+import PalletAndShipPage from './component/PalletAndShipPage';
 
 function App() {
   const [locale, setLocale] = useNavigatorLanguage();
@@ -96,6 +97,9 @@ function App() {
 
                     <Route path="/accountPage" Component={AccountPage} />
                     <Route path="/accountPage/reload" element={<Navigate to="/accountPage" />} />
+
+                    <Route path="/palletAndShipPage" Component={PalletAndShipPage} />
+                    <Route path="/palletAndShipPage/reload" element={<Navigate to="/palletAndShipPage" />} />
 
 
 

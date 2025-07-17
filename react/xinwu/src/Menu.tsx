@@ -62,6 +62,7 @@ const Menu = () => {
 
               <Link to="/register/reload">{formatMessage({ id: 'create_account' })}</Link>
 
+              <Link to="/palletAndShipPage/reload">{formatMessage({ id: 'palletAndShip' })}</Link>
 
             </>
           )}

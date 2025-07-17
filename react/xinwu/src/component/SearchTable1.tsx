@@ -706,6 +706,9 @@ const SearchTable1 = () => {
         alert(`成功建立 Ship: ${shipId}`);
         setIsShipModalVisible(false);
         setSelectedPallets([]);
+
+        navigate('/searchTable1/reload');
+      
     };
 
 

@@ -11,4 +11,6 @@ import jakarta.transaction.Transactional;
 
 public interface PalletAndShipTableRepository extends JpaRepository<PalletAndShipTable, Long> {
     Optional<PalletAndShipTable> findByShipId(String shipId);
+
+
 }

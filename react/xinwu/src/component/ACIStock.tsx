@@ -75,7 +75,7 @@ const ACIStock = () => {
             const input = palletOrShipName.trim();
             if (!input) return;
 
-            // 判斷是 Ship 還是 Pallet
+            // Ship_開頭,保持setPalletOrShipName
             if (input.startsWith('SHIP_')) {
                 // Ship 條碼 → 查 Ship 對應 Pallet Names
                 const shipRes = await fetch(`${globalUrl.url}/api/get-ship-pallets`, {
@@ -103,12 +103,15 @@ const ACIStock = () => {
                     await loadPalletAndCarton(pallet);
                 }
 
+                setPalletOrShipName(input);
+
             } else {
                 // Pallet 條碼
                 await loadPalletAndCarton(input);
+                setPalletOrShipName('');
             }
 
-            setPalletOrShipName('');
+
         }
     };
 
@@ -334,6 +337,7 @@ const ACIStock = () => {
         };
 
         console.log("新增的stock資料 : ", JSON.stringify(selectedPalletNames, null, 2))
+        console.log("新增的stock資料 : ", JSON.stringify(payload, null, 2))
 
         try {
             const response = await fetch(`${globalUrl.url}/api/post-multiple-stocks`, {

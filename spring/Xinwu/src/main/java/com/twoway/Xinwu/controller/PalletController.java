@@ -26,6 +26,7 @@ import com.twoway.Xinwu.entity.PalletRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api")
@@ -58,6 +59,7 @@ public class PalletController {
         PalletAndShipTable shipRecord = new PalletAndShipTable();
         shipRecord.setShipId(shipId);
         shipRecord.setPalletNames(String.join(",", palletNames));
+        shipRecord.setStorageTime(LocalDateTime.now());
         palletAndShipTableRepository.save(shipRecord);
 
         // Update each Pallet's shipId
@@ -71,6 +73,11 @@ public class PalletController {
     }
 
     // 查詢shipId內涵的palletNames
+    // {
+    //     "id": 5,
+    //     "shipId": "SHIP_20250710T023947",
+    //     "palletNames": "twy1_20250710T023716_0,twy5_20250710T023724_1"
+    // }
     @PostMapping("/get-pallets-by-ship")
     public ResponseEntity<?> getPalletsByShip(@RequestBody Map<String, String> request) {
         String shipId = request.get("shipId");
@@ -134,6 +141,38 @@ public class PalletController {
                     .body("更新失敗: " + e.getMessage());
         }
     }
+
+
+     // 更新pallet的shipId
+     @Transactional
+     @PutMapping("/update-shipId")
+     public ResponseEntity<?> updatePalletShipId(@RequestBody Map<String, Object> requestBody) {
+         try {
+             String palletName = (String) requestBody.get("pallet_name");
+             String shipId = (String) requestBody.get("shipId");
+ 
+        
+ 
+             if (palletName == null || shipId == null ) {
+                 return ResponseEntity.badRequest().body("無效的 pallet_name 或 shipId");
+             }
+ 
+             Optional<Pallet> palletOptional = palletRepository.findByPalletName(palletName);
+             if (palletOptional.isEmpty()) {
+                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("找不到對應的 pallet");
+             }
+ 
+             Pallet pallet = palletOptional.get();
+             pallet.setShipId(shipId); // 更新數量
+             palletRepository.save(pallet);
+ 
+             return ResponseEntity.ok("數量更新成功");
+         } catch (Exception e) {
+             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                     .body("更新失敗: " + e.getMessage());
+         }
+     }
+
 
     // 更新pallet的quantity為0
     @PutMapping("/update-quantityToZero")

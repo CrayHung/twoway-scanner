@@ -5,7 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "pallet_and_ship_table")
@@ -21,7 +21,19 @@ public class PalletAndShipTable {
     @Column(name = "pallet_names", columnDefinition = "TEXT")
     private String palletNames; 
 
+    @Column(name = "storage_time")
+    private LocalDateTime storageTime;
 
+
+    public LocalDateTime getStorageTime() {
+        return storageTime;
+    }
+
+    public void setStorageTime(LocalDateTime storageTime) {
+        this.storageTime = storageTime;
+    }
+
+    
     public Long getId() {
         return this.id;
     }
